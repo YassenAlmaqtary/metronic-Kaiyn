@@ -1,0 +1,114 @@
+<div class="kt-container-fixed flex flex-col gap-5 max-w-4xl">
+	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
+		<a class="hover:text-primary" routerLink="/demo1/settings/companies">{{ 'companies.title' | translate }}</a>
+		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+		<span class="text-mono font-medium">
+			@if (isEditMode()) {
+				{{ 'companies.edit' | translate }}
+			} @else {
+				{{ 'companies.create' | translate }}
+			}
+		</span>
+	</div>
+
+	<div class="kt-card">
+		<div class="kt-card-header px-5 py-4 border-b border-border">
+			<h1 class="text-lg font-semibold text-mono">
+				@if (isEditMode()) {
+					{{ 'companies.edit' | translate }}
+				} @else {
+					{{ 'companies.create' | translate }}
+				}
+			</h1>
+		</div>
+
+		@if (loading()) {
+			<div class="kt-card-content flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+				<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'companies.loading' | translate }}
+			</div>
+		} @else {
+			<form class="kt-card-content flex flex-col gap-6 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+				@if (errorMessage()) {
+					<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+						{{ errorMessage() }}
+					</div>
+				}
+
+				<div class="flex flex-col gap-4">
+					<h2 class="text-sm font-semibold text-mono">{{ 'companies.section.basic' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'companies.arName' | translate }} *</label>
+							<input class="kt-input" formControlName="companyArName" type="text" dir="rtl" />
+							@if (form.controls.companyArName.touched && form.controls.companyArName.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'companies.required.arName' | translate }}</span>
+							}
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'companies.enName' | translate }} *</label>
+							<input class="kt-input" formControlName="companyEnName" type="text" dir="ltr" />
+							@if (form.controls.companyEnName.touched && form.controls.companyEnName.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'companies.required.enName' | translate }}</span>
+							}
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'companies.code' | translate }}</label>
+							<input class="kt-input" formControlName="companyCode" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'companies.website' | translate }}</label>
+							<input class="kt-input" formControlName="websiteAddress" type="url" />
+						</div>
+					</div>
+				</div>
+
+				<div class="flex flex-col gap-4">
+					<h2 class="text-sm font-semibold text-mono">{{ 'companies.section.legal' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'companies.commercialRegister' | translate }}</label>
+							<input class="kt-input" formControlName="commercialRegister" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'companies.taxNumber' | translate }}</label>
+							<input class="kt-input" formControlName="taxNumber" type="text" />
+						</div>
+					</div>
+				</div>
+
+				<div class="flex flex-col gap-4">
+					<h2 class="text-sm font-semibold text-mono">{{ 'companies.section.fiscal' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'companies.baseCurrencyId' | translate }}</label>
+							<input class="kt-input" formControlName="baseCurrencyId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'companies.chartOfAccountsId' | translate }}</label>
+							<input class="kt-input" formControlName="chartOfAccountsId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'companies.fiscalYearStart' | translate }}</label>
+							<input class="kt-input" formControlName="fiscalYearStart" type="date" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'companies.fiscalYearEnd' | translate }}</label>
+							<input class="kt-input" formControlName="fiscalYearEnd" type="date" />
+						</div>
+					</div>
+				</div>
+
+				<div class="flex justify-end gap-2 pt-2 border-t border-border">
+					<a class="kt-btn kt-btn-outline" routerLink="/demo1/settings/companies">{{ 'companies.cancel' | translate }}</a>
+					<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
+						@if (saving()) {
+							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+						}
+						{{ 'companies.save' | translate }}
+					</button>
+				</div>
+			</form>
+		}
+	</div>
+</div>

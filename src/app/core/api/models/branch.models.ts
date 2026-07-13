@@ -1,0 +1,93 @@
+export interface Branch {
+  id: number;
+  branchId: number;
+  branchName?: string | null;
+  brandId?: number | null;
+  location?: string | null;
+  phone?: string | null;
+  numberOf?: string | null;
+  series?: number | null;
+  branchCode?: string | null;
+  createdAt?: string | null;
+  companyId?: number | null;
+  managerId?: number | null;
+  openingDate?: string | null;
+  closingDate?: string | null;
+  accountingPeriodId?: number | null;
+  defaultCashAccountId?: number | null;
+  defaultBankAccountId?: number | null;
+  salesAccountId?: number | null;
+  purchasesAccountId?: number | null;
+  inventoryAccountId?: number | null;
+  costOfSalesAccountId?: number | null;
+  expensesAccountId?: number | null;
+  vatAccountId?: number | null;
+  separateInventory: boolean;
+  allowNegativeStock: boolean;
+  useBranchPricing: boolean;
+  useBranchVAT: boolean;
+  isActive: boolean;
+  defaultWarehouseId?: number | null;
+  createdBy?: number | null;
+  updatedBy?: number | null;
+  updatedAt?: string | null;
+}
+
+export interface CreateBranchRequest {
+  branchId: number;
+  branchName?: string | null;
+  brandId?: number | null;
+  location?: string | null;
+  phone?: string | null;
+  numberOf?: string | null;
+  series?: number | null;
+  branchCode?: string | null;
+  companyId?: number | null;
+  managerId?: number | null;
+  openingDate?: string | null;
+  closingDate?: string | null;
+  accountingPeriodId?: number | null;
+  defaultCashAccountId?: number | null;
+  defaultBankAccountId?: number | null;
+  salesAccountId?: number | null;
+  purchasesAccountId?: number | null;
+  inventoryAccountId?: number | null;
+  costOfSalesAccountId?: number | null;
+  expensesAccountId?: number | null;
+  vatAccountId?: number | null;
+  separateInventory?: boolean;
+  allowNegativeStock?: boolean;
+  useBranchPricing?: boolean;
+  useBranchVAT?: boolean;
+  isActive?: boolean;
+  defaultWarehouseId?: number | null;
+}
+
+export interface UpdateBranchRequest {
+  branchName?: string | null;
+  brandId?: number | null;
+  location?: string | null;
+  phone?: string | null;
+  numberOf?: string | null;
+  series?: number | null;
+  branchCode?: string | null;
+  companyId?: number | null;
+  managerId?: number | null;
+  openingDate?: string | null;
+  closingDate?: string | null;
+  accountingPeriodId?: number | null;
+  defaultCashAccountId?: number | null;
+  defaultBankAccountId?: number | null;
+  salesAccountId?: number | null;
+  purchasesAccountId?: number | null;
+  inventoryAccountId?: number | null;
+  costOfSalesAccountId?: number | null;
+  expensesAccountId?: number | null;
+  vatAccountId?: number | null;
+  separateInventory?: boolean;
+  allowNegativeStock?: boolean;
+  useBranchPricing?: boolean;
+  useBranchVAT?: boolean;
+  isActive?: boolean;
+  defaultWarehouseId?: number | null;
+}

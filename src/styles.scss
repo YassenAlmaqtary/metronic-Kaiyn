@@ -1,0 +1,9 @@
+@use "./tailwind";
+
+html[lang="ar"] body {
+	font-family: "Cairo", "Inter", sans-serif;
+}
+
+html[lang="en"] body {
+	font-family: "Inter", sans-serif;
+}

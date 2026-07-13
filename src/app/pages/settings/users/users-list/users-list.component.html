@@ -1,0 +1,147 @@
+<div class="kt-container-fixed flex flex-col gap-5">
+	<div class="flex flex-wrap items-center justify-between gap-3">
+		<div>
+			<h1 class="text-xl font-semibold text-mono">{{ 'users.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground mt-1">{{ 'users.subtitle' | translate }}</p>
+		</div>
+		<a class="kt-btn kt-btn-primary" routerLink="/demo1/settings/users/new">
+			<i class="ki-filled ki-plus"></i>
+			{{ 'users.add' | translate }}
+		</a>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-700">
+			{{ successMessage() }}
+		</div>
+	}
+
+	@if (errorMessage()) {
+		<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
+			<span>{{ errorMessage() }}</span>
+			<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="loadUsers()">
+				{{ 'users.retry' | translate }}
+			</button>
+		</div>
+	}
+
+	<div class="kt-card">
+		<div class="kt-card-header flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border">
+			<div class="relative w-full max-w-sm">
+				<i class="ki-filled ki-magnifier absolute top-1/2 -translate-y-1/2 start-3 text-muted-foreground text-sm"></i>
+				<input
+					class="kt-input ps-9"
+					type="search"
+					[placeholder]="'users.search' | translate"
+					[ngModel]="searchTerm()"
+					(ngModelChange)="onSearchChange($event)" />
+			</div>
+			<span class="text-sm text-secondary-foreground">
+				{{ filteredUsers().length }}
+			</span>
+		</div>
+
+		<div class="kt-card-content p-0">
+			@if (loading()) {
+				<div class="flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+					<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+					{{ 'users.loading' | translate }}
+				</div>
+			} @else if (filteredUsers().length === 0) {
+				<div class="flex flex-col items-center justify-center gap-3 py-16 text-center">
+					<i class="ki-filled ki-people text-3xl text-muted-foreground"></i>
+					<div>
+						<p class="font-medium text-mono">{{ 'users.empty' | translate }}</p>
+						<p class="text-sm text-secondary-foreground mt-1">{{ 'users.emptyHint' | translate }}</p>
+					</div>
+					<a class="kt-btn kt-btn-primary kt-btn-sm" routerLink="/demo1/settings/users/new">
+						{{ 'users.add' | translate }}
+					</a>
+				</div>
+			} @else {
+				<div class="kt-scrollable-x-auto">
+					<table class="kt-table kt-table-border w-full">
+						<thead>
+							<tr>
+								<th>{{ 'users.userName' | translate }}</th>
+								<th>{{ 'users.fullName' | translate }}</th>
+								<th>{{ 'users.email' | translate }}</th>
+								<th>{{ 'users.phone' | translate }}</th>
+								<th>{{ 'users.status' | translate }}</th>
+								<th>{{ 'users.lastLogin' | translate }}</th>
+								<th class="w-[120px]">{{ 'users.actions' | translate }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (user of filteredUsers(); track user.userId) {
+								<tr>
+									<td class="font-medium text-mono">{{ user.userName }}</td>
+									<td>{{ user.fullName || '—' }}</td>
+									<td>{{ user.email || '—' }}</td>
+									<td>{{ user.phone || '—' }}</td>
+									<td>
+										@if (user.isActive) {
+											<span class="kt-badge kt-badge-sm kt-badge-success kt-badge-outline">
+												{{ 'users.active' | translate }}
+											</span>
+										} @else {
+											<span class="kt-badge kt-badge-sm kt-badge-secondary kt-badge-outline">
+												{{ 'users.inactive' | translate }}
+											</span>
+										}
+									</td>
+									<td class="text-secondary-foreground text-sm">
+										{{ user.lastLoginDate ? (user.lastLoginDate | date: 'medium') : '—' }}
+									</td>
+									<td>
+										<div class="flex items-center gap-1">
+											<a
+												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
+												[routerLink]="['/demo1/settings/users', user.userId, 'edit']"
+												[attr.aria-label]="'users.edit' | translate">
+												<i class="ki-filled ki-notepad-edit"></i>
+											</a>
+											<button
+												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive hover:bg-destructive/10"
+												type="button"
+												(click)="openDeleteDialog(user)"
+												[attr.aria-label]="'users.delete' | translate">
+												<i class="ki-filled ki-trash"></i>
+											</button>
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+		</div>
+	</div>
+</div>
+
+@if (deleteTarget(); as user) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<button class="absolute inset-0 bg-black/40" type="button" (click)="closeDeleteDialog()" aria-label="close"></button>
+		<div class="relative kt-card w-full max-w-md shadow-xl">
+			<div class="kt-card-content flex flex-col gap-4 p-6">
+				<div>
+					<h3 class="text-lg font-semibold text-mono">{{ 'users.deleteTitle' | translate }}</h3>
+					<p class="text-sm text-secondary-foreground mt-2">{{ 'users.deleteConfirm' | translate }}</p>
+					<p class="text-sm font-medium text-mono mt-3">{{ user.userName }}</p>
+				</div>
+				<div class="flex justify-end gap-2">
+					<button class="kt-btn kt-btn-outline" type="button" [disabled]="deleting()" (click)="closeDeleteDialog()">
+						{{ 'users.cancel' | translate }}
+					</button>
+					<button class="kt-btn kt-btn-destructive" type="button" [disabled]="deleting()" (click)="confirmDelete()">
+						@if (deleting()) {
+							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+						}
+						{{ 'users.delete' | translate }}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}

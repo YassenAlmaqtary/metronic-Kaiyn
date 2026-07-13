@@ -1,0 +1,184 @@
+<div class="kt-container-fixed flex flex-col gap-5 max-w-5xl">
+	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
+		<a class="hover:text-primary" routerLink="/demo1/settings/branches">{{ 'branches.title' | translate }}</a>
+		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+		<span class="text-mono font-medium">
+			@if (isEditMode()) {
+				{{ 'branches.edit' | translate }}
+			} @else {
+				{{ 'branches.create' | translate }}
+			}
+		</span>
+	</div>
+
+	<div class="kt-card">
+		<div class="kt-card-header px-5 py-4 border-b border-border">
+			<h1 class="text-lg font-semibold text-mono">
+				@if (isEditMode()) {
+					{{ 'branches.edit' | translate }}
+				} @else {
+					{{ 'branches.create' | translate }}
+				}
+			</h1>
+		</div>
+
+		@if (loading()) {
+			<div class="kt-card-content flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+				<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'branches.loading' | translate }}
+			</div>
+		} @else {
+			<form class="kt-card-content flex flex-col gap-6 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+				@if (errorMessage()) {
+					<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+						{{ errorMessage() }}
+					</div>
+				}
+
+				<div class="flex flex-col gap-4">
+					<h2 class="text-sm font-semibold text-mono">{{ 'branches.section.basic' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.branchId' | translate }} *</label>
+							<input class="kt-input" formControlName="branchId" type="number" />
+							@if (form.controls.branchId.touched && form.controls.branchId.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'branches.required.branchId' | translate }}</span>
+							}
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.name' | translate }}</label>
+							<input class="kt-input" formControlName="branchName" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.code' | translate }}</label>
+							<input class="kt-input" formControlName="branchCode" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.companyId' | translate }}</label>
+							<select class="kt-input" formControlName="companyId">
+								<option [ngValue]="null">{{ 'branches.selectCompany' | translate }}</option>
+								@for (company of companies(); track company.companyId) {
+									<option [ngValue]="company.companyId">{{ companyLabel(company) }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.location' | translate }}</label>
+							<input class="kt-input" formControlName="location" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.phone' | translate }}</label>
+							<input class="kt-input" formControlName="phone" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.numberOf' | translate }}</label>
+							<input class="kt-input" formControlName="numberOf" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.series' | translate }}</label>
+							<input class="kt-input" formControlName="series" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.brandId' | translate }}</label>
+							<input class="kt-input" formControlName="brandId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.managerId' | translate }}</label>
+							<input class="kt-input" formControlName="managerId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.openingDate' | translate }}</label>
+							<input class="kt-input" formControlName="openingDate" type="date" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.closingDate' | translate }}</label>
+							<input class="kt-input" formControlName="closingDate" type="date" />
+						</div>
+					</div>
+				</div>
+
+				<div class="flex flex-col gap-4">
+					<h2 class="text-sm font-semibold text-mono">{{ 'branches.section.accounting' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.accountingPeriodId' | translate }}</label>
+							<input class="kt-input" formControlName="accountingPeriodId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.defaultWarehouseId' | translate }}</label>
+							<input class="kt-input" formControlName="defaultWarehouseId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.defaultCashAccountId' | translate }}</label>
+							<input class="kt-input" formControlName="defaultCashAccountId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.defaultBankAccountId' | translate }}</label>
+							<input class="kt-input" formControlName="defaultBankAccountId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.salesAccountId' | translate }}</label>
+							<input class="kt-input" formControlName="salesAccountId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.purchasesAccountId' | translate }}</label>
+							<input class="kt-input" formControlName="purchasesAccountId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.inventoryAccountId' | translate }}</label>
+							<input class="kt-input" formControlName="inventoryAccountId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.costOfSalesAccountId' | translate }}</label>
+							<input class="kt-input" formControlName="costOfSalesAccountId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.expensesAccountId' | translate }}</label>
+							<input class="kt-input" formControlName="expensesAccountId" type="number" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'branches.vatAccountId' | translate }}</label>
+							<input class="kt-input" formControlName="vatAccountId" type="number" />
+						</div>
+					</div>
+				</div>
+
+				<div class="flex flex-col gap-4">
+					<h2 class="text-sm font-semibold text-mono">{{ 'branches.section.settings' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+						<label class="kt-label">
+							<input class="kt-checkbox kt-checkbox-sm" formControlName="isActive" type="checkbox" />
+							<span class="kt-checkbox-label">{{ 'branches.isActive' | translate }}</span>
+						</label>
+						<label class="kt-label">
+							<input class="kt-checkbox kt-checkbox-sm" formControlName="separateInventory" type="checkbox" />
+							<span class="kt-checkbox-label">{{ 'branches.separateInventory' | translate }}</span>
+						</label>
+						<label class="kt-label">
+							<input class="kt-checkbox kt-checkbox-sm" formControlName="allowNegativeStock" type="checkbox" />
+							<span class="kt-checkbox-label">{{ 'branches.allowNegativeStock' | translate }}</span>
+						</label>
+						<label class="kt-label">
+							<input class="kt-checkbox kt-checkbox-sm" formControlName="useBranchPricing" type="checkbox" />
+							<span class="kt-checkbox-label">{{ 'branches.useBranchPricing' | translate }}</span>
+						</label>
+						<label class="kt-label">
+							<input class="kt-checkbox kt-checkbox-sm" formControlName="useBranchVAT" type="checkbox" />
+							<span class="kt-checkbox-label">{{ 'branches.useBranchVAT' | translate }}</span>
+						</label>
+					</div>
+				</div>
+
+				<div class="flex justify-end gap-2 pt-2 border-t border-border">
+					<a class="kt-btn kt-btn-outline" routerLink="/demo1/settings/branches">{{ 'branches.cancel' | translate }}</a>
+					<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
+						@if (saving()) {
+							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+						}
+						{{ 'branches.save' | translate }}
+					</button>
+				</div>
+			</form>
+		}
+	</div>
+</div>

@@ -1,0 +1,106 @@
+<div class="fixed top-5 end-5 z-50 flex items-center gap-2">
+	<app-language-toggle></app-language-toggle>
+	<app-theme-toggle></app-theme-toggle>
+</div>
+
+<div class="flex items-center justify-center grow bg-center bg-no-repeat page-bg w-full">
+	<div class="kt-card max-w-[370px] w-full mx-4">
+		<form class="kt-card-content flex flex-col gap-5 p-10" id="sign_in_form" [formGroup]="form" (ngSubmit)="onSubmit()">
+			<div class="text-center mb-2.5">
+				<h3 class="text-lg font-medium text-mono leading-none mb-2.5">
+					{{ 'auth.signIn.title' | translate }}
+				</h3>
+				<div class="flex items-center justify-center font-medium">
+					<span class="text-sm text-secondary-foreground me-1.5">
+						{{ 'auth.signIn.needAccount' | translate }}
+					</span>
+					<a class="text-sm link" routerLink="/auth/sign-up">
+						{{ 'auth.signIn.signUp' | translate }}
+					</a>
+				</div>
+			</div>
+
+			@if (errorMessage()) {
+				<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+					{{ errorMessage() }}
+				</div>
+			}
+
+			<div class="grid grid-cols-2 gap-2.5">
+				<button type="button" class="kt-btn kt-btn-outline justify-center">
+					<img alt="" class="size-3.5 shrink-0" src="assets/media/brand-logos/google.svg" />
+					{{ 'auth.signIn.useGoogle' | translate }}
+				</button>
+				<button type="button" class="kt-btn kt-btn-outline justify-center">
+					<img alt="" class="size-3.5 shrink-0 dark:hidden" src="assets/media/brand-logos/apple-black.svg" />
+					<img alt="" class="size-3.5 shrink-0 light:hidden" src="assets/media/brand-logos/apple-white.svg" />
+					{{ 'auth.signIn.useApple' | translate }}
+				</button>
+			</div>
+
+			<div class="flex items-center gap-2">
+				<span class="border-t border-border w-full"></span>
+				<span class="text-xs text-muted-foreground font-medium uppercase">
+					{{ 'auth.signIn.or' | translate }}
+				</span>
+				<span class="border-t border-border w-full"></span>
+			</div>
+
+			<div class="flex flex-col gap-1">
+				<label class="kt-form-label font-normal text-mono">
+					{{ 'auth.signIn.userName' | translate }}
+				</label>
+				<input
+					class="kt-input"
+					formControlName="userName"
+					[placeholder]="'auth.signIn.userNamePlaceholder' | translate"
+					type="text"
+					autocomplete="username" />
+			</div>
+
+			<div class="flex flex-col gap-1">
+				<div class="flex items-center justify-between gap-1">
+					<label class="kt-form-label font-normal text-mono">
+						{{ 'auth.signIn.password' | translate }}
+					</label>
+					<a class="text-sm kt-link shrink-0" routerLink="/auth/forgot-password">
+						{{ 'auth.signIn.forgotPassword' | translate }}
+					</a>
+				</div>
+				<div class="kt-input" data-kt-toggle-password="true">
+					<input
+						formControlName="password"
+						[placeholder]="'auth.signIn.passwordPlaceholder' | translate"
+						type="password"
+						autocomplete="current-password" />
+					<button
+						class="kt-btn kt-btn-sm kt-btn-ghost kt-btn-icon bg-transparent! -me-1.5"
+						data-kt-toggle-password-trigger="true"
+						type="button">
+						<span class="kt-toggle-password-active:hidden">
+							<i class="ki-filled ki-eye text-muted-foreground"></i>
+						</span>
+						<span class="hidden kt-toggle-password-active:block">
+							<i class="ki-filled ki-eye-slash text-muted-foreground"></i>
+						</span>
+					</button>
+				</div>
+			</div>
+
+			<label class="kt-label">
+				<input class="kt-checkbox kt-checkbox-sm" formControlName="remember" type="checkbox" />
+				<span class="kt-checkbox-label">
+					{{ 'auth.signIn.rememberMe' | translate }}
+				</span>
+			</label>
+
+			<button class="kt-btn kt-btn-primary flex justify-center grow" type="submit" [disabled]="loading()">
+				@if (loading()) {
+					{{ 'auth.signIn.loading' | translate }}
+				} @else {
+					{{ 'auth.signIn.submit' | translate }}
+				}
+			</button>
+		</form>
+	</div>
+</div>

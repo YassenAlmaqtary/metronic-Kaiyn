@@ -1,0 +1,22 @@
+<!-- Container -->
+<div class="kt-container-fixed flex flex-col gap-5">
+	<div class="kt-card">
+		<div class="kt-card-content p-6 flex flex-col gap-2">
+			<h2 class="text-lg font-semibold text-mono">
+				{{ 'dashboard.welcome' | translate }}, {{ userName() || 'KayianERP' }}
+			</h2>
+			<p class="text-sm text-secondary-foreground">
+				{{ 'dashboard.apiStatus' | translate }}:
+				@if (apiStatus() === 'loading') {
+					<span>{{ 'dashboard.loading' | translate }}</span>
+				} @else if (apiStatus() === 'connected') {
+					<span class="text-green-600">{{ 'dashboard.connected' | translate }}</span>
+					— {{ 'dashboard.usersCount' | translate }}: {{ usersCount() }}
+				} @else {
+					<span class="text-destructive">{{ 'dashboard.error' | translate }}</span>
+				}
+			</p>
+		</div>
+	</div>
+</div>
+<!-- End of Container -->

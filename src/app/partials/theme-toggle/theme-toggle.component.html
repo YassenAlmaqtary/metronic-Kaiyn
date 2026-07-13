@@ -1,0 +1,12 @@
+<button
+  type="button"
+  class="group kt-btn kt-btn-ghost kt-btn-icon size-9 rounded-full hover:bg-primary/10 hover:[&_i]:text-primary"
+  (click)="toggleTheme()"
+  [attr.aria-label]="themeService.sidebarDark() ? ('theme.switchToLight' | translate) : ('theme.switchToDark' | translate)"
+  [attr.title]="themeService.sidebarDark() ? ('theme.switchToLight' | translate) : ('theme.switchToDark' | translate)">
+  @if (themeService.sidebarDark()) {
+    <i class="ki-filled ki-sun text-lg group-hover:text-primary"></i>
+  } @else {
+    <i class="ki-filled ki-moon text-lg group-hover:text-primary"></i>
+  }
+</button>

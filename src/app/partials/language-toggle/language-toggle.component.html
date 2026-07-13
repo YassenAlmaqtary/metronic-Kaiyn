@@ -1,0 +1,48 @@
+<div class="relative shrink-0">
+	<button
+		type="button"
+		class="group kt-btn kt-btn-ghost gap-1.5 rounded-full px-2.5 h-9 min-w-9 hover:bg-primary/10 hover:[&_i]:text-primary hover:[&_span]:text-primary"
+		(click)="toggleMenu()"
+		[attr.aria-expanded]="isOpen()"
+		[attr.aria-haspopup]="true"
+		[attr.aria-label]="'lang.select' | translate"
+		[attr.title]="'lang.select' | translate">
+		<i class="ki-filled ki-flag text-base group-hover:text-primary"></i>
+		<span class="text-xs font-semibold uppercase text-foreground group-hover:text-primary">
+			{{ language.locale() === 'ar' ? 'AR' : 'EN' }}
+		</span>
+	</button>
+
+	@if (isOpen()) {
+		<button
+			class="fixed inset-0 z-40 cursor-default"
+			type="button"
+			tabindex="-1"
+			aria-hidden="true"
+			(click)="closeMenu()"></button>
+
+		<div
+			class="absolute top-full z-50 mt-2 min-w-[180px] rounded-xl border border-border bg-background p-2 shadow-lg end-0"
+			role="menu"
+			[attr.aria-label]="'lang.select' | translate">
+			<p class="px-2.5 py-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+				{{ 'lang.select' | translate }}
+			</p>
+			@for (option of options; track option.locale) {
+				<button
+					type="button"
+					class="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-sm text-foreground hover:bg-accent/60"
+					role="menuitemradio"
+					[attr.aria-checked]="isSelected(option.locale)"
+					[class.bg-accent/60]="isSelected(option.locale)"
+					[class.font-semibold]="isSelected(option.locale)"
+					(click)="selectLocale(option.locale)">
+					<span>{{ option.labelKey | translate }}</span>
+					@if (isSelected(option.locale)) {
+						<i class="ki-filled ki-check text-primary text-sm"></i>
+					}
+				</button>
+			}
+		</div>
+	}
+</div>

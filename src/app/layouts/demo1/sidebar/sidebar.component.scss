@@ -1,0 +1,46 @@
+:host.dark .kt-sidebar-logo .sidebar-brand-name {
+	color: #fff;
+}
+
+:host.dark .kt-sidebar-logo img {
+	filter: none;
+}
+
+:host .kt-menu-link:hover .kt-menu-title,
+:host .kt-menu-link:hover .kt-menu-icon,
+:host .kt-menu-item.active > .kt-menu-link .kt-menu-title,
+:host .kt-menu-item.active > .kt-menu-link .kt-menu-icon,
+:host .kt-menu-link.router-link-active .kt-menu-title,
+:host .kt-menu-link.router-link-active .kt-menu-icon,
+:host .kt-menu-item.active > .kt-menu-accordion .kt-menu-link.router-link-active .kt-menu-title,
+:host .kt-menu-item.active > .kt-menu-accordion .kt-menu-link.router-link-active .kt-menu-icon {
+	color: var(--primary);
+}
+
+:host .kt-menu-item.active > .kt-menu-link,
+:host .kt-menu-link.router-link-active,
+:host .kt-menu-item.active > .kt-menu-accordion .kt-menu-link.router-link-active {
+	background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+	border-radius: 0.5rem;
+}
+
+:host .kt-menu-item.show > .kt-menu-link .kt-menu-title,
+:host .kt-menu-item.show > .kt-menu-link .kt-menu-icon {
+	color: var(--primary);
+}
+
+:host.dark .kt-menu-link:hover .kt-menu-title,
+:host.dark .kt-menu-link:hover .kt-menu-icon,
+:host.dark .kt-menu-item.active > .kt-menu-link .kt-menu-title,
+:host.dark .kt-menu-item.active > .kt-menu-link .kt-menu-icon,
+:host.dark .kt-menu-link.router-link-active .kt-menu-title,
+:host.dark .kt-menu-link.router-link-active .kt-menu-icon,
+:host.dark .kt-menu-item.active > .kt-menu-accordion .kt-menu-link.router-link-active .kt-menu-title,
+:host.dark .kt-menu-item.active > .kt-menu-accordion .kt-menu-link.router-link-active .kt-menu-icon {
+	color: var(--primary);
+}
+
+:host.dark .kt-menu-item.show > .kt-menu-link .kt-menu-title,
+:host.dark .kt-menu-item.show > .kt-menu-link .kt-menu-icon {
+	color: var(--primary);
+}
