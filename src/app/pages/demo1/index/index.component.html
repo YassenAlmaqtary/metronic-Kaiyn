@@ -1,22 +1,1136 @@
 <!-- Container -->
-<div class="kt-container-fixed flex flex-col gap-5">
-	<div class="kt-card">
-		<div class="kt-card-content p-6 flex flex-col gap-2">
-			<h2 class="text-lg font-semibold text-mono">
-				{{ 'dashboard.welcome' | translate }}, {{ userName() || 'KayianERP' }}
-			</h2>
-			<p class="text-sm text-secondary-foreground">
-				{{ 'dashboard.apiStatus' | translate }}:
-				@if (apiStatus() === 'loading') {
-					<span>{{ 'dashboard.loading' | translate }}</span>
-				} @else if (apiStatus() === 'connected') {
-					<span class="text-green-600">{{ 'dashboard.connected' | translate }}</span>
-					— {{ 'dashboard.usersCount' | translate }}: {{ usersCount() }}
-				} @else {
-					<span class="text-destructive">{{ 'dashboard.error' | translate }}</span>
-				}
-			</p>
-		</div>
-	</div>
-</div>
+<div class="kt-container-fixed" id="contentContainer"></div>
 <!-- End of Container -->
+
+<!-- Container -->
+
+<div class="kt-container-fixed">
+
+	<div class="flex flex-wrap items-center lg:items-end justify-between gap-5 pb-7.5">
+
+		<div class="flex flex-col justify-center gap-2">
+
+			<h1 class="text-xl font-medium leading-none text-mono">{{ 'dashboard.title' | translate }}</h1>
+
+			<div class="flex items-center gap-2 text-sm font-normal text-secondary-foreground">
+
+				{{ 'dashboard.subtitle' | translate }}
+
+			</div>
+
+		</div>
+
+		<div class="flex items-center gap-2.5">
+
+			<a class="kt-btn kt-btn-outline" href="#">{{ 'dashboard.viewProfile' | translate }}</a>
+
+		</div>
+
+	</div>
+
+</div>
+
+<!-- End of Container -->
+
+
+
+<!-- Container -->
+
+<div class="kt-container-fixed">
+
+	<div class="grid gap-5 lg:gap-7.5">
+
+		<!-- begin: grid -->
+
+		<div class="grid lg:grid-cols-3 gap-y-5 lg:gap-7.5 items-stretch">
+
+			<div class="lg:col-span-1">
+
+				<div class="grid grid-cols-2 gap-5 lg:gap-7.5 h-full items-stretch">
+
+					<div class="kt-card flex-col justify-between gap-6 h-full bg-cover rtl:bg-[left_top_-1.7rem] bg-[right_top_-1.7rem] bg-no-repeat channel-stats-bg">
+
+						<img alt="" class="w-7 mt-4 ms-5" src="assets/media/brand-logos/linkedin-2.svg" />
+
+						<div class="flex flex-col gap-1 pb-4 px-5">
+
+							<span class="text-3xl font-semibold text-mono">9.3k</span>
+
+							<span class="text-sm font-normal text-secondary-foreground">{{ 'dashboard.stats.amazingMates' | translate }}</span>
+
+						</div>
+
+					</div>
+
+					<div class="kt-card flex-col justify-between gap-6 h-full bg-cover rtl:bg-[left_top_-1.7rem] bg-[right_top_-1.7rem] bg-no-repeat channel-stats-bg">
+
+						<img alt="" class="w-7 mt-4 ms-5" src="assets/media/brand-logos/youtube-2.svg" />
+
+						<div class="flex flex-col gap-1 pb-4 px-5">
+
+							<span class="text-3xl font-semibold text-mono">24k</span>
+
+							<span class="text-sm font-normal text-secondary-foreground">{{ 'dashboard.stats.lessonsViews' | translate }}</span>
+
+						</div>
+
+					</div>
+
+					<div class="kt-card flex-col justify-between gap-6 h-full bg-cover rtl:bg-[left_top_-1.7rem] bg-[right_top_-1.7rem] bg-no-repeat channel-stats-bg">
+
+						<img alt="" class="w-7 mt-4 ms-5" src="assets/media/brand-logos/instagram-03.svg" />
+
+						<div class="flex flex-col gap-1 pb-4 px-5">
+
+							<span class="text-3xl font-semibold text-mono">608</span>
+
+							<span class="text-sm font-normal text-secondary-foreground">{{ 'dashboard.stats.newSubscribers' | translate }}</span>
+
+						</div>
+
+					</div>
+
+					<div class="kt-card flex-col justify-between gap-6 h-full bg-cover rtl:bg-[left_top_-1.7rem] bg-[right_top_-1.7rem] bg-no-repeat channel-stats-bg">
+
+						<img alt="" class="dark:hidden w-7 mt-4 ms-5" src="assets/media/brand-logos/tiktok.svg" />
+
+						<img alt="" class="hidden dark:block w-7 mt-4 ms-5" src="assets/media/brand-logos/tiktok-dark.svg" />
+
+						<div class="flex flex-col gap-1 pb-4 px-5">
+
+							<span class="text-3xl font-semibold text-mono">2.5k</span>
+
+							<span class="text-sm font-normal text-secondary-foreground">{{ 'dashboard.stats.streamAudience' | translate }}</span>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<div class="lg:col-span-2">
+
+				<div class="kt-card h-full">
+
+					<div class="kt-card-content p-10 bg-[length:80%] rtl:[background-position:-70%_25%] [background-position:175%_25%] bg-no-repeat entry-callout-bg">
+
+						<div class="flex flex-col justify-center gap-4">
+
+							<div class="flex -space-x-2">
+
+								<div class="flex">
+
+									<img class="hover:z-5 relative shrink-0 rounded-full ring-1 ring-background size-10" src="assets/media/avatars/300-4.png" />
+
+								</div>
+
+								<div class="flex">
+
+									<img class="hover:z-5 relative shrink-0 rounded-full ring-1 ring-background size-10" src="assets/media/avatars/300-1.png" />
+
+								</div>
+
+								<div class="flex">
+
+									<img class="hover:z-5 relative shrink-0 rounded-full ring-1 ring-background size-10" src="assets/media/avatars/300-2.png" />
+
+								</div>
+
+								<div class="flex">
+
+									<span class="hover:z-5 relative inline-flex items-center justify-center shrink-0 rounded-full ring-1 font-semibold leading-none text-2xs size-10 text-white text-xs ring-background bg-green-500">S</span>
+
+								</div>
+
+							</div>
+
+							<h2 class="text-xl font-semibold text-mono">
+
+								{{ 'dashboard.callout.titleBefore' | translate }}<br />
+
+								{{ 'dashboard.callout.titleAfter' | translate }} <a class="kt-link" href="#">{{ 'dashboard.callout.network' | translate }}</a>
+
+							</h2>
+
+							<p class="text-sm font-normal text-secondary-foreground leading-5.5">
+
+								{{ 'dashboard.callout.description1' | translate }}<br />
+
+								{{ 'dashboard.callout.description2' | translate }}<br />
+
+								{{ 'dashboard.callout.description3' | translate }}
+
+							</p>
+
+						</div>
+
+					</div>
+
+					<div class="kt-card-footer justify-center">
+
+						<a class="kt-link kt-link-underlined kt-link-dashed" href="#">{{ 'dashboard.callout.getStarted' | translate }}</a>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+		<!-- end: grid -->
+
+
+
+		<!-- begin: grid -->
+
+		<div class="grid lg:grid-cols-3 gap-5 lg:gap-7.5 items-stretch">
+
+			<div class="lg:col-span-1">
+
+				<div class="kt-card h-full">
+
+					<div class="kt-card-header">
+
+						<h3 class="kt-card-title">
+
+							{{ 'dashboard.highlights.title' | translate }}
+
+						</h3>
+
+						<div class="kt-menu" data-kt-menu="true">
+
+							<div class="kt-menu-item" data-kt-menu-item-offset="0, 10px" data-kt-menu-item-placement="bottom-start" data-kt-menu-item-toggle="dropdown" data-kt-menu-item-trigger="click">
+
+								<button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
+
+									<i class="ki-filled ki-dots-vertical text-lg">
+
+									</i>
+
+								</button>
+
+								<div class="kt-menu-dropdown kt-menu-default w-full max-w-[200px]" data-kt-menu-dismiss="true">
+
+									<div class="kt-menu-item">
+
+										<a class="kt-menu-link" href="#">
+
+											<span class="kt-menu-icon">
+
+												<i class="ki-filled ki-cloud-change">
+
+												</i>
+
+											</span>
+
+											<span class="kt-menu-title">
+
+												{{ 'dashboard.menu.activity' | translate }}
+
+											</span>
+
+										</a>
+
+									</div>
+
+									<div class="kt-menu-item">
+
+										<a class="kt-menu-link" data-kt-modal-toggle="#share_profile_modal" href="#">
+
+											<span class="kt-menu-icon">
+
+												<i class="ki-filled ki-share">
+
+												</i>
+
+											</span>
+
+											<span class="kt-menu-title">
+
+												{{ 'dashboard.menu.share' | translate }}
+
+											</span>
+
+										</a>
+
+									</div>
+
+									<div class="kt-menu-item" data-kt-menu-item-offset="-15px, 0" data-kt-menu-item-placement="right-start" data-kt-menu-item-toggle="dropdown" data-kt-menu-item-trigger="click|lg:hover">
+
+										<div class="kt-menu-link">
+
+											<span class="kt-menu-icon">
+
+												<i class="ki-filled ki-notification-status">
+
+												</i>
+
+											</span>
+
+											<span class="kt-menu-title">
+
+												{{ 'dashboard.menu.notifications' | translate }}
+
+											</span>
+
+											<span class="kt-menu-arrow">
+
+												<i class="ki-filled ki-right text-xs rtl:transform rtl:rotate-180">
+
+												</i>
+
+											</span>
+
+										</div>
+
+										<div class="kt-menu-dropdown kt-menu-default w-full max-w-[175px]">
+
+											<div class="kt-menu-item">
+
+												<a class="kt-menu-link" href="#">
+
+													<span class="kt-menu-icon">
+
+														<i class="ki-filled ki-sms">
+
+														</i>
+
+													</span>
+
+													<span class="kt-menu-title">
+
+														{{ 'dashboard.menu.email' | translate }}
+
+													</span>
+
+												</a>
+
+											</div>
+
+											<div class="kt-menu-item">
+
+												<a class="kt-menu-link" href="#">
+
+													<span class="kt-menu-icon">
+
+														<i class="ki-filled ki-message-notify">
+
+														</i>
+
+													</span>
+
+													<span class="kt-menu-title">
+
+														{{ 'dashboard.menu.sms' | translate }}
+
+													</span>
+
+												</a>
+
+											</div>
+
+											<div class="kt-menu-item">
+
+												<a class="kt-menu-link" href="#">
+
+													<span class="kt-menu-icon">
+
+														<i class="ki-filled ki-notification-status">
+
+														</i>
+
+													</span>
+
+													<span class="kt-menu-title">
+
+														{{ 'dashboard.menu.push' | translate }}
+
+													</span>
+
+												</a>
+
+											</div>
+
+										</div>
+
+									</div>
+
+									<div class="kt-menu-item">
+
+										<a class="kt-menu-link" data-kt-modal-toggle="#report_user_modal" href="#">
+
+											<span class="kt-menu-icon">
+
+												<i class="ki-filled ki-dislike">
+
+												</i>
+
+											</span>
+
+											<span class="kt-menu-title">
+
+												{{ 'dashboard.menu.report' | translate }}
+
+											</span>
+
+										</a>
+
+									</div>
+
+									<div class="kt-menu-separator">
+
+									</div>
+
+									<div class="kt-menu-item">
+
+										<a class="kt-menu-link" href="#">
+
+											<span class="kt-menu-icon">
+
+												<i class="ki-filled ki-setting-3">
+
+												</i>
+
+											</span>
+
+											<span class="kt-menu-title">
+
+												{{ 'dashboard.menu.settings' | translate }}
+
+											</span>
+
+										</a>
+
+									</div>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+					<div class="kt-card-content flex flex-col gap-4 p-5 lg:p-7.5 lg:pt-4">
+
+						<div class="flex flex-col gap-0.5">
+
+							<span class="text-sm font-normal text-secondary-foreground">
+
+								{{ 'dashboard.highlights.allTimeSales' | translate }}
+
+							</span>
+
+							<div class="flex items-center gap-2.5">
+
+								<span class="text-3xl font-semibold text-mono">
+
+									$295.7k
+
+								</span>
+
+								<span class="kt-badge kt-badge-outline kt-badge-success kt-badge-sm">
+
+									+2.7%
+
+								</span>
+
+							</div>
+
+						</div>
+
+						<div class="flex items-center gap-1 mb-1.5">
+
+							<div class="bg-green-500 h-2 w-full max-w-[60%] rounded-xs">
+
+							</div>
+
+							<div class="bg-destructive h-2 w-full max-w-[25%] rounded-xs">
+
+							</div>
+
+							<div class="bg-violet-500 h-2 w-full max-w-[15%] rounded-xs">
+
+							</div>
+
+						</div>
+
+						<div class="flex items-center flex-wrap gap-4 mb-1">
+
+							<div class="flex items-center gap-1.5">
+
+								<span class="rounded-full size-2 rounded-full kt-badge-success">
+
+								</span>
+
+								<span class="text-sm font-normal text-foreground">
+
+									{{ 'dashboard.highlights.metronic' | translate }}
+
+								</span>
+
+							</div>
+
+							<div class="flex items-center gap-1.5">
+
+								<span class="rounded-full size-2 rounded-full kt-badge-destructive">
+
+								</span>
+
+								<span class="text-sm font-normal text-foreground">
+
+									{{ 'dashboard.highlights.bundle' | translate }}
+
+								</span>
+
+							</div>
+
+							<div class="flex items-center gap-1.5">
+
+								<span class="rounded-full size-2 rounded-full kt-badge-info">
+
+								</span>
+
+								<span class="text-sm font-normal text-foreground">
+
+									{{ 'dashboard.highlights.metronicNest' | translate }}
+
+								</span>
+
+							</div>
+
+						</div>
+
+						<div class="border-b border-input">
+
+						</div>
+
+						<div class="grid gap-3">
+
+							<div class="flex items-center justify-between flex-wrap gap-2">
+
+								<div class="flex items-center gap-1.5">
+
+									<i class="ki-filled ki-shop text-base text-muted-foreground">
+
+									</i>
+
+									<span class="text-sm font-normal text-mono">
+
+										{{ 'dashboard.highlights.onlineStore' | translate }}
+
+									</span>
+
+								</div>
+
+								<div class="flex items-center text-sm font-medium text-foreground gap-6">
+
+									<span class="lg:text-right">
+
+										$172k
+
+									</span>
+
+									<span class="lg:text-right">
+
+										<i class="ki-filled ki-arrow-up text-green-500">
+
+										</i>
+
+										3.9%
+
+									</span>
+
+								</div>
+
+							</div>
+
+							<div class="flex items-center justify-between flex-wrap gap-2">
+
+								<div class="flex items-center gap-1.5">
+
+									<i class="ki-filled ki-facebook text-base text-muted-foreground">
+
+									</i>
+
+									<span class="text-sm font-normal text-mono">
+
+										{{ 'dashboard.highlights.facebook' | translate }}
+
+									</span>
+
+								</div>
+
+								<div class="flex items-center text-sm font-medium text-foreground gap-6">
+
+									<span class="lg:text-right">
+
+										$85k
+
+									</span>
+
+									<span class="lg:text-right">
+
+										<i class="ki-filled ki-arrow-down text-destructive">
+
+										</i>
+
+										0.7%
+
+									</span>
+
+								</div>
+
+							</div>
+
+							<div class="flex items-center justify-between flex-wrap gap-2">
+
+								<div class="flex items-center gap-1.5">
+
+									<i class="ki-filled ki-instagram text-base text-muted-foreground">
+
+									</i>
+
+									<span class="text-sm font-normal text-mono">
+
+										{{ 'dashboard.highlights.instagram' | translate }}
+
+									</span>
+
+								</div>
+
+								<div class="flex items-center text-sm font-medium text-foreground gap-6">
+
+									<span class="lg:text-right">
+
+										$36k
+
+									</span>
+
+									<span class="lg:text-right">
+
+										<i class="ki-filled ki-arrow-up text-green-500">
+
+										</i>
+
+										8.2%
+
+									</span>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<div class="lg:col-span-2">
+
+				<div class="kt-card h-full">
+
+					<div class="kt-card-header">
+
+						<h3 class="kt-card-title">
+
+							{{ 'dashboard.earnings.title' | translate }}
+
+						</h3>
+
+						<div class="flex gap-5">
+
+							<label class="flex items-center gap-2">
+
+								<input class="kt-switch" name="check" type="checkbox" value="1"/>
+
+								<span class="kt-label">
+
+									{{ 'dashboard.earnings.referralsOnly' | translate }}
+
+								</span>
+
+							</label>
+
+							<select class="kt-select w-36" data-kt-select="true" [attr.data-kt-select-placeholder]="'dashboard.earnings.selectPeriod' | translate" name="kt-select">
+
+								<option>
+
+									{{ 'dashboard.earnings.periodNone' | translate }}
+
+								</option>
+
+								<option value="1">
+
+									{{ 'dashboard.earnings.period1Month' | translate }}
+
+								</option>
+
+								<option value="2">
+
+									{{ 'dashboard.earnings.period3Month' | translate }}
+
+								</option>
+
+								<option value="3">
+
+									{{ 'dashboard.earnings.period6Month' | translate }}
+
+								</option>
+
+								<option value="4">
+
+									{{ 'dashboard.earnings.period12Month' | translate }}
+
+								</option>
+
+							</select>
+
+						</div>
+
+					</div>
+
+					<div class="kt-card-content flex flex-col justify-end items-stretch grow px-3 py-1">
+
+						<div id="earnings_chart">
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+		<!-- end: grid -->
+
+		<!-- begin: grid -->
+
+		<div class="grid lg:grid-cols-3 gap-5 lg:gap-7.5 items-stretch">
+
+			<div class="lg:col-span-1">
+
+				<div class="kt-card h-full">
+
+					<div class="kt-card-content lg:p-7.5 lg:pt-6 p-5">
+
+						<div class="flex items-center justify-between flex-wrap gap-5 mb-7.5">
+
+							<div class="flex flex-col gap-1">
+
+								<span class="text-xl font-semibold text-mono">
+
+									{{ 'dashboard.meeting.title' | translate }}
+
+								</span>
+
+								<span class="text-sm font-semibold text-foreground">
+
+									{{ 'dashboard.meeting.time' | translate }}
+
+								</span>
+
+							</div>
+
+							<img alt="" class="size-7" src="assets/media/brand-logos/zoom.svg"/>
+
+						</div>
+
+						<p class="text-sm font-normal text-foreground leading-5.5 mb-8">
+
+							{{ 'dashboard.meeting.description1' | translate }}
+
+							<br/>
+
+							{{ 'dashboard.meeting.description2' | translate }}
+
+							<br/>
+
+							{{ 'dashboard.meeting.description3' | translate }}
+
+						</p>
+
+						<div class="flex rounded-lg bg-accent/50 gap-10 p-5">
+
+							<div class="flex flex-col gap-5">
+
+								<div class="flex items-center gap-1.5 text-sm font-normal text-foreground">
+
+									<i class="ki-filled ki-geolocation text-base text-muted-foreground">
+
+									</i>
+
+									{{ 'dashboard.meeting.location' | translate }}
+
+								</div>
+
+								<div class="text-sm font-medium text-foreground pt-1.5">
+
+									{{ 'dashboard.meeting.locationValue' | translate }}
+
+								</div>
+
+							</div>
+
+							<div class="flex flex-col gap-5">
+
+								<div class="flex items-center gap-1.5 text-sm font-normal text-foreground">
+
+									<i class="ki-filled ki-users text-base text-muted-foreground">
+
+									</i>
+
+									{{ 'dashboard.meeting.team' | translate }}
+
+								</div>
+
+								<div class="flex -space-x-2">
+
+									<div class="flex">
+
+										<img class="hover:z-5 relative shrink-0 rounded-full ring-1 ring-background size-[30px]" src="assets/media/avatars/300-4.png"/>
+
+									</div>
+
+									<div class="flex">
+
+										<img class="hover:z-5 relative shrink-0 rounded-full ring-1 ring-background size-[30px]" src="assets/media/avatars/300-1.png"/>
+
+									</div>
+
+									<div class="flex">
+
+										<img class="hover:z-5 relative shrink-0 rounded-full ring-1 ring-background size-[30px]" src="assets/media/avatars/300-2.png"/>
+
+									</div>
+
+									<div class="flex">
+
+										<span class="hover:z-5 relative inline-flex items-center justify-center shrink-0 rounded-full ring-1 font-semibold leading-none text-2xs size-[30px] text-white text-xs ring-background bg-green-500">
+
+											+10
+
+										</span>
+
+									</div>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+					<div class="kt-card-footer justify-center">
+
+						<a class="kt-link kt-link-underlined kt-link-dashed" href="#">
+
+							{{ 'dashboard.meeting.join' | translate }}
+
+						</a>
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<div class="lg:col-span-2">
+
+				<div class="grid">
+
+					<div class="kt-card kt-card-grid h-full min-w-full">
+
+						<div class="kt-card-header">
+
+							<h3 class="kt-card-title">
+
+								{{ 'dashboard.teams.title' | translate }}
+
+							</h3>
+
+							<div class="kt-input max-w-48">
+
+								<i class="ki-filled ki-magnifier">
+
+								</i>
+
+								<input data-kt-datatable-search="#kt_datatable_1" [attr.placeholder]="'dashboard.teams.search' | translate" type="text" />
+
+							</div>
+
+						</div>
+
+						<div class="kt-card-table">
+
+							<div class="grid" data-kt-datatable="true" data-kt-datatable-page-size="5" id="teams_datatable">
+
+								<div class="kt-scrollable-x-auto">
+
+									<table class="kt-table kt-table-border table-fixed" data-kt-datatable-table="true" id="kt_datatable_1">
+
+										<thead>
+
+											<tr>
+
+												<th class="w-[50px]">
+
+													<input class="kt-checkbox kt-checkbox-sm" data-kt-datatable-check="true" type="checkbox"/>
+
+												</th>
+
+												<th class="w-[280px]">
+
+													<span class="kt-table-col">
+
+														<span class="kt-table-col-label">
+
+															{{ 'dashboard.teams.colTeam' | translate }}
+
+														</span>
+
+														<span class="kt-table-col-sort">
+
+														</span>
+
+													</span>
+
+												</th>
+
+												<th class="w-[125px]">
+
+													<span class="kt-table-col">
+
+														<span class="kt-table-col-label">
+
+															{{ 'dashboard.teams.colRating' | translate }}
+
+														</span>
+
+														<span class="kt-table-col-sort">
+
+														</span>
+
+													</span>
+
+												</th>
+
+												<th class="w-[135px]">
+
+													<span class="kt-table-col">
+
+														<span class="kt-table-col-label">
+
+															{{ 'dashboard.teams.colLastModified' | translate }}
+
+														</span>
+
+														<span class="kt-table-col-sort">
+
+														</span>
+
+													</span>
+
+												</th>
+
+												<th class="w-[125px]">
+
+													<span class="kt-table-col">
+
+														<span class="kt-table-col-label">
+
+															{{ 'dashboard.teams.colMembers' | translate }}
+
+														</span>
+
+														<span class="kt-table-col-sort">
+
+														</span>
+
+													</span>
+
+												</th>
+
+											</tr>
+
+										</thead>
+
+										<tbody>
+
+											@for (team of teams; track team.id) {
+
+												<tr>
+
+													<td>
+
+														<input class="kt-checkbox kt-checkbox-sm" data-kt-datatable-row-check="true" type="checkbox" [value]="team.id"/>
+
+													</td>
+
+													<td>
+
+														<div class="flex flex-col gap-2">
+
+															<a class="leading-none font-medium text-sm text-mono hover:text-primary" href="#">
+
+																{{ team.nameKey | translate }}
+
+															</a>
+
+															<span class="text-2sm text-secondary-foreground font-normal leading-3">
+
+																{{ team.descKey | translate }}
+
+															</span>
+
+														</div>
+
+													</td>
+
+													<td>
+
+														<div class="kt-rating">
+
+															@for (star of ratingStars; track star) {
+
+																<div
+
+																	class="kt-rating-label"
+
+																	[class.checked]="isStarChecked(team.rating, star)"
+
+																	[class.indeterminate]="isStarHalf(team.rating, star)"
+
+																>
+
+																	@if (isStarHalf(team.rating, star)) {
+
+																		<i class="kt-rating-on ki-solid ki-star text-base leading-none" style="width: 50.0%">
+
+																		</i>
+
+																	} @else {
+
+																		<i class="kt-rating-on ki-solid ki-star text-base leading-none">
+
+																		</i>
+
+																	}
+
+																	<i class="kt-rating-off ki-outline ki-star text-base leading-none">
+
+																	</i>
+
+																</div>
+
+															}
+
+														</div>
+
+													</td>
+
+													<td>
+
+														{{ team.modifiedKey | translate }}
+
+													</td>
+
+													<td>
+
+														<div class="flex -space-x-2">
+
+															@for (member of team.members; track $index) {
+
+																<div class="flex">
+
+																	@if (member.type === 'avatar') {
+
+																		<img class="hover:z-5 relative shrink-0 rounded-full ring-1 ring-background size-[30px]" [src]="member.src"/>
+
+																	} @else {
+
+																		<span class="relative inline-flex items-center justify-center shrink-0 rounded-full ring-1 font-semibold leading-none text-2xs size-[30px] text-white ring-background" [class]="member.badgeClass">
+
+																			{{ member.label }}
+
+																		</span>
+
+																	}
+
+																</div>
+
+															}
+
+														</div>
+
+													</td>
+
+												</tr>
+
+											}
+
+										</tbody>
+
+									</table>
+
+								</div>
+
+								<div class="kt-card-footer justify-center md:justify-between flex-col md:flex-row gap-5 text-secondary-foreground text-sm font-medium">
+
+									<div class="flex items-center gap-2 order-2 md:order-1">
+
+										{{ 'dashboard.teams.show' | translate }}
+
+										<select class="kt-select w-16" data-kt-datatable-size="true" data-kt-select="" name="perpage">
+
+										</select>
+
+										{{ 'dashboard.teams.perPage' | translate }}
+
+									</div>
+
+									<div class="flex items-center gap-4 order-1 md:order-2">
+
+										<span data-kt-datatable-info="true">
+
+										</span>
+
+										<div class="kt-datatable-pagination" data-kt-datatable-pagination="true">
+
+										</div>
+
+									</div>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+		<!-- end: grid -->
+
+
+
+	</div>
+
+</div>
+
+<!-- End of Container -->
+
