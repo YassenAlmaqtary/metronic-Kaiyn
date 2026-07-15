@@ -1,0 +1,257 @@
+<div class="kt-container-fixed flex flex-col gap-5 max-w-6xl">
+	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
+		<a class="hover:text-primary" routerLink="/demo1/sales/sales-invoices">{{ 'salesInvoices.title' | translate }}</a>
+		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+		<span class="text-mono font-medium">
+			@if (isEditMode()) {
+				@if (isReadOnly()) {
+					{{ 'salesInvoices.view' | translate }}
+				} @else {
+					{{ 'salesInvoices.edit' | translate }}
+				}
+			} @else {
+				{{ 'salesInvoices.create' | translate }}
+			}
+		</span>
+	</div>
+
+	<div class="kt-card">
+		<div class="kt-card-header px-5 py-4 border-b border-border">
+			<h1 class="text-lg font-semibold text-mono">
+				@if (isEditMode()) {
+					@if (isReadOnly()) {
+						{{ 'salesInvoices.view' | translate }}
+					} @else {
+						{{ 'salesInvoices.edit' | translate }}
+					}
+				} @else {
+					{{ 'salesInvoices.create' | translate }}
+				}
+			</h1>
+		</div>
+
+		@if (loading()) {
+			<div class="kt-card-content flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+				<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'salesInvoices.loading' | translate }}
+			</div>
+		} @else {
+			<form class="kt-card-content flex flex-col gap-5 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+				@if (isReadOnly()) {
+					<div class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800">
+						{{ 'salesInvoices.readOnly' | translate }}
+					</div>
+				}
+
+				@if (errorMessage()) {
+					<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+						{{ errorMessage() }}
+					</div>
+				}
+
+				<div>
+					<h2 class="text-sm font-semibold text-mono mb-3">{{ 'salesInvoices.title' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'salesInvoices.invoiceNo' | translate }}</label>
+							<input class="kt-input" formControlName="invoiceNo" type="text" readonly />
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'salesInvoices.invoiceDate' | translate }} *</label>
+							<input class="kt-input" formControlName="invoiceDate" type="date" />
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'salesInvoices.branch' | translate }} *</label>
+							<select class="kt-input" formControlName="branchId">
+								<option [ngValue]="null">{{ 'salesInvoices.selectBranch' | translate }}</option>
+								@for (branch of branches(); track branch.branchId) {
+									<option [ngValue]="branch.branchId">{{ branchLabel(branch) }}</option>
+								}
+							</select>
+							@if (form.controls.branchId.touched && form.controls.branchId.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'salesInvoices.required.branch' | translate }}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'salesInvoices.store' | translate }} *</label>
+							<select class="kt-input" formControlName="storeId">
+								<option [ngValue]="null">{{ 'salesInvoices.selectStore' | translate }}</option>
+								@for (store of stores(); track store.storeId) {
+									<option [ngValue]="store.storeId">{{ store.storeName || store.storeId }}</option>
+								}
+							</select>
+							@if (form.controls.storeId.touched && form.controls.storeId.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'salesInvoices.required.store' | translate }}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'salesInvoices.customer' | translate }} *</label>
+							<select class="kt-input" formControlName="customerId">
+								<option [ngValue]="null">{{ 'salesInvoices.selectCustomer' | translate }}</option>
+								@for (customer of customers(); track customer.customerId) {
+									<option [ngValue]="customer.customerId">{{ customerLabel(customer) }}</option>
+								}
+							</select>
+							@if (form.controls.customerId.touched && form.controls.customerId.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'salesInvoices.required.customer' | translate }}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'salesInvoices.salesman' | translate }}</label>
+							<select class="kt-input" formControlName="salesmanId">
+								<option [ngValue]="null">{{ 'salesInvoices.selectSalesman' | translate }}</option>
+								@for (salesman of salesmen(); track salesman.salesmanId) {
+									<option [ngValue]="salesman.salesmanId">{{ salesmanLabel(salesman) }}</option>
+								}
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'salesInvoices.invoiceType' | translate }} *</label>
+							<select class="kt-input" formControlName="invoiceType">
+								<option [ngValue]="SalesInvoiceType.Cash">{{ 'salesInvoices.type.cash' | translate }}</option>
+								<option [ngValue]="SalesInvoiceType.Credit">{{ 'salesInvoices.type.credit' | translate }}</option>
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'salesInvoices.currency' | translate }}</label>
+							<select class="kt-input" formControlName="currencyId">
+								<option [ngValue]="null">{{ 'salesInvoices.selectCurrency' | translate }}</option>
+								@for (currency of currencies(); track currency.id) {
+									<option [ngValue]="currency.id">{{ currencyLabel(currency) }}</option>
+								}
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'salesInvoices.exchangeRate' | translate }}</label>
+							<input class="kt-input" formControlName="exchangeRate" type="number" step="any" min="0" />
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'salesInvoices.discountAmount' | translate }}</label>
+							<input class="kt-input" formControlName="discountAmount" type="number" step="any" min="0" />
+						</div>
+					</div>
+				</div>
+
+				<div>
+					<div class="flex items-center justify-between gap-3 mb-3">
+						<h2 class="text-sm font-semibold text-mono">{{ 'salesInvoices.details' | translate }}</h2>
+						@if (!isReadOnly()) {
+							<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="addLine()">
+								<i class="ki-filled ki-plus"></i>
+								{{ 'salesInvoices.addLine' | translate }}
+							</button>
+						}
+					</div>
+
+					<div class="flex flex-col gap-4" formArrayName="details">
+						@for (line of details.controls; track $index; let i = $index) {
+							<div class="rounded-lg border border-border p-4" [formGroupName]="i">
+								<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+									<div class="flex flex-col gap-1 lg:col-span-2">
+										<label class="kt-form-label">{{ 'salesInvoices.product' | translate }} *</label>
+										<select class="kt-input" formControlName="productId">
+											<option [ngValue]="null">{{ 'salesInvoices.selectProduct' | translate }}</option>
+											@for (product of products(); track product.productId) {
+												<option [ngValue]="product.productId">{{ productLabel(product) }}</option>
+											}
+										</select>
+									</div>
+
+									<div class="flex flex-col gap-1">
+										<label class="kt-form-label">{{ 'salesInvoices.unit' | translate }} *</label>
+										<select class="kt-input" formControlName="uomId">
+											<option [ngValue]="null">{{ 'salesInvoices.selectUnit' | translate }}</option>
+											@for (unit of unitsForLine(i); track unit.unitId) {
+												<option [ngValue]="unit.unitId">{{ unit.unitName || unit.unitId }}</option>
+											}
+										</select>
+									</div>
+
+									<div class="flex flex-col gap-1">
+										<label class="kt-form-label">{{ 'salesInvoices.qty' | translate }} *</label>
+										<input class="kt-input" formControlName="qty" type="number" step="any" min="0" />
+									</div>
+
+									<div class="flex flex-col gap-1">
+										<label class="kt-form-label">{{ 'salesInvoices.unitPrice' | translate }} *</label>
+										<input class="kt-input" formControlName="unitPrice" type="number" step="any" min="0" />
+									</div>
+
+									<div class="flex flex-col gap-1">
+										<label class="kt-form-label">{{ 'salesInvoices.discountRate' | translate }}</label>
+										<input class="kt-input" formControlName="discountRate" type="number" step="any" min="0" max="100" />
+									</div>
+
+									<div class="flex flex-col gap-1">
+										<label class="kt-form-label">{{ 'salesInvoices.taxRate' | translate }}</label>
+										<input class="kt-input" formControlName="taxRate" type="number" step="any" min="0" max="100" />
+									</div>
+
+									<div class="flex flex-col gap-1">
+										<label class="kt-form-label">{{ 'salesInvoices.lineTotal' | translate }}</label>
+										<input class="kt-input" [value]="line.controls.netAmount.value | number: '1.2-2'" type="text" readonly />
+									</div>
+
+									@if (!isReadOnly() && details.length > 1) {
+										<div class="flex items-end">
+											<button
+												class="kt-btn kt-btn-sm kt-btn-outline text-destructive"
+												type="button"
+												(click)="removeLine(i)">
+												{{ 'salesInvoices.removeLine' | translate }}
+											</button>
+										</div>
+									}
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+
+				<div class="rounded-lg border border-border bg-muted/30 p-4">
+					<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+						<div>
+							<span class="text-secondary-foreground">{{ 'salesInvoices.totalBeforeDiscount' | translate }}</span>
+							<p class="font-medium text-mono mt-1">{{ headerTotalBeforeDiscount() | number: '1.2-2' }}</p>
+						</div>
+						<div>
+							<span class="text-secondary-foreground">{{ 'salesInvoices.taxAmount' | translate }}</span>
+							<p class="font-medium text-mono mt-1">{{ headerTaxAmount() | number: '1.2-2' }}</p>
+						</div>
+						<div>
+							<span class="text-secondary-foreground">{{ 'salesInvoices.netAmount' | translate }}</span>
+							<p class="font-medium text-mono mt-1">{{ headerNetAmount() | number: '1.2-2' }}</p>
+						</div>
+						<div>
+							<span class="text-secondary-foreground">{{ 'salesInvoices.remainingAmount' | translate }}</span>
+							<p class="font-medium text-mono mt-1">{{ headerRemainingAmount() | number: '1.2-2' }}</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="flex justify-end gap-2 pt-2 border-t border-border">
+					<a class="kt-btn kt-btn-outline" routerLink="/demo1/sales/sales-invoices">
+						{{ 'salesInvoices.cancel' | translate }}
+					</a>
+					@if (!isReadOnly()) {
+						<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
+							@if (saving()) {
+								<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+							}
+							{{ 'salesInvoices.save' | translate }}
+						</button>
+					}
+				</div>
+			</form>
+		}
+	</div>
+</div>

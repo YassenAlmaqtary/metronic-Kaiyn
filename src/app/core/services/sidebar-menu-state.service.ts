@@ -1,15 +1,13 @@
 import { Injectable } from '@angular/core';
 
-export type MenuSection = 'sales' | 'inventory' | 'accounting' | 'settings';
+import { SIDEBAR_MENU_SECTIONS } from '../navigation/sidebar-menu.config';
+import { SidebarMenuSectionId } from '../navigation/sidebar-menu.models';
+
+export type MenuSection = SidebarMenuSectionId;
 
 const STORAGE_KEY = 'kayian-erp-sidebar-sections';
 
-const MENU_SECTIONS: readonly MenuSection[] = [
-  'sales',
-  'inventory',
-  'accounting',
-  'settings',
-] as const;
+const MENU_SECTIONS: readonly MenuSection[] = SIDEBAR_MENU_SECTIONS.map((section) => section.id);
 
 function isMenuSection(value: unknown): value is MenuSection {
   return typeof value === 'string' && MENU_SECTIONS.includes(value as MenuSection);

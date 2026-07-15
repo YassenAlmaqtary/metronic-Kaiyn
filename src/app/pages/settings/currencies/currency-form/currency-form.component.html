@@ -1,0 +1,93 @@
+<div class="kt-container-fixed flex flex-col gap-5 max-w-3xl">
+	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
+		<a class="hover:text-primary" routerLink="/demo1/settings/currencies">{{ 'currencies.title' | translate }}</a>
+		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+		<span class="text-mono font-medium">
+			@if (isEditMode()) {
+				{{ 'currencies.edit' | translate }}
+			} @else {
+				{{ 'currencies.create' | translate }}
+			}
+		</span>
+	</div>
+
+	<div class="kt-card">
+		<div class="kt-card-header px-5 py-4 border-b border-border">
+			<h1 class="text-lg font-semibold text-mono">
+				@if (isEditMode()) {
+					{{ 'currencies.edit' | translate }}
+				} @else {
+					{{ 'currencies.create' | translate }}
+				}
+			</h1>
+		</div>
+
+		@if (loading()) {
+			<div class="kt-card-content flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+				<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'currencies.loading' | translate }}
+			</div>
+		} @else {
+			<form class="kt-card-content flex flex-col gap-5 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+				@if (errorMessage()) {
+					<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+						{{ errorMessage() }}
+					</div>
+				}
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'currencies.name' | translate }} *</label>
+						<input class="kt-input" formControlName="currencyName" type="text" />
+						@if (form.controls.currencyName.touched && form.controls.currencyName.hasError('required')) {
+							<span class="text-xs text-destructive">{{ 'currencies.required.name' | translate }}</span>
+						}
+					</div>
+
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'currencies.shortcut' | translate }}</label>
+						<input class="kt-input" formControlName="currencyShorcut" type="text" />
+					</div>
+
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'currencies.fakhName' | translate }}</label>
+						<input class="kt-input" formControlName="fakhName" type="text" />
+					</div>
+
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'currencies.valuesCurr' | translate }}</label>
+						<input class="kt-input" formControlName="valuesCurr" type="number" step="any" />
+					</div>
+
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'currencies.effectiveDate' | translate }}</label>
+						<input class="kt-input" formControlName="effectiveDate" type="date" />
+					</div>
+				</div>
+
+				<div class="flex flex-wrap gap-5">
+					<label class="flex items-center gap-2 text-sm">
+						<input class="kt-checkbox" formControlName="isActive" type="checkbox" />
+						{{ 'currencies.isActive' | translate }}
+					</label>
+					<label class="flex items-center gap-2 text-sm">
+						<input class="kt-checkbox" formControlName="isBaseCurrency" type="checkbox" />
+						{{ 'currencies.isBaseCurrency' | translate }}
+					</label>
+				</div>
+
+				<div class="flex justify-end gap-2 pt-2 border-t border-border">
+					<a class="kt-btn kt-btn-outline" routerLink="/demo1/settings/currencies">
+						{{ 'currencies.cancel' | translate }}
+					</a>
+					<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
+						@if (saving()) {
+							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+						}
+						{{ 'currencies.save' | translate }}
+					</button>
+				</div>
+			</form>
+		}
+	</div>
+</div>

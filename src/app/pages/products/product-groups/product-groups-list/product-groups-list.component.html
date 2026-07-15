@@ -1,0 +1,157 @@
+<div class="kt-container-fixed flex flex-col gap-5">
+	<div class="flex flex-wrap items-center justify-between gap-3">
+		<div>
+			<h1 class="text-xl font-semibold text-mono">{{ 'productGroups.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground mt-1">{{ 'productGroups.subtitle' | translate }}</p>
+		</div>
+		<a class="kt-btn kt-btn-primary" routerLink="/demo1/products/groups/new">
+			<i class="ki-filled ki-plus"></i>
+			{{ 'productGroups.add' | translate }}
+		</a>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-700">
+			{{ successMessage() }}
+		</div>
+	}
+
+	@if (errorMessage()) {
+		<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
+			<span>{{ errorMessage() }}</span>
+			<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="loadProductGroups()">
+				{{ 'productGroups.retry' | translate }}
+			</button>
+		</div>
+	}
+
+	<div class="kt-card">
+		<div class="kt-card-header flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border">
+			<div class="flex flex-wrap items-center gap-3 grow">
+				<div class="relative w-full max-w-sm">
+					<i class="ki-filled ki-magnifier absolute top-1/2 -translate-y-1/2 start-3 text-muted-foreground text-sm"></i>
+					<input
+						class="kt-input ps-9"
+						type="search"
+						[placeholder]="'productGroups.search' | translate"
+						[ngModel]="searchTerm()"
+						(ngModelChange)="onSearchChange($event)" />
+				</div>
+				<div class="flex items-center gap-1">
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm"
+						[class.kt-btn-primary]="filter() === 'all'"
+						[class.kt-btn-outline]="filter() !== 'all'"
+						(click)="setFilter('all')">
+						{{ 'productGroups.filter.all' | translate }}
+					</button>
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm"
+						[class.kt-btn-primary]="filter() === 'active'"
+						[class.kt-btn-outline]="filter() !== 'active'"
+						(click)="setFilter('active')">
+						{{ 'productGroups.filter.active' | translate }}
+					</button>
+				</div>
+			</div>
+			<span class="text-sm text-secondary-foreground">{{ filteredProductGroups().length }}</span>
+		</div>
+
+		<div class="kt-card-content p-0">
+			@if (loading()) {
+				<div class="flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+					<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+					{{ 'productGroups.loading' | translate }}
+				</div>
+			} @else if (filteredProductGroups().length === 0) {
+				<div class="flex flex-col items-center justify-center gap-3 py-16 text-center">
+					<i class="ki-filled ki-category text-3xl text-muted-foreground"></i>
+					<div>
+						<p class="font-medium text-mono">{{ 'productGroups.empty' | translate }}</p>
+						<p class="text-sm text-secondary-foreground mt-1">{{ 'productGroups.emptyHint' | translate }}</p>
+					</div>
+					<a class="kt-btn kt-btn-primary kt-btn-sm" routerLink="/demo1/products/groups/new">
+						{{ 'productGroups.add' | translate }}
+					</a>
+				</div>
+			} @else {
+				<div class="kt-scrollable-x-auto">
+					<table class="kt-table kt-table-border w-full">
+						<thead>
+							<tr>
+								<th>{{ 'productGroups.groupName' | translate }}</th>
+								<th>{{ 'productGroups.arrayShow' | translate }}</th>
+								<th>{{ 'productGroups.status' | translate }}</th>
+								<th class="w-[120px]">{{ 'productGroups.actions' | translate }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (group of filteredProductGroups(); track group.groupId) {
+								<tr>
+									<td class="font-medium text-mono">{{ group.groupName || '—' }}</td>
+									<td>{{ group.arrayShow ?? '—' }}</td>
+									<td>
+										@if (group.status !== false) {
+											<span class="kt-badge kt-badge-sm kt-badge-success kt-badge-outline">
+												{{ 'productGroups.active' | translate }}
+											</span>
+										} @else {
+											<span class="kt-badge kt-badge-sm kt-badge-secondary kt-badge-outline">
+												{{ 'productGroups.inactive' | translate }}
+											</span>
+										}
+									</td>
+									<td>
+										<div class="flex items-center gap-1">
+											<a
+												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
+												[routerLink]="['/demo1/products/groups', group.groupId, 'edit']"
+												[attr.aria-label]="'productGroups.edit' | translate">
+												<i class="ki-filled ki-notepad-edit"></i>
+											</a>
+											<button
+												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive hover:bg-destructive/10"
+												type="button"
+												(click)="openDeleteDialog(group)"
+												[attr.aria-label]="'productGroups.delete' | translate">
+												<i class="ki-filled ki-trash"></i>
+											</button>
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+		</div>
+	</div>
+</div>
+
+@if (deleteTarget(); as group) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<button class="absolute inset-0 bg-black/40" type="button" (click)="closeDeleteDialog()" aria-label="close"></button>
+		<div class="relative kt-card w-full max-w-md shadow-xl">
+			<div class="kt-card-content flex flex-col gap-4 p-6">
+				<div>
+					<h3 class="text-lg font-semibold text-mono">{{ 'productGroups.deleteTitle' | translate }}</h3>
+					<p class="text-sm text-secondary-foreground mt-2">{{ 'productGroups.deleteConfirm' | translate }}</p>
+					<p class="text-sm font-medium text-mono mt-3">{{ group.groupName || group.groupId }}</p>
+				</div>
+				<div class="flex justify-end gap-2">
+					<button class="kt-btn kt-btn-outline" type="button" [disabled]="deleting()" (click)="closeDeleteDialog()">
+						{{ 'productGroups.cancel' | translate }}
+					</button>
+					<button class="kt-btn kt-btn-destructive" type="button" [disabled]="deleting()" (click)="confirmDelete()">
+						@if (deleting()) {
+							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+						}
+						{{ 'productGroups.delete' | translate }}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}

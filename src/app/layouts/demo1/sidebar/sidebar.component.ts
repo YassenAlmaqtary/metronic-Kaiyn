@@ -2,11 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
+import { SidebarMenuSectionId, SidebarMenuService } from '../../../core/navigation';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
-import {
-  MenuSection,
-  SidebarMenuStateService,
-} from '../../../core/services/sidebar-menu-state.service';
+import { SidebarMenuStateService } from '../../../core/services/sidebar-menu-state.service';
 import { ThemeToggleService } from '../../../partials/theme-toggle/theme-toggle.service';
 
 @Component({
@@ -18,16 +16,15 @@ import { ThemeToggleService } from '../../../partials/theme-toggle/theme-toggle.
 export class SidebarComponent {
   private router = inject(Router);
   private menuState = inject(SidebarMenuStateService);
+  private sidebarMenu = inject(SidebarMenuService);
   protected themeService = inject(ThemeToggleService);
 
-  private readonly sectionRoutes: Record<MenuSection, string[]> = {
-    sales: ['/sales'],
-    inventory: ['/inventory'],
-    accounting: ['/accounting', '/reports'],
-    settings: ['/settings'],
-  };
+  protected readonly rootLinks = this.sidebarMenu.rootLinks;
+  protected readonly sections = this.sidebarMenu.sections;
 
-  private readonly expandedSections = signal<Set<MenuSection>>(this.buildInitialExpandedSections());
+  private readonly expandedSections = signal<Set<SidebarMenuSectionId>>(
+    this.buildInitialExpandedSections(),
+  );
 
   constructor() {
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
@@ -35,18 +32,18 @@ export class SidebarComponent {
     });
   }
 
-  isSectionExpanded(section: MenuSection): boolean {
-    return this.expandedSections().has(section);
+  isSectionExpanded(sectionId: SidebarMenuSectionId): boolean {
+    return this.expandedSections().has(sectionId);
   }
 
-  toggleSection(section: MenuSection): void {
+  toggleSection(sectionId: SidebarMenuSectionId): void {
     this.expandedSections.update((sections) => {
       const next = new Set(sections);
 
-      if (next.has(section)) {
-        next.delete(section);
+      if (next.has(sectionId)) {
+        next.delete(sectionId);
       } else {
-        next.add(section);
+        next.add(sectionId);
       }
 
       this.menuState.save(next);
@@ -54,7 +51,7 @@ export class SidebarComponent {
     });
   }
 
-  private buildInitialExpandedSections(): Set<MenuSection> {
+  private buildInitialExpandedSections(): Set<SidebarMenuSectionId> {
     const sections = this.menuState.load();
     const activeSection = this.getActiveSection(this.router.url);
 
@@ -87,9 +84,10 @@ export class SidebarComponent {
     });
   }
 
-  private getActiveSection(url: string): MenuSection | null {
-    const entries = Object.entries(this.sectionRoutes) as [MenuSection, string[]][];
-    const match = entries.find(([, segments]) => segments.some((segment) => url.includes(segment)));
-    return match?.[0] ?? null;
+  private getActiveSection(url: string): SidebarMenuSectionId | null {
+    const match = this.sections().find((section) =>
+      section.matchPaths.some((path) => url.includes(path)),
+    );
+    return match?.id ?? null;
   }
 }
