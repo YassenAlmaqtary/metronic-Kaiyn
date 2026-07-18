@@ -58,6 +58,8 @@ import { BankAccountsListComponent } from './pages/banks/accounts/bank-accounts-
 import { BankAccountFormComponent } from './pages/banks/accounts/bank-account-form/bank-account-form.component';
 import { CheckBooksListComponent } from './pages/banks/check-books/check-books-list/check-books-list.component';
 import { CheckBookFormComponent } from './pages/banks/check-books/check-book-form/check-book-form.component';
+import { IssuedChecksListComponent } from './pages/accounting/issued-checks/issued-checks-list/issued-checks-list.component';
+import { IssuedCheckFormComponent } from './pages/accounting/issued-checks/issued-check-form/issued-check-form.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth/sign-in' },
@@ -137,6 +139,12 @@ export const routes: Routes = [
       { path: 'accounting/receipt-vouchers', component: ReceiptVouchersListComponent },
       { path: 'accounting/receipt-vouchers/new', component: ReceiptVoucherFormComponent },
       { path: 'accounting/receipt-vouchers/:id/edit', component: ReceiptVoucherFormComponent },
+      { path: 'accounting/check-books', component: CheckBooksListComponent },
+      { path: 'accounting/check-books/new', component: CheckBookFormComponent },
+      { path: 'accounting/check-books/:id/edit', component: CheckBookFormComponent },
+      { path: 'accounting/issued-checks', component: IssuedChecksListComponent },
+      { path: 'accounting/issued-checks/new', component: IssuedCheckFormComponent },
+      { path: 'accounting/issued-checks/:id/edit', component: IssuedCheckFormComponent },
       { path: 'accounting/reports/general-ledger', component: GeneralLedgerComponent },
       { path: 'accounting/reports/trial-balance', component: TrialBalanceComponent },
       { path: 'banks/banks', component: BanksListComponent },

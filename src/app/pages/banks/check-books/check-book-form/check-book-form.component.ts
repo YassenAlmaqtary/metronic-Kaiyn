@@ -30,6 +30,12 @@ export class CheckBookFormComponent implements OnInit {
   private auth = inject(AuthService);
   private language = inject(LanguageService);
 
+  get basePath(): string {
+    return this.router.url.includes('/accounting/')
+      ? '/demo1/accounting/check-books'
+      : '/demo1/banks/check-books';
+  }
+
   readonly CheckBookStatus = CheckBookStatus;
 
   loading = signal(false);
@@ -158,7 +164,7 @@ export class CheckBookFormComponent implements OnInit {
 
   private navigateBack(messageKey: TranslationKey): void {
     this.saving.set(false);
-    void this.router.navigate(['/demo1/banks/check-books'], {
+    void this.router.navigate([this.basePath], {
       state: { successMessage: this.language.translate(messageKey) },
     });
   }

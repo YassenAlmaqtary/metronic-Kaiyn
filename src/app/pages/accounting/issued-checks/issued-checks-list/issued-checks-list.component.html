@@ -1,0 +1,311 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div class="flex items-start gap-3">
+			<div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+				<i class="ki-filled ki-cheque text-xl"></i>
+			</div>
+			<div>
+				<h1 class="text-xl font-semibold text-mono tracking-tight">{{ 'issuedChecks.title' | translate }}</h1>
+				<p class="text-sm text-secondary-foreground mt-1 max-w-xl">{{ 'issuedChecks.subtitle' | translate }}</p>
+			</div>
+		</div>
+		<a class="kt-btn kt-btn-primary" routerLink="/demo1/accounting/issued-checks/new">
+			<i class="ki-filled ki-plus"></i>
+			{{ 'issuedChecks.add' | translate }}
+		</a>
+	</div>
+
+	<div class="grid grid-cols-2 xl:grid-cols-5 gap-3">
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+					<i class="ki-filled ki-document"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'issuedChecks.stats.total' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().total }}</div>
+				</div>
+			</div>
+		</div>
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-info/10 text-info">
+					<i class="ki-filled ki-pencil"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'issuedChecks.stats.draftIssued' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().draftIssued }}</div>
+				</div>
+			</div>
+		</div>
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+					<i class="ki-filled ki-send"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'issuedChecks.stats.posted' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().posted }}</div>
+				</div>
+			</div>
+		</div>
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-success/10 text-success">
+					<i class="ki-filled ki-check-circle"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'issuedChecks.stats.paid' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().paid }}</div>
+				</div>
+			</div>
+		</div>
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+					<i class="ki-filled ki-cross-circle"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'issuedChecks.stats.bounced' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().bounced }}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-700 flex items-center gap-2">
+			<i class="ki-filled ki-check-circle"></i>
+			{{ successMessage() }}
+		</div>
+	}
+
+	@if (errorMessage()) {
+		<div class="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
+			<span class="flex items-center gap-2">
+				<i class="ki-filled ki-information-2"></i>
+				{{ errorMessage() }}
+			</span>
+			<button class="kt-btn kt-btn-sm kt-btn-light" type="button" (click)="loadChecks()">
+				{{ 'issuedChecks.retry' | translate }}
+			</button>
+		</div>
+	}
+
+	<div class="kt-card overflow-hidden">
+		<div class="px-5 pt-5 pb-4 border-b border-border space-y-4">
+			<div class="flex flex-wrap items-center justify-between gap-3">
+				<div class="inline-flex flex-wrap rounded-lg border border-border bg-muted/40 p-1 gap-1">
+					@for (filter of statusFilters; track filter) {
+						<button type="button" class="kt-btn kt-btn-sm border-0 shadow-none" [class.kt-btn-primary]="statusFilter() === filter" [class.kt-btn-ghost]="statusFilter() !== filter" (click)="setStatusFilter(filter)">
+							{{ filterLabel(filter) }}
+						</button>
+					}
+				</div>
+				@if (hasActiveFilters()) {
+					<button class="kt-btn kt-btn-sm kt-btn-light" type="button" (click)="clearFilters()">
+						{{ 'issuedChecks.clearFilters' | translate }}
+					</button>
+				}
+			</div>
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'issuedChecks.searchLabel' | translate }}</label>
+					<div class="relative">
+						<i class="ki-filled ki-magnifier absolute top-1/2 -translate-y-1/2 start-3 text-muted-foreground text-sm"></i>
+						<input class="kt-input ps-9" type="search" [placeholder]="'issuedChecks.search' | translate" [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)" />
+					</div>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'issuedChecks.bankAccount' | translate }}</label>
+					<select class="kt-input" [ngModel]="bankAccountFilter()" (ngModelChange)="onBankAccountFilterChange($event)">
+						<option value="">{{ 'issuedChecks.filter.accountAll' | translate }}</option>
+						@for (account of bankAccounts(); track account.bankAccountID) {
+							<option [value]="account.bankAccountID">{{ account.accountName || account.accountNumber || account.bankAccountID }}</option>
+						}
+					</select>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'issuedChecks.filter.dateFrom' | translate }}</label>
+					<input class="kt-input" type="date" [ngModel]="dateFrom()" (ngModelChange)="onDateFromChange($event)" />
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'issuedChecks.filter.dateTo' | translate }}</label>
+					<input class="kt-input" type="date" [ngModel]="dateTo()" (ngModelChange)="onDateToChange($event)" />
+				</div>
+			</div>
+		</div>
+
+		<div class="kt-card-content p-0">
+			@if (loading()) {
+				<div class="flex flex-col items-center justify-center gap-3 py-20 text-secondary-foreground">
+					<span class="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+					<span class="text-sm">{{ 'issuedChecks.loading' | translate }}</span>
+				</div>
+			} @else if (filteredChecks().length === 0) {
+				<div class="flex flex-col items-center justify-center gap-4 py-20 text-center px-6">
+					<div class="relative">
+						<div class="absolute inset-0 rounded-full bg-primary/10 blur-2xl scale-150"></div>
+						<div class="relative flex size-16 items-center justify-center rounded-2xl bg-muted/60 text-muted-foreground">
+							<i class="ki-filled ki-cheque text-3xl"></i>
+						</div>
+					</div>
+					<div>
+						<p class="font-medium text-mono">{{ 'issuedChecks.empty' | translate }}</p>
+						<p class="text-sm text-secondary-foreground mt-1 max-w-md">{{ 'issuedChecks.emptyHint' | translate }}</p>
+					</div>
+					<a class="kt-btn kt-btn-primary kt-btn-sm" routerLink="/demo1/accounting/issued-checks/new">
+						{{ 'issuedChecks.add' | translate }}
+					</a>
+				</div>
+			} @else {
+				<div class="px-5 py-3 text-xs text-secondary-foreground border-b border-border">
+					{{ 'issuedChecks.showing' | translate }} {{ filteredChecks().length }}
+				</div>
+				<div class="kt-scrollable-x-auto">
+					<table class="kt-table kt-table-border w-full">
+						<thead>
+							<tr>
+								<th>{{ 'issuedChecks.checkNumber' | translate }}</th>
+								<th>{{ 'issuedChecks.checkDate' | translate }}</th>
+								<th>{{ 'issuedChecks.payeeName' | translate }}</th>
+								<th>{{ 'issuedChecks.bankAccount' | translate }}</th>
+								<th>{{ 'issuedChecks.amount' | translate }}</th>
+								<th>{{ 'issuedChecks.status' | translate }}</th>
+								<th>{{ 'issuedChecks.approvalStatus' | translate }}</th>
+								<th class="w-[180px]">{{ 'issuedChecks.actions' | translate }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (check of filteredChecks(); track check.checkID) {
+								<tr>
+									<td class="font-mono">{{ check.checkNumber || ('#' + check.checkID) }}</td>
+									<td>{{ check.checkDate | date: 'mediumDate' }}</td>
+									<td>{{ check.payeeName || '—' }}</td>
+									<td>{{ check.bankAccountName || check.bankAccountID }}</td>
+									<td class="font-mono">{{ check.amount | number: '1.2-2' }}</td>
+									<td>
+										<div class="flex flex-wrap gap-1">
+											<span class="kt-badge kt-badge-sm kt-badge-outline" [class]="statusBadgeClass(check.status)">{{ statusLabel(check) }}</span>
+											@if (check.isPosted) {
+												<span class="kt-badge kt-badge-sm kt-badge-primary kt-badge-outline">{{ 'issuedChecks.posted' | translate }}</span>
+											}
+										</div>
+									</td>
+									<td>{{ check.approvalStatusName || '—' }}</td>
+									<td>
+										<div class="flex items-center gap-1 flex-wrap">
+											<a class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" [routerLink]="['/demo1/accounting/issued-checks', check.checkID, 'edit']" [attr.title]="(isDraftOrIssuedNotPosted(check) ? 'issuedChecks.edit' : 'issuedChecks.view') | translate">
+												<i class="ki-filled" [class.ki-eye]="!isDraftOrIssuedNotPosted(check)" [class.ki-notepad-edit]="isDraftOrIssuedNotPosted(check)"></i>
+											</a>
+											@if (isDraftOrIssuedNotPosted(check)) {
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="openActionDialog(check, 'approve')" [attr.title]="'issuedChecks.approve' | translate">
+													<i class="ki-filled ki-check-circle"></i>
+												</button>
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="openActionDialog(check, 'reject')" [attr.title]="'issuedChecks.reject' | translate">
+													<i class="ki-filled ki-cross-circle"></i>
+												</button>
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="openActionDialog(check, 'post')" [attr.title]="'issuedChecks.post' | translate">
+													<i class="ki-filled ki-send"></i>
+												</button>
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="openActionDialog(check, 'cancel')" [attr.title]="'issuedChecks.cancelCheck' | translate">
+													<i class="ki-filled ki-cross-square"></i>
+												</button>
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive" (click)="openActionDialog(check, 'delete')" [attr.title]="'issuedChecks.delete' | translate">
+													<i class="ki-filled ki-trash"></i>
+												</button>
+											}
+											@if (isPostedUnpaid(check)) {
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="openActionDialog(check, 'pay')" [attr.title]="'issuedChecks.pay' | translate">
+													<i class="ki-filled ki-dollar"></i>
+												</button>
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="openActionDialog(check, 'bounce')" [attr.title]="'issuedChecks.bounce' | translate">
+													<i class="ki-filled ki-arrow-circle-left"></i>
+												</button>
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="openActionDialog(check, 'cancel')" [attr.title]="'issuedChecks.cancelCheck' | translate">
+													<i class="ki-filled ki-cross-square"></i>
+												</button>
+											}
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+		</div>
+	</div>
+
+	@if (actionTarget() && actionType()) {
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" (click)="closeActionDialog()">
+			<div class="kt-card w-full max-w-md shadow-xl" (click)="$event.stopPropagation()">
+				<div class="kt-card-header px-5 py-4 border-b border-border">
+					<h2 class="text-lg font-semibold text-mono">
+						@switch (actionType()) {
+							@case ('delete') { {{ 'issuedChecks.deleteTitle' | translate }} }
+							@case ('approve') { {{ 'issuedChecks.approveTitle' | translate }} }
+							@case ('reject') { {{ 'issuedChecks.rejectTitle' | translate }} }
+							@case ('post') { {{ 'issuedChecks.postTitle' | translate }} }
+							@case ('pay') { {{ 'issuedChecks.payTitle' | translate }} }
+							@case ('cancel') { {{ 'issuedChecks.cancelTitle' | translate }} }
+							@case ('bounce') { {{ 'issuedChecks.bounceTitle' | translate }} }
+						}
+					</h2>
+				</div>
+				<div class="kt-card-content px-5 py-4 text-sm text-secondary-foreground space-y-4">
+					@switch (actionType()) {
+						@case ('delete') { {{ 'issuedChecks.deleteConfirm' | translate }} }
+						@case ('approve') { {{ 'issuedChecks.approveConfirm' | translate }} }
+						@case ('reject') { {{ 'issuedChecks.rejectConfirm' | translate }} }
+						@case ('post') { {{ 'issuedChecks.postConfirm' | translate }} }
+						@case ('pay') { {{ 'issuedChecks.payConfirm' | translate }} }
+						@case ('cancel') { {{ 'issuedChecks.cancelConfirm' | translate }} }
+						@case ('bounce') { {{ 'issuedChecks.bounceConfirm' | translate }} }
+					}
+
+					@if (actionNeedsReason() || actionNeedsPayDates()) {
+						<form class="space-y-3" [formGroup]="actionForm">
+							@if (actionNeedsReason()) {
+								<div class="flex flex-col gap-1">
+									<label class="text-xs font-medium text-secondary-foreground">{{ 'issuedChecks.reason' | translate }}</label>
+									<textarea class="kt-input min-h-20" formControlName="reason" [placeholder]="'issuedChecks.reasonPlaceholder' | translate"></textarea>
+								</div>
+							}
+							@if (actionNeedsPayDates()) {
+								<div class="flex flex-col gap-1">
+									<label class="text-xs font-medium text-secondary-foreground">{{ 'issuedChecks.paymentDate' | translate }} *</label>
+									<input class="kt-input" type="date" formControlName="paymentDate" />
+								</div>
+								<div class="flex flex-col gap-1">
+									<label class="text-xs font-medium text-secondary-foreground">{{ 'issuedChecks.clearingDate' | translate }}</label>
+									<input class="kt-input" type="date" formControlName="clearingDate" />
+								</div>
+							}
+						</form>
+					}
+				</div>
+				<div class="kt-card-footer px-5 py-4 border-t border-border flex justify-end gap-2">
+					<button class="kt-btn kt-btn-light" type="button" [disabled]="actionLoading()" (click)="closeActionDialog()">
+						{{ 'issuedChecks.cancel' | translate }}
+					</button>
+					<button class="kt-btn" [class.kt-btn-destructive]="actionType() === 'delete' || actionType() === 'bounce'" [class.kt-btn-primary]="actionType() !== 'delete' && actionType() !== 'bounce'" type="button" [disabled]="actionLoading()" (click)="confirmAction()">
+						@if (actionLoading()) {
+							<span class="size-4 rounded-full border-2 border-current border-t-transparent animate-spin"></span>
+						} @else {
+							@switch (actionType()) {
+								@case ('delete') { {{ 'issuedChecks.delete' | translate }} }
+								@case ('approve') { {{ 'issuedChecks.approve' | translate }} }
+								@case ('reject') { {{ 'issuedChecks.reject' | translate }} }
+								@case ('post') { {{ 'issuedChecks.post' | translate }} }
+								@case ('pay') { {{ 'issuedChecks.pay' | translate }} }
+								@case ('cancel') { {{ 'issuedChecks.cancelCheck' | translate }} }
+								@case ('bounce') { {{ 'issuedChecks.bounce' | translate }} }
+							}
+						}
+					</button>
+				</div>
+			</div>
+		</div>
+	}
+</div>

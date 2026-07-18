@@ -24,6 +24,8 @@ export const menuEn = {
   'menu.accounting.openingBalances': 'Opening Balances',
   'menu.accounting.paymentVouchers': 'Payment Vouchers',
   'menu.accounting.receiptVouchers': 'Receipt Vouchers',
+  'menu.accounting.checkBooks': 'Check Books',
+  'menu.accounting.issuedChecks': 'Issued Checks',
   'menu.accounting.generalLedger': 'General Ledger',
   'menu.accounting.trialBalance': 'Trial Balance',
   'menu.reports': 'Reports',

@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { BankAccount } from '../../../../core/api/models/bank-account.models';
 import { CheckBook, CheckBookStatus } from '../../../../core/api/models/check-book.models';
@@ -23,7 +23,14 @@ type CheckBookAction = 'delete' | 'toggle';
 export class CheckBooksListComponent implements OnInit {
   private checkBooksService = inject(CheckBooksService);
   private bankAccountsService = inject(BankAccountsService);
+  private router = inject(Router);
   private language = inject(LanguageService);
+
+  get basePath(): string {
+    return this.router.url.includes('/accounting/')
+      ? '/demo1/accounting/check-books'
+      : '/demo1/banks/check-books';
+  }
 
   readonly CheckBookStatus = CheckBookStatus;
 

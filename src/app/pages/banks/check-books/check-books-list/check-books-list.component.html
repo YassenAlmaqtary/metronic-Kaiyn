@@ -9,7 +9,7 @@
 				<p class="text-sm text-secondary-foreground mt-1 max-w-xl">{{ 'checkBooks.subtitle' | translate }}</p>
 			</div>
 		</div>
-		<a class="kt-btn kt-btn-primary" routerLink="/demo1/banks/check-books/new">
+		<a class="kt-btn kt-btn-primary" [routerLink]="[basePath, 'new']">
 			<i class="ki-filled ki-plus"></i>
 			{{ 'checkBooks.add' | translate }}
 		</a>
@@ -136,7 +136,7 @@
 						<p class="font-medium text-mono">{{ 'checkBooks.empty' | translate }}</p>
 						<p class="text-sm text-secondary-foreground mt-1 max-w-md">{{ 'checkBooks.emptyHint' | translate }}</p>
 					</div>
-					<a class="kt-btn kt-btn-primary kt-btn-sm" routerLink="/demo1/banks/check-books/new">
+					<a class="kt-btn kt-btn-primary kt-btn-sm" [routerLink]="[basePath, 'new']">
 						{{ 'checkBooks.add' | translate }}
 					</a>
 				</div>
@@ -176,7 +176,7 @@
 									</td>
 									<td>
 										<div class="flex items-center gap-1">
-											<a class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" [routerLink]="['/demo1/banks/check-books', item.checkBookID, 'edit']" [attr.title]="'checkBooks.edit' | translate">
+											<a class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" [routerLink]="[basePath, item.checkBookID, 'edit']" [attr.title]="'checkBooks.edit' | translate">
 												<i class="ki-filled ki-notepad-edit"></i>
 											</a>
 											<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="openActionDialog(item, 'toggle')" [attr.title]="'checkBooks.toggleStatus' | translate">

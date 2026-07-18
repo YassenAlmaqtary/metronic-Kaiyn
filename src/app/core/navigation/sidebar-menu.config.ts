@@ -147,6 +147,18 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         permission: 'receiptVouchers.view',
       },
       {
+        id: 'accounting-check-books',
+        labelKey: 'menu.accounting.checkBooks',
+        route: '/demo1/accounting/check-books',
+        permission: 'checkBooks.view',
+      },
+      {
+        id: 'accounting-issued-checks',
+        labelKey: 'menu.accounting.issuedChecks',
+        route: '/demo1/accounting/issued-checks',
+        permission: 'issuedChecks.view',
+      },
+      {
         id: 'accounting-general-ledger',
         labelKey: 'menu.accounting.generalLedger',
         route: '/demo1/accounting/reports/general-ledger',

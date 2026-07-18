@@ -24,6 +24,8 @@ export const menuAr = {
   'menu.accounting.openingBalances': 'الأرصدة الافتتاحية',
   'menu.accounting.paymentVouchers': 'سندات الصرف',
   'menu.accounting.receiptVouchers': 'سندات القبض',
+  'menu.accounting.checkBooks': 'دفاتر الشيكات',
+  'menu.accounting.issuedChecks': 'الشيكات الصادرة',
   'menu.accounting.generalLedger': 'دفتر الأستاذ العام',
   'menu.accounting.trialBalance': 'ميزان المراجعة',
   'menu.reports': 'التقارير',
