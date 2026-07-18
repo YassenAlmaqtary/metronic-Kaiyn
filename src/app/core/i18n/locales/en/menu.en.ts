@@ -13,7 +13,7 @@ export const menuEn = {
   'menu.inventory': 'Inventory',
   'menu.inventory.warehouses': 'Warehouses',
   'menu.inventory.movements': 'Stock Movements',
-  'menu.accounting': 'Accounting',
+  'menu.accounting': 'Accounting Directory',
   'menu.accounting.journal': 'Journal Entries',
   'menu.accounting.accountGroups': 'Account Groups',
   'menu.accounting.periods': 'Accounting Periods',

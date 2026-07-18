@@ -13,7 +13,7 @@ export const menuAr = {
   'menu.inventory': 'المخزون',
   'menu.inventory.warehouses': 'المستودعات',
   'menu.inventory.movements': 'حركة المخزون',
-  'menu.accounting': 'المحاسبة',
+  'menu.accounting': 'الدليل المحاسبي',
   'menu.accounting.journal': 'قيود اليومية',
   'menu.accounting.accountGroups': 'مجموعات الحسابات',
   'menu.accounting.periods': 'الفترات المحاسبية',
