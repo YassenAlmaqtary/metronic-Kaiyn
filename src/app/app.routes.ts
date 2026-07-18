@@ -30,6 +30,34 @@ import { ProductFormComponent } from './pages/products/items/product-form/produc
 import { ProductsListComponent } from './pages/products/items/products-list/products-list.component';
 import { UnitFormComponent } from './pages/products/units/unit-form/unit-form.component';
 import { UnitsListComponent } from './pages/products/units/units-list/units-list.component';
+import { AccountGroupFormComponent } from './pages/accounting/account-groups/account-group-form/account-group-form.component';
+import { AccountGroupsListComponent } from './pages/accounting/account-groups/account-groups-list/account-groups-list.component';
+import { AccountingPeriodFormComponent } from './pages/accounting/periods/accounting-period-form/accounting-period-form.component';
+import { AccountingPeriodsListComponent } from './pages/accounting/periods/accounting-periods-list/accounting-periods-list.component';
+import { FiscalYearFormComponent } from './pages/accounting/fiscal-years/fiscal-year-form/fiscal-year-form.component';
+import { FiscalYearsListComponent } from './pages/accounting/fiscal-years/fiscal-years-list/fiscal-years-list.component';
+import { AccountFormComponent } from './pages/accounting/accounts/account-form/account-form.component';
+import { AccountsTreeComponent } from './pages/accounting/accounts/accounts-tree/accounts-tree.component';
+import { CostCenterFormComponent } from './pages/accounting/cost-centers/cost-center-form/cost-center-form.component';
+import { CostCentersListComponent } from './pages/accounting/cost-centers/cost-centers-list/cost-centers-list.component';
+import { TaxSetupFormComponent } from './pages/accounting/tax-setups/tax-setup-form/tax-setup-form.component';
+import { TaxSetupsListComponent } from './pages/accounting/tax-setups/tax-setups-list/tax-setups-list.component';
+import { OpeningBalanceFormComponent } from './pages/accounting/opening-balances/opening-balance-form/opening-balance-form.component';
+import { OpeningBalancesListComponent } from './pages/accounting/opening-balances/opening-balances-list/opening-balances-list.component';
+import { JournalEntryFormComponent } from './pages/accounting/journal-entries/journal-entry-form/journal-entry-form.component';
+import { JournalEntriesListComponent } from './pages/accounting/journal-entries/journal-entries-list/journal-entries-list.component';
+import { PaymentVoucherFormComponent } from './pages/accounting/payment-vouchers/payment-voucher-form/payment-voucher-form.component';
+import { PaymentVouchersListComponent } from './pages/accounting/payment-vouchers/payment-vouchers-list/payment-vouchers-list.component';
+import { ReceiptVoucherFormComponent } from './pages/accounting/receipt-vouchers/receipt-voucher-form/receipt-voucher-form.component';
+import { ReceiptVouchersListComponent } from './pages/accounting/receipt-vouchers/receipt-vouchers-list/receipt-vouchers-list.component';
+import { GeneralLedgerComponent } from './pages/accounting/reports/general-ledger/general-ledger.component';
+import { TrialBalanceComponent } from './pages/accounting/reports/trial-balance/trial-balance.component';
+import { BanksListComponent } from './pages/banks/banks/banks-list/banks-list.component';
+import { BankFormComponent } from './pages/banks/banks/bank-form/bank-form.component';
+import { BankAccountsListComponent } from './pages/banks/accounts/bank-accounts-list/bank-accounts-list.component';
+import { BankAccountFormComponent } from './pages/banks/accounts/bank-account-form/bank-account-form.component';
+import { CheckBooksListComponent } from './pages/banks/check-books/check-books-list/check-books-list.component';
+import { CheckBookFormComponent } from './pages/banks/check-books/check-book-form/check-book-form.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth/sign-in' },
@@ -79,6 +107,47 @@ export const routes: Routes = [
       { path: 'products/units', component: UnitsListComponent },
       { path: 'products/units/new', component: UnitFormComponent },
       { path: 'products/units/:id/edit', component: UnitFormComponent },
+      { path: 'accounting/account-groups', component: AccountGroupsListComponent },
+      { path: 'accounting/account-groups/new', component: AccountGroupFormComponent },
+      { path: 'accounting/account-groups/:id/edit', component: AccountGroupFormComponent },
+      { path: 'accounting/periods', component: AccountingPeriodsListComponent },
+      { path: 'accounting/periods/new', component: AccountingPeriodFormComponent },
+      { path: 'accounting/periods/:id/edit', component: AccountingPeriodFormComponent },
+      { path: 'accounting/fiscal-years', component: FiscalYearsListComponent },
+      { path: 'accounting/fiscal-years/new', component: FiscalYearFormComponent },
+      { path: 'accounting/fiscal-years/:id/edit', component: FiscalYearFormComponent },
+      { path: 'accounting/accounts', component: AccountsTreeComponent },
+      { path: 'accounting/accounts/new', component: AccountFormComponent },
+      { path: 'accounting/accounts/:id/edit', component: AccountFormComponent },
+      { path: 'accounting/cost-centers', component: CostCentersListComponent },
+      { path: 'accounting/cost-centers/new', component: CostCenterFormComponent },
+      { path: 'accounting/cost-centers/:id/edit', component: CostCenterFormComponent },
+      { path: 'accounting/tax-setups', component: TaxSetupsListComponent },
+      { path: 'accounting/tax-setups/new', component: TaxSetupFormComponent },
+      { path: 'accounting/tax-setups/:id/edit', component: TaxSetupFormComponent },
+      { path: 'accounting/opening-balances', component: OpeningBalancesListComponent },
+      { path: 'accounting/opening-balances/new', component: OpeningBalanceFormComponent },
+      { path: 'accounting/opening-balances/:id/edit', component: OpeningBalanceFormComponent },
+      { path: 'accounting/journal-entries', component: JournalEntriesListComponent },
+      { path: 'accounting/journal-entries/new', component: JournalEntryFormComponent },
+      { path: 'accounting/journal-entries/:id/edit', component: JournalEntryFormComponent },
+      { path: 'accounting/payment-vouchers', component: PaymentVouchersListComponent },
+      { path: 'accounting/payment-vouchers/new', component: PaymentVoucherFormComponent },
+      { path: 'accounting/payment-vouchers/:id/edit', component: PaymentVoucherFormComponent },
+      { path: 'accounting/receipt-vouchers', component: ReceiptVouchersListComponent },
+      { path: 'accounting/receipt-vouchers/new', component: ReceiptVoucherFormComponent },
+      { path: 'accounting/receipt-vouchers/:id/edit', component: ReceiptVoucherFormComponent },
+      { path: 'accounting/reports/general-ledger', component: GeneralLedgerComponent },
+      { path: 'accounting/reports/trial-balance', component: TrialBalanceComponent },
+      { path: 'banks/banks', component: BanksListComponent },
+      { path: 'banks/banks/new', component: BankFormComponent },
+      { path: 'banks/banks/:id/edit', component: BankFormComponent },
+      { path: 'banks/accounts', component: BankAccountsListComponent },
+      { path: 'banks/accounts/new', component: BankAccountFormComponent },
+      { path: 'banks/accounts/:id/edit', component: BankAccountFormComponent },
+      { path: 'banks/check-books', component: CheckBooksListComponent },
+      { path: 'banks/check-books/new', component: CheckBookFormComponent },
+      { path: 'banks/check-books/:id/edit', component: CheckBookFormComponent },
     ],
   },
 ];

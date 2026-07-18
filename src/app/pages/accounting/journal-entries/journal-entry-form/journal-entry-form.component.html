@@ -1,0 +1,266 @@
+<div class="kt-container-fixed flex flex-col gap-5 max-w-7xl pb-8">
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div>
+			<div class="flex items-center gap-2 text-sm text-secondary-foreground mb-2">
+				<a class="hover:text-primary" routerLink="/demo1/accounting/journal-entries">{{ 'journalEntries.title' | translate }}</a>
+				<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+				<span class="text-mono font-medium text-foreground">
+					@if (isEditMode()) {
+						@if (isReadOnly()) {
+							{{ 'journalEntries.view' | translate }}
+						} @else {
+							{{ 'journalEntries.edit' | translate }}
+						}
+					} @else {
+						{{ 'journalEntries.create' | translate }}
+					}
+				</span>
+			</div>
+			<div class="flex items-center gap-3">
+				<div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+					<i class="ki-filled ki-notepad text-lg"></i>
+				</div>
+				<h1 class="text-xl font-semibold text-mono">
+					@if (isEditMode()) {
+						@if (isReadOnly()) {
+							{{ 'journalEntries.view' | translate }}
+						} @else {
+							{{ 'journalEntries.edit' | translate }}
+						}
+					} @else {
+						{{ 'journalEntries.create' | translate }}
+					}
+				</h1>
+			</div>
+		</div>
+	</div>
+
+	<div class="kt-card overflow-hidden">
+		@if (loading()) {
+			<div class="kt-card-content flex flex-col items-center justify-center gap-3 py-20 text-secondary-foreground">
+				<span class="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				<span class="text-sm">{{ 'journalEntries.loading' | translate }}</span>
+			</div>
+		} @else {
+			<form class="kt-card-content flex flex-col gap-6 p-5 md:p-6" [formGroup]="form" (ngSubmit)="onSubmit()">
+				@if (isReadOnly()) {
+					<div class="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 flex items-center gap-2">
+						<i class="ki-filled ki-information-2"></i>
+						{{ 'journalEntries.readOnly' | translate }}
+					</div>
+				}
+
+				@if (errorMessage()) {
+					<div class="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center gap-2">
+						<i class="ki-filled ki-information-2"></i>
+						{{ errorMessage() }}
+					</div>
+				}
+
+				<div class="rounded-xl border border-border bg-muted/20 p-4 md:p-5">
+					<h2 class="text-sm font-semibold text-mono mb-4">{{ 'journalEntries.header' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'journalEntries.entryId' | translate }} *</label>
+							<input class="kt-input" formControlName="entryId" type="number" />
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'journalEntries.entryDate' | translate }} *</label>
+							<input class="kt-input" formControlName="entryDate" type="date" />
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'journalEntries.period' | translate }}</label>
+							<select class="kt-input" formControlName="periodId">
+								<option [ngValue]="null">{{ 'journalEntries.selectPeriod' | translate }}</option>
+								@for (period of periods(); track period.periodId) {
+									<option [ngValue]="period.periodId">{{ period.periodName || period.periodId }}</option>
+								}
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'journalEntries.branch' | translate }}</label>
+							<select class="kt-input" formControlName="branchId">
+								<option [ngValue]="null">{{ 'journalEntries.selectBranch' | translate }}</option>
+								@for (branch of branches(); track branch.branchId) {
+									<option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchCode || branch.branchId }}</option>
+								}
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'journalEntries.journalType' | translate }}</label>
+							<select class="kt-input" formControlName="journalTypeId">
+								<option [ngValue]="null">{{ 'journalEntries.selectJournalType' | translate }}</option>
+								@for (type of journalTypes(); track type.journalTypeId) {
+									<option [ngValue]="type.journalTypeId">{{ type.code }} — {{ type.name }}</option>
+								}
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'journalEntries.referenceId' | translate }}</label>
+							<input class="kt-input" formControlName="referenceId" type="number" />
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'journalEntries.originalEntryId' | translate }}</label>
+							<input class="kt-input" formControlName="originalEntryId" type="number" />
+						</div>
+
+						<div class="flex items-center gap-4 md:col-span-2 lg:col-span-3 flex-wrap pt-1">
+							<label class="inline-flex items-center gap-2 text-sm">
+								<input class="kt-checkbox" type="checkbox" formControlName="isClosingEntry" />
+								{{ 'journalEntries.isClosingEntry' | translate }}
+							</label>
+							<label class="inline-flex items-center gap-2 text-sm">
+								<input class="kt-checkbox" type="checkbox" formControlName="isAdjusted" />
+								{{ 'journalEntries.isAdjusted' | translate }}
+							</label>
+							<label class="inline-flex items-center gap-2 text-sm">
+								<input class="kt-checkbox" type="checkbox" formControlName="isReversingEntry" />
+								{{ 'journalEntries.isReversingEntry' | translate }}
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="rounded-xl border border-border overflow-hidden">
+					<div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-border bg-muted/20">
+						<h2 class="text-sm font-semibold text-mono">{{ 'journalEntries.details' | translate }}</h2>
+						@if (!isReadOnly()) {
+							<button class="kt-btn kt-btn-sm kt-btn-light" type="button" (click)="addLine()">
+								<i class="ki-filled ki-plus"></i>
+								{{ 'journalEntries.addLine' | translate }}
+							</button>
+						}
+					</div>
+
+					<div class="kt-scrollable-x-auto" formArrayName="details">
+						<table class="kt-table kt-table-border w-full min-w-[1100px]">
+							<thead>
+								<tr class="bg-muted/30">
+									<th>{{ 'journalEntries.account' | translate }}</th>
+									<th class="w-[120px]">{{ 'journalEntries.debit' | translate }}</th>
+									<th class="w-[120px]">{{ 'journalEntries.credit' | translate }}</th>
+									<th>{{ 'journalEntries.description' | translate }}</th>
+									<th>{{ 'journalEntries.costCenter' | translate }}</th>
+									<th>{{ 'journalEntries.lineBranch' | translate }}</th>
+									<th class="w-[90px]">{{ 'journalEntries.isTaxable' | translate }}</th>
+									<th>{{ 'journalEntries.taxSetup' | translate }}</th>
+									<th>{{ 'journalEntries.currency' | translate }}</th>
+									<th class="w-[100px]">{{ 'journalEntries.exchangeRate' | translate }}</th>
+									@if (!isReadOnly()) {
+										<th class="w-[60px]"></th>
+									}
+								</tr>
+							</thead>
+							<tbody>
+								@for (group of details.controls; track $index; let i = $index) {
+									<tr [formGroupName]="i">
+										<td>
+											<select class="kt-input" formControlName="accCode">
+												<option [ngValue]="null">{{ 'journalEntries.selectAccount' | translate }}</option>
+												@for (account of postingAccounts(); track account.accId) {
+													<option [ngValue]="account.accCode">{{ accountLabel(account) }}</option>
+												}
+											</select>
+										</td>
+										<td>
+											<input class="kt-input" formControlName="debit" type="number" step="any" min="0" />
+										</td>
+										<td>
+											<input class="kt-input" formControlName="credit" type="number" step="any" min="0" />
+										</td>
+										<td>
+											<input class="kt-input" formControlName="description" type="text" />
+										</td>
+										<td>
+											<select class="kt-input" formControlName="costCenterId">
+												<option [ngValue]="null">—</option>
+												@for (cc of costCenters(); track cc.costCenterId) {
+													<option [ngValue]="cc.costCenterId">{{ cc.costCenterCode }} — {{ cc.costCenterName }}</option>
+												}
+											</select>
+										</td>
+										<td>
+											<select class="kt-input" formControlName="branchId">
+												<option [ngValue]="null">—</option>
+												@for (branch of branches(); track branch.branchId) {
+													<option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchId }}</option>
+												}
+											</select>
+										</td>
+										<td class="text-center">
+											<input class="kt-checkbox" type="checkbox" formControlName="isTaxable" />
+										</td>
+										<td>
+											<select class="kt-input" formControlName="taxSetupId">
+												<option [ngValue]="null">—</option>
+												@for (tax of taxSetups(); track tax.taxSetupId) {
+													<option [ngValue]="tax.taxSetupId">{{ tax.taxCode }} — {{ tax.taxType }}</option>
+												}
+											</select>
+										</td>
+										<td>
+											<select class="kt-input" formControlName="currencyId">
+												<option [ngValue]="null">—</option>
+												@for (currency of currencies(); track currency.id) {
+													<option [ngValue]="currency.id">{{ currency.currencyShorcut || currency.currencyName || currency.id }}</option>
+												}
+											</select>
+										</td>
+										<td>
+											<input class="kt-input" formControlName="exchangeRate" type="number" step="any" min="0" />
+										</td>
+										@if (!isReadOnly()) {
+											<td>
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive" (click)="removeLine(i)">
+													<i class="ki-filled ki-trash"></i>
+												</button>
+											</td>
+										}
+									</tr>
+								}
+							</tbody>
+							<tfoot>
+								<tr>
+									<td class="font-medium text-end">{{ 'journalEntries.total' | translate }}</td>
+									<td class="font-mono">{{ totalDebit() | number: '1.2-2' }}</td>
+									<td class="font-mono">{{ totalCredit() | number: '1.2-2' }}</td>
+									<td [attr.colspan]="isReadOnly() ? 7 : 8"></td>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>
+
+				<div class="rounded-xl border border-border bg-muted/20 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+					<div class="flex flex-wrap gap-4 text-sm">
+						<span>{{ 'journalEntries.totalDebit' | translate }}: <strong class="font-mono">{{ totalDebit() | number: '1.2-2' }}</strong></span>
+						<span>{{ 'journalEntries.totalCredit' | translate }}: <strong class="font-mono">{{ totalCredit() | number: '1.2-2' }}</strong></span>
+					</div>
+					@if (isBalanced()) {
+						<span class="kt-badge kt-badge-sm kt-badge-success kt-badge-outline">{{ 'journalEntries.balanced' | translate }}</span>
+					} @else {
+						<span class="kt-badge kt-badge-sm kt-badge-warning kt-badge-outline">{{ 'journalEntries.unbalanced' | translate }}</span>
+					}
+				</div>
+
+				<div class="flex flex-wrap items-center justify-end gap-2 pt-1">
+					<a class="kt-btn kt-btn-light" routerLink="/demo1/accounting/journal-entries">{{ 'journalEntries.cancel' | translate }}</a>
+					@if (!isReadOnly()) {
+						<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
+							@if (saving()) {
+								<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+							}
+							{{ 'journalEntries.save' | translate }}
+						</button>
+					}
+				</div>
+			</form>
+		}
+	</div>
+</div>

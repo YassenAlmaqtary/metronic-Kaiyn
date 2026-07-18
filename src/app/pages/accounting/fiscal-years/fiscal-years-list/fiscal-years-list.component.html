@@ -1,0 +1,216 @@
+<div class="kt-container-fixed flex flex-col gap-5">
+	<div class="flex flex-wrap items-center justify-between gap-3">
+		<div>
+			<h1 class="text-xl font-semibold text-mono">{{ 'fiscalYears.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground mt-1">{{ 'fiscalYears.subtitle' | translate }}</p>
+		</div>
+		<a class="kt-btn kt-btn-primary" routerLink="/demo1/accounting/fiscal-years/new">
+			<i class="ki-filled ki-plus"></i>
+			{{ 'fiscalYears.add' | translate }}
+		</a>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-700">
+			{{ successMessage() }}
+		</div>
+	}
+
+	@if (errorMessage()) {
+		<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
+			<span>{{ errorMessage() }}</span>
+			<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="loadFiscalYears()">
+				{{ 'fiscalYears.retry' | translate }}
+			</button>
+		</div>
+	}
+
+	<div class="kt-card">
+		<div class="kt-card-header flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border">
+			<div class="flex flex-wrap items-center gap-3 grow">
+				<div class="relative w-full max-w-sm">
+					<i class="ki-filled ki-magnifier absolute top-1/2 -translate-y-1/2 start-3 text-muted-foreground text-sm"></i>
+					<input
+						class="kt-input ps-9"
+						type="search"
+						[placeholder]="'fiscalYears.search' | translate"
+						[ngModel]="searchTerm()"
+						(ngModelChange)="onSearchChange($event)" />
+				</div>
+				<div class="flex items-center gap-1">
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm"
+						[class.kt-btn-primary]="filter() === 'all'"
+						[class.kt-btn-outline]="filter() !== 'all'"
+						(click)="setFilter('all')">
+						{{ 'fiscalYears.filter.all' | translate }}
+					</button>
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm"
+						[class.kt-btn-primary]="filter() === 'open'"
+						[class.kt-btn-outline]="filter() !== 'open'"
+						(click)="setFilter('open')">
+						{{ 'fiscalYears.filter.open' | translate }}
+					</button>
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm"
+						[class.kt-btn-primary]="filter() === 'closed'"
+						[class.kt-btn-outline]="filter() !== 'closed'"
+						(click)="setFilter('closed')">
+						{{ 'fiscalYears.filter.closed' | translate }}
+					</button>
+				</div>
+			</div>
+			<span class="text-sm text-secondary-foreground">{{ filteredFiscalYears().length }}</span>
+		</div>
+
+		<div class="kt-card-content p-0">
+			@if (loading()) {
+				<div class="flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+					<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+					{{ 'fiscalYears.loading' | translate }}
+				</div>
+			} @else if (filteredFiscalYears().length === 0) {
+				<div class="flex flex-col items-center justify-center gap-3 py-16 text-center">
+					<i class="ki-filled ki-calendar-tick text-3xl text-muted-foreground"></i>
+					<div>
+						<p class="font-medium text-mono">{{ 'fiscalYears.empty' | translate }}</p>
+						<p class="text-sm text-secondary-foreground mt-1">{{ 'fiscalYears.emptyHint' | translate }}</p>
+					</div>
+					<a class="kt-btn kt-btn-primary kt-btn-sm" routerLink="/demo1/accounting/fiscal-years/new">
+						{{ 'fiscalYears.add' | translate }}
+					</a>
+				</div>
+			} @else {
+				<div class="kt-scrollable-x-auto">
+					<table class="kt-table kt-table-border w-full">
+						<thead>
+							<tr>
+								<th>{{ 'fiscalYears.year' | translate }}</th>
+								<th>{{ 'fiscalYears.startDate' | translate }}</th>
+								<th>{{ 'fiscalYears.endDate' | translate }}</th>
+								<th>{{ 'fiscalYears.description' | translate }}</th>
+								<th>{{ 'fiscalYears.status' | translate }}</th>
+								<th class="w-[160px]">{{ 'fiscalYears.actions' | translate }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (item of filteredFiscalYears(); track item.fiscalYearId) {
+								<tr>
+									<td class="font-medium text-mono">{{ item.year }}</td>
+									<td>{{ item.startDate | date: 'yyyy-MM-dd' }}</td>
+									<td>{{ item.endDate | date: 'yyyy-MM-dd' }}</td>
+									<td>{{ item.description || '—' }}</td>
+									<td>
+										@if (item.isClosed) {
+											<span class="kt-badge kt-badge-sm kt-badge-secondary kt-badge-outline">
+												{{ 'fiscalYears.closed' | translate }}
+											</span>
+										} @else {
+											<span class="kt-badge kt-badge-sm kt-badge-success kt-badge-outline">
+												{{ 'fiscalYears.open' | translate }}
+											</span>
+										}
+									</td>
+									<td>
+										<div class="flex items-center gap-1">
+											<a
+												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
+												[routerLink]="['/demo1/accounting/fiscal-years', item.fiscalYearId, 'edit']"
+												[attr.aria-label]="'fiscalYears.edit' | translate">
+												<i class="ki-filled ki-notepad-edit"></i>
+											</a>
+											@if (!item.isClosed) {
+												<button
+													class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
+													type="button"
+													(click)="openActionDialog(item, 'close')"
+													[attr.aria-label]="'fiscalYears.close' | translate"
+													[attr.title]="'fiscalYears.close' | translate">
+													<i class="ki-filled ki-lock"></i>
+												</button>
+											} @else {
+												<button
+													class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
+													type="button"
+													(click)="openActionDialog(item, 'reopen')"
+													[attr.aria-label]="'fiscalYears.reopen' | translate"
+													[attr.title]="'fiscalYears.reopen' | translate">
+													<i class="ki-filled ki-arrows-circle"></i>
+												</button>
+											}
+											<button
+												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive hover:bg-destructive/10"
+												type="button"
+												(click)="openActionDialog(item, 'delete')"
+												[attr.aria-label]="'fiscalYears.delete' | translate">
+												<i class="ki-filled ki-trash"></i>
+											</button>
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+		</div>
+	</div>
+</div>
+
+@if (actionTarget(); as item) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<button class="absolute inset-0 bg-black/40" type="button" (click)="closeActionDialog()" aria-label="close"></button>
+		<div class="relative kt-card w-full max-w-md shadow-xl">
+			<div class="kt-card-content flex flex-col gap-4 p-6">
+				<div>
+					<h3 class="text-lg font-semibold text-mono">
+						@if (actionType() === 'delete') {
+							{{ 'fiscalYears.deleteTitle' | translate }}
+						} @else if (actionType() === 'close') {
+							{{ 'fiscalYears.closeTitle' | translate }}
+						} @else {
+							{{ 'fiscalYears.reopenTitle' | translate }}
+						}
+					</h3>
+					<p class="text-sm text-secondary-foreground mt-2">
+						@if (actionType() === 'delete') {
+							{{ 'fiscalYears.deleteConfirm' | translate }}
+						} @else if (actionType() === 'close') {
+							{{ 'fiscalYears.closeConfirm' | translate }}
+						} @else {
+							{{ 'fiscalYears.reopenConfirm' | translate }}
+						}
+					</p>
+					<p class="text-sm font-medium text-mono mt-3">{{ item.year }}</p>
+				</div>
+				<div class="flex justify-end gap-2">
+					<button class="kt-btn kt-btn-outline" type="button" [disabled]="actionLoading()" (click)="closeActionDialog()">
+						{{ 'fiscalYears.cancel' | translate }}
+					</button>
+					<button
+						class="kt-btn"
+						[class.kt-btn-destructive]="actionType() === 'delete'"
+						[class.kt-btn-primary]="actionType() !== 'delete'"
+						type="button"
+						[disabled]="actionLoading()"
+						(click)="confirmAction()">
+						@if (actionLoading()) {
+							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+						}
+						@if (actionType() === 'delete') {
+							{{ 'fiscalYears.delete' | translate }}
+						} @else if (actionType() === 'close') {
+							{{ 'fiscalYears.close' | translate }}
+						} @else {
+							{{ 'fiscalYears.reopen' | translate }}
+						}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}

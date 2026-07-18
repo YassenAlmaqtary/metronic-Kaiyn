@@ -1,0 +1,76 @@
+<div class="kt-container-fixed flex flex-col gap-5 max-w-7xl pb-8">
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div>
+			<div class="flex items-center gap-2 text-sm text-secondary-foreground mb-2">
+				<a class="hover:text-primary" routerLink="/demo1/accounting/receipt-vouchers">{{ 'receiptVouchers.title' | translate }}</a>
+				<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+				<span class="text-mono font-medium text-foreground">@if (isEditMode()) { @if (isReadOnly()) { {{ 'receiptVouchers.view' | translate }} } @else { {{ 'receiptVouchers.edit' | translate }} } } @else { {{ 'receiptVouchers.create' | translate }} }</span>
+			</div>
+			<div class="flex items-center gap-3">
+				<div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><i class="ki-filled ki-dollar text-lg"></i></div>
+				<h1 class="text-xl font-semibold text-mono">@if (isEditMode()) { @if (isReadOnly()) { {{ 'receiptVouchers.view' | translate }} } @else { {{ 'receiptVouchers.edit' | translate }} } } @else { {{ 'receiptVouchers.create' | translate }} }</h1>
+			</div>
+		</div>
+	</div>
+
+	<div class="kt-card overflow-hidden">
+		@if (loading()) {
+			<div class="kt-card-content flex flex-col items-center justify-center gap-3 py-20 text-secondary-foreground"><span class="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></span><span class="text-sm">{{ 'receiptVouchers.loading' | translate }}</span></div>
+		} @else {
+			<form class="kt-card-content flex flex-col gap-6 p-5 md:p-6" [formGroup]="form" (ngSubmit)="onSubmit()">
+				@if (isReadOnly()) { <div class="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 flex items-center gap-2"><i class="ki-filled ki-information-2"></i>{{ 'receiptVouchers.readOnly' | translate }}</div> }
+				@if (errorMessage()) { <div class="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center gap-2"><i class="ki-filled ki-information-2"></i>{{ errorMessage() }}</div> }
+
+				<div class="rounded-xl border border-border bg-muted/20 p-4 md:p-5">
+					<h2 class="text-sm font-semibold text-mono mb-4">{{ 'receiptVouchers.header' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						<div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.voucherNumber' | translate }} *</label><input class="kt-input" formControlName="voucherNumber" type="text" /></div>
+						<div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.voucherDate' | translate }} *</label><input class="kt-input" formControlName="voucherDate" type="date" /></div>
+						<div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.payerName' | translate }} *</label><input class="kt-input" formControlName="payerName" type="text" /></div>
+						<div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.paymentType' | translate }} *</label><select class="kt-input" formControlName="paymentTypeId"><option [ngValue]="null">{{ 'receiptVouchers.selectPaymentType' | translate }}</option>@for (type of paymentTypes(); track type.paymentTypeId) { <option [ngValue]="type.paymentTypeId">{{ type.paymentTypeName || type.paymentTypeId }}</option> }</select></div>
+						<div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.debitAccount' | translate }} *</label><select class="kt-input" formControlName="debitAccountId"><option [ngValue]="null">{{ 'receiptVouchers.selectAccount' | translate }}</option>@for (account of postingAccounts(); track account.accId) { <option [ngValue]="account.accId">{{ accountLabel(account) }}</option> }</select></div>
+						<div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.branch' | translate }}</label><select class="kt-input" formControlName="branchId"><option [ngValue]="null">{{ 'receiptVouchers.selectBranch' | translate }}</option>@for (branch of branches(); track branch.branchId) { <option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchCode || branch.branchId }}</option> }</select></div>
+						<div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.currency' | translate }} *</label><select class="kt-input" formControlName="currencyId"><option [ngValue]="null">{{ 'receiptVouchers.selectCurrency' | translate }}</option>@for (currency of currencies(); track currency.id) { <option [ngValue]="currency.id">{{ currency.currencyName || currency.currencyShorcut || currency.id }}</option> }</select></div>
+						<div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.exchangeRate' | translate }}</label><input class="kt-input" formControlName="exchangeRate" type="number" step="0.000001" min="0.000001" /></div>
+						<div class="flex flex-col gap-1 md:col-span-2"><label class="kt-form-label">{{ 'receiptVouchers.description' | translate }}</label><input class="kt-input" formControlName="description" type="text" /></div>
+						<div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.reference' | translate }}</label><input class="kt-input" formControlName="reference" type="text" /></div>
+					</div>
+				</div>
+
+				<div class="rounded-xl border border-border bg-muted/20 p-4 md:p-5">
+					<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+						<h2 class="text-sm font-semibold text-mono">{{ 'receiptVouchers.lines' | translate }}</h2>
+						@if (!isReadOnly()) { <button class="kt-btn kt-btn-sm kt-btn-light" type="button" (click)="addLine()"><i class="ki-filled ki-plus"></i>{{ 'receiptVouchers.addLine' | translate }}</button> }
+					</div>
+					<div class="flex flex-col gap-3">
+						@for (line of lines.controls; track $index; let i = $index) {
+							<div class="rounded-lg border border-border bg-background p-4" [formGroup]="line">
+								<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+									<div class="flex flex-col gap-1 lg:col-span-2"><label class="kt-form-label">{{ 'receiptVouchers.account' | translate }} *</label><select class="kt-input" formControlName="creditAccountId"><option [ngValue]="null">{{ 'receiptVouchers.selectAccount' | translate }}</option>@for (account of postingAccounts(); track account.accId) { <option [ngValue]="account.accId">{{ accountLabel(account) }}</option> }</select></div>
+									<div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.amount' | translate }} *</label><input class="kt-input" formControlName="amount" type="number" step="0.01" min="0" /></div>
+									<div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.costCenter' | translate }}</label><select class="kt-input" formControlName="costCenterId"><option [ngValue]="null">—</option>@for (center of costCenters(); track center.costCenterId) { <option [ngValue]="center.costCenterId">{{ center.costCenterName || center.costCenterCode }}</option> }</select></div>
+									<div class="flex flex-col gap-1 lg:col-span-2"><label class="kt-form-label">{{ 'receiptVouchers.description' | translate }}</label><input class="kt-input" formControlName="description" type="text" /></div>
+									<div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.lineBranch' | translate }}</label><select class="kt-input" formControlName="branchId"><option [ngValue]="null">—</option>@for (branch of branches(); track branch.branchId) { <option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchCode }}</option> }</select></div>
+									<div class="flex flex-col gap-1 justify-end"><label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" formControlName="isTaxable" /><span class="text-sm">{{ 'receiptVouchers.isTaxable' | translate }}</span></label></div>
+									@if (line.controls.isTaxable.value) { <div class="flex flex-col gap-1"><label class="kt-form-label">{{ 'receiptVouchers.taxSetup' | translate }}</label><select class="kt-input" formControlName="taxSetupId"><option [ngValue]="null">—</option>@for (tax of taxSetups(); track tax.taxSetupId) { <option [ngValue]="tax.taxSetupId">{{ tax.taxCode || tax.taxType || tax.taxSetupId }}</option> }</select></div> }
+									@if (!isReadOnly() && lines.length > 1) { <div class="flex items-end justify-end lg:col-span-4"><button class="kt-btn kt-btn-sm kt-btn-ghost text-destructive" type="button" (click)="removeLine(i)"><i class="ki-filled ki-trash"></i></button></div> }
+								</div>
+							</div>
+						}
+					</div>
+					<div class="mt-4 flex flex-wrap items-center justify-end gap-6 border-t border-border pt-4">
+						<div class="text-sm"><span class="text-secondary-foreground">{{ 'receiptVouchers.totalAmount' | translate }}:</span><span class="font-semibold text-mono ms-2">{{ totalAmount() | number: '1.2-2' }}</span></div>
+						<div class="text-sm"><span class="text-secondary-foreground">{{ 'receiptVouchers.totalAmountLc' | translate }}:</span><span class="font-semibold text-mono ms-2">{{ totalAmountLc() | number: '1.2-2' }}</span></div>
+					</div>
+				</div>
+
+				@if (!isReadOnly()) {
+					<div class="flex flex-wrap items-center justify-end gap-2">
+						<a class="kt-btn kt-btn-light" routerLink="/demo1/accounting/receipt-vouchers">{{ 'receiptVouchers.cancel' | translate }}</a>
+						<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">@if (saving()) { <span class="size-4 rounded-full border-2 border-current border-t-transparent animate-spin"></span> }{{ 'receiptVouchers.save' | translate }}</button>
+					</div>
+				}
+			</form>
+		}
+	</div>
+</div>

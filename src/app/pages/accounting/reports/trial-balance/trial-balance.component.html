@@ -1,0 +1,99 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex items-start gap-3">
+		<div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+			<i class="ki-filled ki-chart-simple text-xl"></i>
+		</div>
+		<div>
+			<h1 class="text-xl font-semibold text-mono tracking-tight">{{ 'trialBalance.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground mt-1 max-w-xl">{{ 'trialBalance.subtitle' | translate }}</p>
+		</div>
+	</div>
+
+	<div class="kt-card overflow-hidden">
+		<div class="px-5 pt-5 pb-4 border-b border-border">
+			<h2 class="text-sm font-semibold text-mono mb-4">{{ 'trialBalance.filters' | translate }}</h2>
+			<form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 items-end" [formGroup]="filterForm" (ngSubmit)="runReport()">
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'trialBalance.fromDate' | translate }}</label>
+					<input class="kt-input" formControlName="fromDate" type="date" />
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'trialBalance.toDate' | translate }}</label>
+					<input class="kt-input" formControlName="toDate" type="date" />
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'trialBalance.branch' | translate }}</label>
+					<select class="kt-input" formControlName="branchId">
+						<option [ngValue]="null">{{ 'trialBalance.selectBranch' | translate }}</option>
+						@for (branch of branches(); track branch.branchId) {
+							<option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchCode }}</option>
+						}
+					</select>
+				</div>
+				<div>
+					<button class="kt-btn kt-btn-primary w-full" type="submit" [disabled]="loading()">
+						@if (loading()) { <span class="size-4 rounded-full border-2 border-current border-t-transparent animate-spin"></span> }
+						{{ 'trialBalance.runReport' | translate }}
+					</button>
+				</div>
+			</form>
+		</div>
+
+		@if (errorMessage()) {
+			<div class="mx-5 mt-4 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
+				<span>{{ errorMessage() }}</span>
+				<button class="kt-btn kt-btn-sm kt-btn-light" type="button" (click)="runReport()">{{ 'generalLedger.retry' | translate }}</button>
+			</div>
+		}
+
+		<div class="kt-card-content p-0">
+			@if (loading()) {
+				<div class="flex flex-col items-center justify-center gap-3 py-20 text-secondary-foreground">
+					<span class="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+					<span class="text-sm">{{ 'trialBalance.loading' | translate }}</span>
+				</div>
+			} @else if (hasRun() && rows().length === 0) {
+				<div class="flex flex-col items-center justify-center gap-4 py-20 text-center px-6">
+					<div class="relative"><div class="absolute inset-0 rounded-full bg-primary/10 blur-2xl scale-150"></div><div class="relative flex size-16 items-center justify-center rounded-2xl bg-muted/60 text-muted-foreground"><i class="ki-filled ki-chart-simple text-3xl"></i></div></div>
+					<div><p class="font-medium text-mono">{{ 'trialBalance.empty' | translate }}</p><p class="text-sm text-secondary-foreground mt-1">{{ 'trialBalance.emptyHint' | translate }}</p></div>
+				</div>
+			} @else if (rows().length > 0) {
+				<div class="kt-scrollable-x-auto">
+					<table class="kt-table kt-table-border w-full">
+						<thead>
+							<tr>
+								<th>{{ 'trialBalance.accCode' | translate }}</th>
+								<th>{{ 'trialBalance.accName' | translate }}</th>
+								<th>{{ 'trialBalance.openingBalance' | translate }}</th>
+								<th>{{ 'trialBalance.totalDebit' | translate }}</th>
+								<th>{{ 'trialBalance.totalCredit' | translate }}</th>
+								<th>{{ 'trialBalance.netBalance' | translate }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (row of rows(); track row.accId) {
+								<tr>
+									<td class="font-mono">{{ row.accCode }}</td>
+									<td>{{ row.accName || row.accName2 || '—' }}</td>
+									<td class="font-mono">{{ row.openingBalance | number: '1.2-2' }}</td>
+									<td class="font-mono">{{ row.totalDebit | number: '1.2-2' }}</td>
+									<td class="font-mono">{{ row.totalCredit | number: '1.2-2' }}</td>
+									<td class="font-mono">{{ row.netBalance | number: '1.2-2' }}</td>
+								</tr>
+							}
+						</tbody>
+						<tfoot>
+							<tr class="bg-muted/30 font-semibold">
+								<td colspan="2">{{ 'trialBalance.totals' | translate }}</td>
+								<td class="font-mono">{{ totals().openingBalance | number: '1.2-2' }}</td>
+								<td class="font-mono">{{ totals().totalDebit | number: '1.2-2' }}</td>
+								<td class="font-mono">{{ totals().totalCredit | number: '1.2-2' }}</td>
+								<td class="font-mono">{{ totals().netBalance | number: '1.2-2' }}</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+			}
+		</div>
+	</div>
+</div>

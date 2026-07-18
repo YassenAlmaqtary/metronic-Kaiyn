@@ -1,0 +1,98 @@
+<div class="kt-container-fixed flex flex-col gap-5 max-w-3xl">
+	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
+		<a class="hover:text-primary" routerLink="/demo1/accounting/cost-centers">{{ 'costCenters.title' | translate }}</a>
+		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+		<span class="text-mono font-medium">
+			@if (isEditMode()) {
+				{{ 'costCenters.edit' | translate }}
+			} @else {
+				{{ 'costCenters.create' | translate }}
+			}
+		</span>
+	</div>
+
+	<div class="kt-card">
+		<div class="kt-card-header px-5 py-4 border-b border-border">
+			<h1 class="text-lg font-semibold text-mono">
+				@if (isEditMode()) {
+					{{ 'costCenters.edit' | translate }}
+				} @else {
+					{{ 'costCenters.create' | translate }}
+				}
+			</h1>
+		</div>
+
+		@if (loading()) {
+			<div class="kt-card-content flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+				<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'costCenters.loading' | translate }}
+			</div>
+		} @else {
+			<form class="kt-card-content flex flex-col gap-5 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+				@if (errorMessage()) {
+					<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+						{{ errorMessage() }}
+					</div>
+				}
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'costCenters.costCenterCode' | translate }} *</label>
+						<input class="kt-input" formControlName="costCenterCode" type="text" />
+						@if (form.controls.costCenterCode.touched && form.controls.costCenterCode.hasError('required')) {
+							<span class="text-xs text-destructive">{{ 'costCenters.required.costCenterCode' | translate }}</span>
+						}
+					</div>
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'costCenters.costCenterName' | translate }} *</label>
+						<input class="kt-input" formControlName="costCenterName" type="text" />
+						@if (form.controls.costCenterName.touched && form.controls.costCenterName.hasError('required')) {
+							<span class="text-xs text-destructive">{{ 'costCenters.required.costCenterName' | translate }}</span>
+						}
+					</div>
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'costCenters.branch' | translate }}</label>
+						<select class="kt-select" formControlName="branchId">
+							<option [ngValue]="null">{{ 'costCenters.selectBranch' | translate }}</option>
+							@for (branch of branches(); track branch.branchId) {
+								<option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchCode || branch.branchId }}</option>
+							}
+						</select>
+					</div>
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'costCenters.parent' | translate }}</label>
+						<select class="kt-select" formControlName="parentId" (change)="onParentChange()">
+							<option [ngValue]="null">{{ 'costCenters.selectParent' | translate }}</option>
+							@for (item of parentOptions(); track item.costCenterId) {
+								<option [ngValue]="item.costCenterId">{{ costCenterLabel(item) }}</option>
+							}
+						</select>
+					</div>
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'costCenters.level' | translate }}</label>
+						<input class="kt-input" formControlName="level" type="number" min="1" max="3" />
+					</div>
+					<div class="flex flex-col gap-1 md:col-span-2">
+						<label class="kt-form-label">{{ 'costCenters.notes' | translate }}</label>
+						<textarea class="kt-textarea" formControlName="notes" rows="3"></textarea>
+					</div>
+				</div>
+
+				<label class="flex items-center gap-2 text-sm">
+					<input class="kt-checkbox" formControlName="isActive" type="checkbox" />
+					{{ 'costCenters.isActive' | translate }}
+				</label>
+
+				<div class="flex justify-end gap-2 pt-2 border-t border-border">
+					<a class="kt-btn kt-btn-outline" routerLink="/demo1/accounting/cost-centers">{{ 'costCenters.cancel' | translate }}</a>
+					<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
+						@if (saving()) {
+							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+						}
+						{{ 'costCenters.save' | translate }}
+					</button>
+				</div>
+			</form>
+		}
+	</div>
+</div>

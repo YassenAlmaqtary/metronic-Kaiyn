@@ -1,0 +1,254 @@
+<div class="kt-container-fixed flex flex-col gap-5 max-w-4xl">
+	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
+		<a class="hover:text-primary" routerLink="/demo1/accounting/accounts">{{ 'accounts.title' | translate }}</a>
+		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+		<span class="text-mono font-medium">
+			@if (isEditMode()) {
+				{{ 'accounts.edit' | translate }}
+			} @else if (parentPreset()) {
+				{{ 'accounts.createChild' | translate }}
+			} @else {
+				{{ 'accounts.create' | translate }}
+			}
+		</span>
+	</div>
+
+	<div class="kt-card">
+		<div class="kt-card-header px-5 py-4 border-b border-border">
+			<h1 class="text-lg font-semibold text-mono">
+				@if (isEditMode()) {
+					{{ 'accounts.edit' | translate }}
+				} @else if (parentPreset()) {
+					{{ 'accounts.createChild' | translate }}
+				} @else {
+					{{ 'accounts.create' | translate }}
+				}
+			</h1>
+			@if (parentPreset(); as parent) {
+				<p class="text-sm text-secondary-foreground mt-1">
+					{{ 'accounts.accParent' | translate }}:
+					<span class="font-mono">{{ accountLabel(parent) }}</span>
+				</p>
+			}
+		</div>
+
+		@if (loading()) {
+			<div class="kt-card-content flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+				<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'accounts.loading' | translate }}
+			</div>
+		} @else {
+			<form class="kt-card-content flex flex-col gap-6 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+				@if (errorMessage()) {
+					<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+						{{ errorMessage() }}
+					</div>
+				}
+
+				<div>
+					<h2 class="text-sm font-semibold text-mono mb-1">{{ 'accounts.section.basic' | translate }}</h2>
+					<p class="text-xs text-secondary-foreground mb-3">{{ 'accounts.hint.code' | translate }}</p>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'accounts.accCode' | translate }} *</label>
+							<div class="flex gap-2">
+								<input class="kt-input grow" formControlName="accCode" type="number" />
+								<button
+									class="kt-btn kt-btn-outline shrink-0"
+									type="button"
+									[disabled]="suggestingCode()"
+									(click)="suggestCode()">
+									@if (suggestingCode()) {
+										<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+									}
+									{{ 'accounts.suggestCode' | translate }}
+								</button>
+							</div>
+							@if (form.controls.accCode.touched && form.controls.accCode.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'accounts.required.accCode' | translate }}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'accounts.accName' | translate }} *</label>
+							<input class="kt-input" formControlName="accName" type="text" />
+							@if (form.controls.accName.touched && form.controls.accName.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'accounts.required.accName' | translate }}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'accounts.accName2' | translate }}</label>
+							<input class="kt-input" formControlName="accName2" type="text" />
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'accounts.accParent' | translate }}</label>
+							<select
+								class="kt-select"
+								formControlName="accParent"
+								(change)="onParentChange(form.controls.accParent.value)">
+								<option [ngValue]="null">{{ 'accounts.selectParent' | translate }}</option>
+								@for (account of parentOptions(); track account.accId) {
+									<option [ngValue]="account.accId">{{ accountLabel(account) }}</option>
+								}
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div>
+					<h2 class="text-sm font-semibold text-mono mb-1">{{ 'accounts.section.classification' | translate }}</h2>
+					<p class="text-xs text-secondary-foreground mb-3">
+						{{ 'accounts.hint.main' | translate }}
+						{{ 'accounts.hint.sub' | translate }}
+					</p>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'accounts.accType' | translate }}</label>
+							<select class="kt-select" formControlName="accType">
+								<option [ngValue]="null">{{ 'accounts.selectType' | translate }}</option>
+								<option [ngValue]="AccountStructureType.Main">{{ 'accounts.accType.main' | translate }}</option>
+								<option [ngValue]="AccountStructureType.Sub">{{ 'accounts.accType.sub' | translate }}</option>
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'accounts.accDmType' | translate }}</label>
+							<select class="kt-select" formControlName="accDmType">
+								<option [ngValue]="null">{{ 'accounts.selectNature' | translate }}</option>
+								<option [ngValue]="AccountNatureType.Debit">{{ 'accounts.accDmType.debit' | translate }}</option>
+								<option [ngValue]="AccountNatureType.Credit">{{ 'accounts.accDmType.credit' | translate }}</option>
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'accounts.accountCategory' | translate }}</label>
+							<select class="kt-select" formControlName="accountCategory">
+								<option [ngValue]="null">{{ 'accounts.selectCategory' | translate }}</option>
+								<option [ngValue]="AccountCategory.Assets">{{ 'accounts.category.assets' | translate }}</option>
+								<option [ngValue]="AccountCategory.Liabilities">{{ 'accounts.category.liabilities' | translate }}</option>
+								<option [ngValue]="AccountCategory.Equity">{{ 'accounts.category.equity' | translate }}</option>
+								<option [ngValue]="AccountCategory.Revenue">{{ 'accounts.category.revenue' | translate }}</option>
+								<option [ngValue]="AccountCategory.Expenses">{{ 'accounts.category.expenses' | translate }}</option>
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'accounts.group' | translate }}</label>
+							<select class="kt-select" formControlName="groupId">
+								<option [ngValue]="null">{{ 'accounts.selectGroup' | translate }}</option>
+								@for (group of groups(); track group.groupId) {
+									<option [ngValue]="group.groupId">{{ group.groupName }}</option>
+								}
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'accounts.currency' | translate }}</label>
+							<select class="kt-select" formControlName="currencyId">
+								<option [ngValue]="null">{{ 'accounts.selectCurrency' | translate }}</option>
+								@for (currency of currencies(); track currency.id) {
+									<option [ngValue]="currency.id">
+										{{ currency.currencyName || currency.currencyShorcut || currency.id }}
+									</option>
+								}
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1 md:col-span-2">
+							<label class="kt-form-label">{{ 'accounts.accNote' | translate }}</label>
+							<textarea class="kt-textarea" formControlName="accNote" rows="2"></textarea>
+						</div>
+					</div>
+				</div>
+
+				<div>
+					<h2 class="text-sm font-semibold text-mono mb-3">{{ 'accounts.section.options' | translate }}</h2>
+					<div class="flex flex-wrap gap-4">
+						<label class="flex items-center gap-2 text-sm">
+							<input class="kt-checkbox" formControlName="accStopped" type="checkbox" />
+							{{ 'accounts.accStopped' | translate }}
+						</label>
+						<label class="flex items-center gap-2 text-sm">
+							<input class="kt-checkbox" formControlName="isBranchRequired" type="checkbox" />
+							{{ 'accounts.isBranchRequired' | translate }}
+						</label>
+						<label class="flex items-center gap-2 text-sm">
+							<input class="kt-checkbox" formControlName="isCostCenterRequired" type="checkbox" (change)="onCostCenterRequiredChange()" />
+							{{ 'accounts.isCostCenterRequired' | translate }}
+						</label>
+						<label class="flex items-center gap-2 text-sm">
+							<input class="kt-checkbox" formControlName="isLinkWithGroup" type="checkbox" />
+							{{ 'accounts.isLinkWithGroup' | translate }}
+						</label>
+						<label class="flex items-center gap-2 text-sm">
+							<input class="kt-checkbox" formControlName="isMultiCurrency" type="checkbox" />
+							{{ 'accounts.isMultiCurrency' | translate }}
+						</label>
+						<label class="flex items-center gap-2 text-sm">
+							<input class="kt-checkbox" formControlName="isTaxable" type="checkbox" (change)="onTaxableChange()" />
+							{{ 'accounts.isTaxable' | translate }}
+						</label>
+					</div>
+
+					@if (form.controls.isCostCenterRequired.value) {
+						<div class="flex flex-col gap-1 mt-4">
+							<label class="kt-form-label">{{ 'accounts.costCenter' | translate }} *</label>
+							<select class="kt-select" formControlName="costCenterId">
+								<option [ngValue]="null">{{ 'accounts.selectCostCenter' | translate }}</option>
+								@for (item of costCenters(); track item.costCenterId) {
+									<option [ngValue]="item.costCenterId">{{ costCenterLabel(item) }}</option>
+								}
+							</select>
+							<p class="text-xs text-secondary-foreground">{{ 'accounts.hint.costCenter' | translate }}</p>
+							@if (form.controls.costCenterId.touched && form.controls.costCenterId.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'accounts.required.costCenterId' | translate }}</span>
+							}
+						</div>
+					}
+
+					@if (form.controls.isTaxable.value) {
+						<div class="flex flex-col gap-1 mt-4">
+							<label class="kt-form-label">{{ 'accounts.taxType' | translate }} *</label>
+							<input
+								class="kt-input"
+								formControlName="taxType"
+								type="text"
+								list="account-tax-type-options"
+								[placeholder]="'accounts.selectTaxType' | translate" />
+							<datalist id="account-tax-type-options">
+								@for (type of taxTypeOptions(); track type) {
+									<option [value]="type"></option>
+								}
+							</datalist>
+							<p class="text-xs text-secondary-foreground">{{ 'accounts.hint.tax' | translate }}</p>
+							@if (form.controls.taxType.touched && form.controls.taxType.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'accounts.required.taxType' | translate }}</span>
+							}
+						</div>
+					}
+
+					@if (form.controls.accStopped.value) {
+						<div class="flex flex-col gap-1 mt-4">
+							<label class="kt-form-label">{{ 'accounts.reasonsStop' | translate }}</label>
+							<input class="kt-input" formControlName="reasonsStop" type="text" />
+						</div>
+					}
+				</div>
+
+				<div class="flex justify-end gap-2 pt-2 border-t border-border">
+					<a class="kt-btn kt-btn-outline" routerLink="/demo1/accounting/accounts">
+						{{ 'accounts.cancel' | translate }}
+					</a>
+					<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
+						@if (saving()) {
+							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+						}
+						{{ 'accounts.save' | translate }}
+					</button>
+				</div>
+			</form>
+		}
+	</div>
+</div>

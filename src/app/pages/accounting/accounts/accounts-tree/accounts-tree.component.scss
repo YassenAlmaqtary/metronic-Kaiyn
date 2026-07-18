@@ -1,0 +1,13 @@
+:host {
+	display: contents;
+}
+
+.account-tree-indent {
+	display: inline-block;
+	width: calc(var(--level, 0) * 1.25rem);
+	flex-shrink: 0;
+}
+
+.account-row-selected {
+	background-color: color-mix(in oklab, var(--color-primary, #1b84ff) 8%, transparent);
+}

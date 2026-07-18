@@ -1,0 +1,204 @@
+<div class="kt-container-fixed flex flex-col gap-5 max-w-4xl">
+	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
+		<a class="hover:text-primary" routerLink="/demo1/banks/accounts">{{ 'bankAccounts.title' | translate }}</a>
+		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+		<span class="text-mono font-medium">
+			@if (isEditMode()) {
+				{{ 'bankAccounts.edit' | translate }}
+			} @else {
+				{{ 'bankAccounts.create' | translate }}
+			}
+		</span>
+	</div>
+
+	<div class="kt-card">
+		<div class="kt-card-header px-5 py-4 border-b border-border">
+			<h1 class="text-lg font-semibold text-mono">
+				@if (isEditMode()) {
+					{{ 'bankAccounts.edit' | translate }}
+				} @else {
+					{{ 'bankAccounts.create' | translate }}
+				}
+			</h1>
+		</div>
+
+		@if (loading()) {
+			<div class="kt-card-content flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+				<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'bankAccounts.loading' | translate }}
+			</div>
+		} @else {
+			<form class="kt-card-content flex flex-col gap-6 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+				@if (errorMessage()) {
+					<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+						{{ errorMessage() }}
+					</div>
+				}
+
+				<div class="space-y-4">
+					<h2 class="text-sm font-semibold text-mono">{{ 'bankAccounts.section.basic' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.bank' | translate }} *</label>
+							<select class="kt-select" formControlName="bankID">
+								<option [ngValue]="null">{{ 'bankAccounts.selectBank' | translate }}</option>
+								@for (bank of banks(); track bank.bankID) {
+									<option [ngValue]="bank.bankID">{{ bank.bankName || bank.bankCode || bank.bankID }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.branch' | translate }} *</label>
+							<select class="kt-select" formControlName="branchID">
+								<option [ngValue]="null">{{ 'bankAccounts.selectBranch' | translate }}</option>
+								@for (branch of branches(); track branch.branchId) {
+									<option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchCode || branch.branchId }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.accountName' | translate }} *</label>
+							<input class="kt-input" formControlName="accountName" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.accountNumber' | translate }} *</label>
+							<input class="kt-input" formControlName="accountNumber" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.iban' | translate }}</label>
+							<input class="kt-input" formControlName="iban" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.swiftCode' | translate }}</label>
+							<input class="kt-input" formControlName="swiftCode" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.accountType' | translate }} *</label>
+							<select class="kt-select" formControlName="accountType">
+								<option [ngValue]="BankAccountType.Current">{{ 'bankAccounts.type.current' | translate }}</option>
+								<option [ngValue]="BankAccountType.Savings">{{ 'bankAccounts.type.savings' | translate }}</option>
+								<option [ngValue]="BankAccountType.Deposit">{{ 'bankAccounts.type.deposit' | translate }}</option>
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.accountStatus' | translate }} *</label>
+							<select class="kt-select" formControlName="accountStatus">
+								<option [ngValue]="BankAccountStatus.Active">{{ 'bankAccounts.status.active' | translate }}</option>
+								<option [ngValue]="BankAccountStatus.Inactive">{{ 'bankAccounts.status.inactive' | translate }}</option>
+								<option [ngValue]="BankAccountStatus.Closed">{{ 'bankAccounts.status.closed' | translate }}</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div class="space-y-4 pt-2 border-t border-border">
+					<h2 class="text-sm font-semibold text-mono">{{ 'bankAccounts.section.gl' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.glAccount' | translate }} *</label>
+							<select class="kt-select" formControlName="gL_AccountID">
+								<option [ngValue]="null">{{ 'bankAccounts.selectGlAccount' | translate }}</option>
+								@for (account of glAccounts(); track account.accId) {
+									<option [ngValue]="account.accId">{{ accountLabel(account) }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.currency' | translate }} *</label>
+							<select class="kt-select" formControlName="currencyID">
+								<option [ngValue]="null">{{ 'bankAccounts.selectCurrency' | translate }}</option>
+								@for (currency of currencies(); track currency.id) {
+									<option [ngValue]="currency.id">{{ currency.currencyName || currency.currencyShorcut || currency.id }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.defaultCostCenter' | translate }}</label>
+							<select class="kt-select" formControlName="defaultCostCenter">
+								<option [ngValue]="null">{{ 'bankAccounts.selectCostCenter' | translate }}</option>
+								@for (item of costCenters(); track item.costCenterId) {
+									<option [ngValue]="item.costCenterId">{{ costCenterLabel(item) }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.exchangeDiffAccount' | translate }}</label>
+							<select class="kt-select" formControlName="exchangeDiffAccountID">
+								<option [ngValue]="null">{{ 'bankAccounts.selectGlAccount' | translate }}</option>
+								@for (account of glAccounts(); track account.accId) {
+									<option [ngValue]="account.accId">{{ accountLabel(account) }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.exchangeRatePolicy' | translate }}</label>
+							<input class="kt-input" formControlName="exchangeRatePolicy" type="number" />
+						</div>
+						<label class="flex items-center gap-2 text-sm self-end pb-2">
+							<input class="kt-checkbox" formControlName="allowMultiCurrency" type="checkbox" />
+							{{ 'bankAccounts.allowMultiCurrency' | translate }}
+						</label>
+					</div>
+				</div>
+
+				<div class="space-y-4 pt-2 border-t border-border">
+					<h2 class="text-sm font-semibold text-mono">{{ 'bankAccounts.section.opening' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.openingBalance' | translate }}</label>
+							<input class="kt-input" formControlName="openingBalance" type="number" step="0.01" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.openingBalanceDate' | translate }}</label>
+							<input class="kt-input" formControlName="openingBalanceDate" type="date" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'bankAccounts.openingBalanceVoucher' | translate }}</label>
+							<input class="kt-input" formControlName="openingBalanceVoucher" type="text" />
+						</div>
+					</div>
+				</div>
+
+				<div class="space-y-4 pt-2 border-t border-border">
+					<h2 class="text-sm font-semibold text-mono">{{ 'bankAccounts.section.features' | translate }}</h2>
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+						<label class="flex items-center gap-2 text-sm">
+							<input class="kt-checkbox" formControlName="supportsChecks" type="checkbox" />
+							{{ 'bankAccounts.supportsChecks' | translate }}
+						</label>
+						<label class="flex items-center gap-2 text-sm">
+							<input class="kt-checkbox" formControlName="supportsTransfers" type="checkbox" />
+							{{ 'bankAccounts.supportsTransfers' | translate }}
+						</label>
+						<label class="flex items-center gap-2 text-sm">
+							<input class="kt-checkbox" formControlName="supportsReconciliation" type="checkbox" />
+							{{ 'bankAccounts.supportsReconciliation' | translate }}
+						</label>
+						<label class="flex items-center gap-2 text-sm">
+							<input class="kt-checkbox" formControlName="requireCheckApproval" type="checkbox" />
+							{{ 'bankAccounts.requireCheckApproval' | translate }}
+						</label>
+						<label class="flex items-center gap-2 text-sm">
+							<input class="kt-checkbox" formControlName="isHidden" type="checkbox" />
+							{{ 'bankAccounts.isHidden' | translate }}
+						</label>
+					</div>
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'bankAccounts.notes' | translate }}</label>
+						<textarea class="kt-textarea" formControlName="notes" rows="3"></textarea>
+					</div>
+				</div>
+
+				<div class="flex justify-end gap-2 pt-2 border-t border-border">
+					<a class="kt-btn kt-btn-outline" routerLink="/demo1/banks/accounts">{{ 'bankAccounts.cancel' | translate }}</a>
+					<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
+						@if (saving()) {
+							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+						}
+						{{ 'bankAccounts.save' | translate }}
+					</button>
+				</div>
+			</form>
+		}
+	</div>
+</div>

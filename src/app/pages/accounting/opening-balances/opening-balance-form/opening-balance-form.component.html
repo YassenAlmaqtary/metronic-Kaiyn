@@ -1,0 +1,411 @@
+<div class="kt-container-fixed flex flex-col gap-5 max-w-7xl">
+	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
+		<a class="hover:text-primary" routerLink="/demo1/accounting/opening-balances">{{ 'openingBalances.title' | translate }}</a>
+		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+		<span class="text-mono font-medium">
+			@if (isEditMode()) {
+				@if (isReadOnly()) {
+					{{ 'openingBalances.view' | translate }}
+				} @else {
+					{{ 'openingBalances.edit' | translate }}
+				}
+			} @else {
+				{{ 'openingBalances.create' | translate }}
+			}
+		</span>
+	</div>
+
+	<div class="kt-card">
+		<div class="kt-card-header px-5 py-4 border-b border-border">
+			<h1 class="text-lg font-semibold text-mono">
+				@if (isEditMode()) {
+					@if (isReadOnly()) {
+						{{ 'openingBalances.view' | translate }}
+					} @else {
+						{{ 'openingBalances.edit' | translate }}
+					}
+				} @else {
+					{{ 'openingBalances.create' | translate }}
+				}
+			</h1>
+		</div>
+
+		@if (loading()) {
+			<div class="kt-card-content flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+				<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'openingBalances.loading' | translate }}
+			</div>
+		} @else {
+			<form class="kt-card-content flex flex-col gap-5 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+				@if (isReadOnly()) {
+					<div class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800">
+						{{ 'openingBalances.readOnly' | translate }}
+					</div>
+				}
+
+				@if (errorMessage()) {
+					<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+						{{ errorMessage() }}
+					</div>
+				}
+
+				<div>
+					<h2 class="text-sm font-semibold text-mono mb-3">{{ 'openingBalances.header' | translate }}</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'openingBalances.openingDate' | translate }} *</label>
+							<input class="kt-input" formControlName="openingDate" type="date" />
+							@if (form.controls.openingDate.touched && form.controls.openingDate.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'openingBalances.required.openingDate' | translate }}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'openingBalances.period' | translate }} *</label>
+							<select class="kt-input" formControlName="periodId">
+								<option [ngValue]="null">{{ 'openingBalances.selectPeriod' | translate }}</option>
+								@for (period of periods(); track period.periodId) {
+									<option [ngValue]="period.periodId">{{ period.periodName || period.periodId }}</option>
+								}
+							</select>
+							@if (form.controls.periodId.touched && form.controls.periodId.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'openingBalances.required.period' | translate }}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'openingBalances.fiscalYear' | translate }} *</label>
+							<select class="kt-input" formControlName="fiscalYearId">
+								<option [ngValue]="null">{{ 'openingBalances.selectFiscalYear' | translate }}</option>
+								@for (year of fiscalYears(); track year.fiscalYearId) {
+									<option [ngValue]="year.fiscalYearId">{{ year.year }} — {{ year.description || year.fiscalYearId }}</option>
+								}
+							</select>
+							@if (form.controls.fiscalYearId.touched && form.controls.fiscalYearId.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'openingBalances.required.fiscalYear' | translate }}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'openingBalances.branch' | translate }}</label>
+							<select class="kt-input" formControlName="branchId">
+								<option [ngValue]="null">{{ 'openingBalances.selectBranch' | translate }}</option>
+								@for (branch of branches(); track branch.branchId) {
+									<option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchCode || branch.branchId }}</option>
+								}
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'openingBalances.costCenter' | translate }}</label>
+							<select class="kt-input" formControlName="costCenterId">
+								<option [ngValue]="null">{{ 'openingBalances.selectCostCenter' | translate }}</option>
+								@for (cc of costCenters(); track cc.costCenterId) {
+									<option [ngValue]="cc.costCenterId">{{ cc.costCenterCode }} — {{ cc.costCenterName }}</option>
+								}
+							</select>
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'openingBalances.currency' | translate }} *</label>
+							<select class="kt-input" formControlName="currencyId">
+								<option [ngValue]="null">{{ 'openingBalances.selectCurrency' | translate }}</option>
+								@for (currency of currencies(); track currency.id) {
+									<option [ngValue]="currency.id">{{ currency.currencyName || currency.currencyShorcut || currency.id }}</option>
+								}
+							</select>
+							@if (form.controls.currencyId.touched && form.controls.currencyId.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'openingBalances.required.currency' | translate }}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'openingBalances.exchangeRate' | translate }} *</label>
+							<input class="kt-input" formControlName="exchangeRate" type="number" step="any" min="0" />
+						</div>
+					</div>
+				</div>
+
+				<div class="flex flex-wrap items-center gap-2 border-b border-border pb-2">
+					<button type="button" class="kt-btn kt-btn-sm" [class.kt-btn-primary]="activeTab() === 'accounts'" [class.kt-btn-outline]="activeTab() !== 'accounts'" (click)="setTab('accounts')">
+						{{ 'openingBalances.tab.accounts' | translate }} ({{ accountsArray.length }})
+					</button>
+					<button type="button" class="kt-btn kt-btn-sm" [class.kt-btn-primary]="activeTab() === 'partners'" [class.kt-btn-outline]="activeTab() !== 'partners'" (click)="setTab('partners')">
+						{{ 'openingBalances.tab.partners' | translate }} ({{ partnersArray.length }})
+					</button>
+					<button type="button" class="kt-btn kt-btn-sm" [class.kt-btn-primary]="activeTab() === 'inventory'" [class.kt-btn-outline]="activeTab() !== 'inventory'" (click)="setTab('inventory')">
+						{{ 'openingBalances.tab.inventory' | translate }} ({{ inventoryArray.length }})
+					</button>
+				</div>
+
+				@if (activeTab() === 'accounts') {
+					<div>
+						<div class="flex items-center justify-between gap-3 mb-3">
+							<h2 class="text-sm font-semibold text-mono">{{ 'openingBalances.tab.accounts' | translate }}</h2>
+							@if (!isReadOnly()) {
+								<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="addAccountLine()">
+									<i class="ki-filled ki-plus"></i>
+									{{ 'openingBalances.addLine' | translate }}
+								</button>
+							}
+						</div>
+
+						<div class="kt-scrollable-x-auto" formArrayName="accounts">
+							<table class="kt-table kt-table-border w-full">
+								<thead>
+									<tr>
+										<th>{{ 'openingBalances.account' | translate }}</th>
+										<th class="w-[140px]">{{ 'openingBalances.debit' | translate }}</th>
+										<th class="w-[140px]">{{ 'openingBalances.credit' | translate }}</th>
+										<th>{{ 'openingBalances.notes' | translate }}</th>
+										@if (!isReadOnly()) {
+											<th class="w-[60px]"></th>
+										}
+									</tr>
+								</thead>
+								<tbody>
+									@for (group of accountsArray.controls; track $index; let i = $index) {
+										<tr [formGroupName]="i">
+											<td>
+												<select class="kt-input" formControlName="accId">
+													<option [ngValue]="null">{{ 'openingBalances.selectAccount' | translate }}</option>
+													@for (account of postingAccounts(); track account.accId) {
+														<option [ngValue]="account.accId">{{ accountLabel(account) }}</option>
+													}
+												</select>
+											</td>
+											<td>
+												<input class="kt-input" formControlName="debit" type="number" step="any" min="0" />
+											</td>
+											<td>
+												<input class="kt-input" formControlName="credit" type="number" step="any" min="0" />
+											</td>
+											<td>
+												<input class="kt-input" formControlName="notes" type="text" />
+											</td>
+											@if (!isReadOnly()) {
+												<td>
+													<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive" (click)="removeAccountLine(i)">
+														<i class="ki-filled ki-trash"></i>
+													</button>
+												</td>
+											}
+										</tr>
+									}
+								</tbody>
+								<tfoot>
+									<tr>
+										<td class="font-medium text-end">{{ 'openingBalances.total' | translate }}</td>
+										<td class="font-mono">{{ accountsTotalDebit() | number: '1.2-2' }}</td>
+										<td class="font-mono">{{ accountsTotalCredit() | number: '1.2-2' }}</td>
+										<td colspan="2"></td>
+									</tr>
+								</tfoot>
+							</table>
+						</div>
+					</div>
+				}
+
+				@if (activeTab() === 'partners') {
+					<div>
+						<div class="flex items-center justify-between gap-3 mb-3">
+							<h2 class="text-sm font-semibold text-mono">{{ 'openingBalances.tab.partners' | translate }}</h2>
+							@if (!isReadOnly()) {
+								<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="addPartnerLine()">
+									<i class="ki-filled ki-plus"></i>
+									{{ 'openingBalances.addLine' | translate }}
+								</button>
+							}
+						</div>
+
+						<div class="kt-scrollable-x-auto" formArrayName="partners">
+							<table class="kt-table kt-table-border w-full">
+								<thead>
+									<tr>
+										<th>{{ 'openingBalances.partnerType' | translate }}</th>
+										<th>{{ 'openingBalances.partner' | translate }}</th>
+										<th>{{ 'openingBalances.account' | translate }}</th>
+										<th class="w-[120px]">{{ 'openingBalances.debit' | translate }}</th>
+										<th class="w-[120px]">{{ 'openingBalances.credit' | translate }}</th>
+										<th class="w-[140px]">{{ 'openingBalances.dueDate' | translate }}</th>
+										<th>{{ 'openingBalances.reference' | translate }}</th>
+										@if (!isReadOnly()) {
+											<th class="w-[60px]"></th>
+										}
+									</tr>
+								</thead>
+								<tbody>
+									@for (group of partnersArray.controls; track $index; let i = $index) {
+										<tr [formGroupName]="i">
+											<td>
+												<select class="kt-input" formControlName="partnerType">
+													<option [ngValue]="null">{{ 'openingBalances.selectPartnerType' | translate }}</option>
+													@for (type of partnerTypes(); track type.typeId) {
+														<option [ngValue]="type.typeId">{{ partnerTypeLabel(type) }}</option>
+													}
+												</select>
+											</td>
+											<td>
+												@if (isCustomerPartnerType(group.controls.partnerType.value)) {
+													<select class="kt-input" formControlName="partnerId">
+														<option [ngValue]="null">{{ 'openingBalances.selectPartner' | translate }}</option>
+														@for (customer of customers(); track customer.customerId) {
+															<option [ngValue]="customer.customerId">{{ customer.customerName || customer.customerId }}</option>
+														}
+													</select>
+												} @else if (isSupplierPartnerType(group.controls.partnerType.value)) {
+													<select class="kt-input" formControlName="partnerId">
+														<option [ngValue]="null">{{ 'openingBalances.selectPartner' | translate }}</option>
+														@for (supplier of suppliers(); track supplier.supplierId) {
+															<option [ngValue]="supplier.supplierId">{{ supplier.supplierName || supplier.supplierId }}</option>
+														}
+													</select>
+												} @else {
+													<input class="kt-input" formControlName="partnerId" type="number" [placeholder]="'openingBalances.partnerId' | translate" />
+												}
+											</td>
+											<td>
+												<select class="kt-input" formControlName="accId">
+													<option [ngValue]="null">{{ 'openingBalances.selectAccount' | translate }}</option>
+													@for (account of postingAccounts(); track account.accId) {
+														<option [ngValue]="account.accId">{{ accountLabel(account) }}</option>
+													}
+												</select>
+											</td>
+											<td>
+												<input class="kt-input" formControlName="debit" type="number" step="any" min="0" />
+											</td>
+											<td>
+												<input class="kt-input" formControlName="credit" type="number" step="any" min="0" />
+											</td>
+											<td>
+												<input class="kt-input" formControlName="dueDate" type="date" />
+											</td>
+											<td>
+												<input class="kt-input" formControlName="reference" type="text" />
+											</td>
+											@if (!isReadOnly()) {
+												<td>
+													<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive" (click)="removePartnerLine(i)">
+														<i class="ki-filled ki-trash"></i>
+													</button>
+												</td>
+											}
+										</tr>
+									}
+								</tbody>
+								<tfoot>
+									<tr>
+										<td colspan="3" class="font-medium text-end">{{ 'openingBalances.total' | translate }}</td>
+										<td class="font-mono">{{ partnersTotalDebit() | number: '1.2-2' }}</td>
+										<td class="font-mono">{{ partnersTotalCredit() | number: '1.2-2' }}</td>
+										<td colspan="3"></td>
+									</tr>
+								</tfoot>
+							</table>
+						</div>
+					</div>
+				}
+
+				@if (activeTab() === 'inventory') {
+					<div>
+						<div class="flex items-center justify-between gap-3 mb-3">
+							<h2 class="text-sm font-semibold text-mono">{{ 'openingBalances.tab.inventory' | translate }}</h2>
+							@if (!isReadOnly()) {
+								<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="addInventoryLine()">
+									<i class="ki-filled ki-plus"></i>
+									{{ 'openingBalances.addLine' | translate }}
+								</button>
+							}
+						</div>
+
+						<div class="kt-scrollable-x-auto" formArrayName="inventoryItems">
+							<table class="kt-table kt-table-border w-full">
+								<thead>
+									<tr>
+										<th>{{ 'openingBalances.item' | translate }}</th>
+										<th>{{ 'openingBalances.warehouse' | translate }}</th>
+										<th class="w-[120px]">{{ 'openingBalances.quantity' | translate }}</th>
+										<th class="w-[140px]">{{ 'openingBalances.unitCost' | translate }}</th>
+										<th class="w-[140px]">{{ 'openingBalances.totalValue' | translate }}</th>
+										@if (!isReadOnly()) {
+											<th class="w-[60px]"></th>
+										}
+									</tr>
+								</thead>
+								<tbody>
+									@for (group of inventoryArray.controls; track $index; let i = $index) {
+										<tr [formGroupName]="i">
+											<td>
+												<select class="kt-input" formControlName="itemId">
+													<option [ngValue]="null">{{ 'openingBalances.selectItem' | translate }}</option>
+													@for (product of products(); track product.productId) {
+														<option [ngValue]="product.productId">{{ product.proCode ? product.proCode + ' — ' : '' }}{{ product.productName || product.productId }}</option>
+													}
+												</select>
+											</td>
+											<td>
+												<select class="kt-input" formControlName="warehouseId">
+													<option [ngValue]="null">{{ 'openingBalances.selectWarehouse' | translate }}</option>
+													@for (store of stores(); track store.storeId) {
+														<option [ngValue]="store.storeId">{{ store.storeName || store.storeId }}</option>
+													}
+												</select>
+											</td>
+											<td>
+												<input class="kt-input" formControlName="quantity" type="number" step="any" min="0" />
+											</td>
+											<td>
+												<input class="kt-input" formControlName="unitCost" type="number" step="any" min="0" />
+											</td>
+											<td class="font-mono">{{ inventoryLineTotal(group) | number: '1.2-2' }}</td>
+											@if (!isReadOnly()) {
+												<td>
+													<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive" (click)="removeInventoryLine(i)">
+														<i class="ki-filled ki-trash"></i>
+													</button>
+												</td>
+											}
+										</tr>
+									}
+								</tbody>
+								<tfoot>
+									<tr>
+										<td colspan="4" class="font-medium text-end">{{ 'openingBalances.total' | translate }}</td>
+										<td class="font-mono">{{ inventoryTotal() | number: '1.2-2' }}</td>
+										<td></td>
+									</tr>
+								</tfoot>
+							</table>
+						</div>
+					</div>
+				}
+
+				<div class="rounded-lg border border-border bg-muted/30 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+					<div class="flex flex-wrap gap-4 text-sm">
+						<span>{{ 'openingBalances.totalDebit' | translate }}: <strong class="font-mono">{{ grandDebit() | number: '1.2-2' }}</strong></span>
+						<span>{{ 'openingBalances.totalCredit' | translate }}: <strong class="font-mono">{{ grandCredit() | number: '1.2-2' }}</strong></span>
+						<span>{{ 'openingBalances.inventoryValue' | translate }}: <strong class="font-mono">{{ inventoryTotal() | number: '1.2-2' }}</strong></span>
+					</div>
+					@if (isBalanced()) {
+						<span class="kt-badge kt-badge-sm kt-badge-success kt-badge-outline">{{ 'openingBalances.balanced' | translate }}</span>
+					} @else {
+						<span class="kt-badge kt-badge-sm kt-badge-warning kt-badge-outline">{{ 'openingBalances.unbalanced' | translate }}</span>
+					}
+				</div>
+
+				<div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-border">
+					<a class="kt-btn kt-btn-outline" routerLink="/demo1/accounting/opening-balances">{{ 'openingBalances.cancel' | translate }}</a>
+					@if (!isReadOnly()) {
+						<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
+							@if (saving()) {
+								<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+							}
+							{{ 'openingBalances.save' | translate }}
+						</button>
+					}
+				</div>
+			</form>
+		}
+	</div>
+</div>

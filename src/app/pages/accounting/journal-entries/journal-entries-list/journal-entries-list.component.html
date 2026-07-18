@@ -1,0 +1,382 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div class="flex items-start gap-3">
+			<div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+				<i class="ki-filled ki-notepad text-xl"></i>
+			</div>
+			<div>
+				<h1 class="text-xl font-semibold text-mono tracking-tight">{{ 'journalEntries.title' | translate }}</h1>
+				<p class="text-sm text-secondary-foreground mt-1 max-w-xl">{{ 'journalEntries.subtitle' | translate }}</p>
+			</div>
+		</div>
+		<div class="flex flex-wrap items-center gap-2">
+			@if (selectedUnpostedCount() > 0) {
+				<button class="kt-btn kt-btn-light" type="button" (click)="openActionDialog(null, 'bulkPost')">
+					<i class="ki-filled ki-check-circle"></i>
+					{{ 'journalEntries.bulkPost' | translate }}
+					<span class="kt-badge kt-badge-sm kt-badge-primary">{{ selectedUnpostedCount() }}</span>
+				</button>
+			}
+			<a class="kt-btn kt-btn-primary" routerLink="/demo1/accounting/journal-entries/new">
+				<i class="ki-filled ki-plus"></i>
+				{{ 'journalEntries.add' | translate }}
+			</a>
+		</div>
+	</div>
+
+	<div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+					<i class="ki-filled ki-document"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'journalEntries.stats.total' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().total }}</div>
+				</div>
+			</div>
+		</div>
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-warning/10 text-warning">
+					<i class="ki-filled ki-time"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'journalEntries.stats.unposted' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().unposted }}</div>
+				</div>
+			</div>
+		</div>
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-success/10 text-success">
+					<i class="ki-filled ki-check-circle"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'journalEntries.stats.posted' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().posted }}</div>
+				</div>
+			</div>
+		</div>
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-info/10 text-info">
+					<i class="ki-filled ki-chart-line-up"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'journalEntries.stats.movement' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().debit | number: '1.0-0' }}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-700 flex items-center gap-2">
+			<i class="ki-filled ki-check-circle"></i>
+			{{ successMessage() }}
+		</div>
+	}
+
+	@if (errorMessage()) {
+		<div class="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
+			<span class="flex items-center gap-2">
+				<i class="ki-filled ki-information-2"></i>
+				{{ errorMessage() }}
+			</span>
+			<button class="kt-btn kt-btn-sm kt-btn-light" type="button" (click)="loadEntries()">
+				{{ 'journalEntries.retry' | translate }}
+			</button>
+		</div>
+	}
+
+	<div class="kt-card overflow-hidden">
+		<div class="px-5 pt-5 pb-4 border-b border-border space-y-4">
+			<div class="flex flex-wrap items-center justify-between gap-3">
+				<div class="inline-flex rounded-lg border border-border bg-muted/40 p-1 gap-1">
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm border-0 shadow-none"
+						[class.kt-btn-primary]="filter() === 'all'"
+						[class.kt-btn-ghost]="filter() !== 'all'"
+						(click)="setFilter('all')">
+						{{ 'journalEntries.filter.all' | translate }}
+					</button>
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm border-0 shadow-none"
+						[class.kt-btn-primary]="filter() === 'unposted'"
+						[class.kt-btn-ghost]="filter() !== 'unposted'"
+						(click)="setFilter('unposted')">
+						{{ 'journalEntries.filter.unposted' | translate }}
+						<span class="ms-1 opacity-80">{{ stats().unposted }}</span>
+					</button>
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm border-0 shadow-none"
+						[class.kt-btn-primary]="filter() === 'posted'"
+						[class.kt-btn-ghost]="filter() !== 'posted'"
+						(click)="setFilter('posted')">
+						{{ 'journalEntries.filter.posted' | translate }}
+						<span class="ms-1 opacity-80">{{ stats().posted }}</span>
+					</button>
+				</div>
+
+				<div class="flex items-center gap-2">
+					@if (hasActiveFilters()) {
+						<button type="button" class="kt-btn kt-btn-sm kt-btn-ghost" (click)="clearFilters()">
+							<i class="ki-filled ki-cross-circle"></i>
+							{{ 'journalEntries.clearFilters' | translate }}
+						</button>
+					}
+					<span class="text-sm text-secondary-foreground">
+						{{ 'journalEntries.showing' | translate }}:
+						<span class="font-medium text-foreground">{{ filteredEntries().length }}</span>
+					</span>
+				</div>
+			</div>
+
+			<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+				<div class="relative sm:col-span-2 xl:col-span-1">
+					<label class="kt-form-label text-xs mb-1.5">{{ 'journalEntries.searchLabel' | translate }}</label>
+					<div class="relative">
+						<i class="ki-filled ki-magnifier absolute top-1/2 -translate-y-1/2 start-3 text-muted-foreground text-sm"></i>
+						<input
+							class="kt-input ps-9"
+							type="search"
+							[placeholder]="'journalEntries.search' | translate"
+							[ngModel]="searchTerm()"
+							(ngModelChange)="onSearchChange($event)" />
+					</div>
+				</div>
+
+				<div>
+					<label class="kt-form-label text-xs mb-1.5">{{ 'journalEntries.period' | translate }}</label>
+					<select class="kt-input" [ngModel]="periodFilter() ?? ''" (ngModelChange)="onPeriodFilterChange($event)">
+						<option value="">{{ 'journalEntries.filter.periodAll' | translate }}</option>
+						@for (period of periods(); track period.periodId) {
+							<option [value]="period.periodId">{{ period.periodName || period.periodId }}</option>
+						}
+					</select>
+				</div>
+
+				<div>
+					<label class="kt-form-label text-xs mb-1.5">{{ 'journalEntries.branch' | translate }}</label>
+					<select class="kt-input" [ngModel]="branchFilter() ?? ''" (ngModelChange)="onBranchFilterChange($event)">
+						<option value="">{{ 'journalEntries.filter.branchAll' | translate }}</option>
+						@for (branch of branches(); track branch.branchId) {
+							<option [value]="branch.branchId">{{ branch.branchName || branch.branchCode || branch.branchId }}</option>
+						}
+					</select>
+				</div>
+
+				<div>
+					<label class="kt-form-label text-xs mb-1.5">{{ 'journalEntries.journalType' | translate }}</label>
+					<select class="kt-input" [ngModel]="typeFilter() ?? ''" (ngModelChange)="onTypeFilterChange($event)">
+						<option value="">{{ 'journalEntries.filter.typeAll' | translate }}</option>
+						@for (type of journalTypes(); track type.journalTypeId) {
+							<option [value]="type.journalTypeId">{{ type.code }} — {{ type.name }}</option>
+						}
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<div class="kt-card-content p-0">
+			@if (loading()) {
+				<div class="flex flex-col items-center justify-center gap-3 py-20 text-secondary-foreground">
+					<span class="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+					<span class="text-sm">{{ 'journalEntries.loading' | translate }}</span>
+				</div>
+			} @else if (filteredEntries().length === 0) {
+				<div class="flex flex-col items-center justify-center gap-4 py-20 px-6 text-center">
+					<div class="relative">
+						<div class="absolute inset-0 rounded-full bg-primary/10 blur-xl scale-150"></div>
+						<div class="relative flex size-20 items-center justify-center rounded-full bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/10 text-primary">
+							<i class="ki-filled ki-notepad text-3xl"></i>
+						</div>
+					</div>
+					<div class="max-w-md">
+						<p class="text-base font-semibold text-mono">{{ 'journalEntries.empty' | translate }}</p>
+						<p class="text-sm text-secondary-foreground mt-2 leading-relaxed">{{ 'journalEntries.emptyHint' | translate }}</p>
+					</div>
+					<div class="flex flex-wrap items-center justify-center gap-2">
+						@if (hasActiveFilters()) {
+							<button type="button" class="kt-btn kt-btn-light" (click)="clearFilters()">
+								{{ 'journalEntries.clearFilters' | translate }}
+							</button>
+						}
+						<a class="kt-btn kt-btn-primary" routerLink="/demo1/accounting/journal-entries/new">
+							<i class="ki-filled ki-plus"></i>
+							{{ 'journalEntries.add' | translate }}
+						</a>
+					</div>
+				</div>
+			} @else {
+				<div class="kt-scrollable-x-auto">
+					<table class="kt-table kt-table-border w-full">
+						<thead>
+							<tr class="bg-muted/30">
+								<th class="w-[44px]">
+									<input
+										type="checkbox"
+										class="kt-checkbox"
+										[checked]="allVisibleSelected()"
+										(change)="toggleSelectAll($any($event.target).checked)" />
+								</th>
+								<th>{{ 'journalEntries.entryId' | translate }}</th>
+								<th>{{ 'journalEntries.entryDate' | translate }}</th>
+								<th>{{ 'journalEntries.period' | translate }}</th>
+								<th>{{ 'journalEntries.branch' | translate }}</th>
+								<th>{{ 'journalEntries.journalType' | translate }}</th>
+								<th class="text-end">{{ 'journalEntries.totalDebit' | translate }}</th>
+								<th class="text-end">{{ 'journalEntries.totalCredit' | translate }}</th>
+								<th>{{ 'journalEntries.status' | translate }}</th>
+								<th class="w-[150px]">{{ 'journalEntries.actions' | translate }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (entry of filteredEntries(); track entry.entryId) {
+								<tr class="hover:bg-muted/20 transition-colors">
+									<td>
+										<input
+											type="checkbox"
+											class="kt-checkbox"
+											[checked]="isSelected(entry.entryId)"
+											(change)="toggleSelect(entry.entryId, $any($event.target).checked)" />
+									</td>
+									<td>
+										<div class="flex flex-col gap-1">
+											<span class="font-mono font-medium text-foreground">#{{ entry.entryId }}</span>
+											<div class="flex flex-wrap gap-1">
+												@if (entry.isReversingEntry) {
+													<span class="kt-badge kt-badge-xs kt-badge-info kt-badge-outline">{{ 'journalEntries.reversing' | translate }}</span>
+												}
+												@if (entry.isClosingEntry) {
+													<span class="kt-badge kt-badge-xs kt-badge-secondary kt-badge-outline">{{ 'journalEntries.closing' | translate }}</span>
+												}
+												@if (entry.isAdjusted) {
+													<span class="kt-badge kt-badge-xs kt-badge-warning kt-badge-outline">{{ 'journalEntries.adjusted' | translate }}</span>
+												}
+											</div>
+										</div>
+									</td>
+									<td class="text-sm text-secondary-foreground">{{ entry.entryDate || '—' }}</td>
+									<td>{{ periodLabel(entry.periodId) }}</td>
+									<td>{{ branchLabel(entry.branchId) }}</td>
+									<td>
+										<span class="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-medium">
+											{{ typeLabel(entry.journalTypeId) }}
+										</span>
+									</td>
+									<td class="font-mono text-end">{{ totalDebit(entry) | number: '1.2-2' }}</td>
+									<td class="font-mono text-end">{{ totalCredit(entry) | number: '1.2-2' }}</td>
+									<td>
+										@if (isPosted(entry)) {
+											<span class="kt-badge kt-badge-sm kt-badge-success kt-badge-outline">
+												<span class="size-1.5 rounded-full bg-success me-1.5"></span>
+												{{ 'journalEntries.posted' | translate }}
+											</span>
+										} @else {
+											<span class="kt-badge kt-badge-sm kt-badge-warning kt-badge-outline">
+												<span class="size-1.5 rounded-full bg-warning me-1.5"></span>
+												{{ 'journalEntries.unposted' | translate }}
+											</span>
+										}
+									</td>
+									<td>
+										<div class="flex items-center justify-end gap-0.5">
+											<a
+												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
+												[routerLink]="['/demo1/accounting/journal-entries', entry.entryId, 'edit']"
+												[attr.title]="(isPosted(entry) ? 'journalEntries.view' : 'journalEntries.edit') | translate">
+												<i class="ki-filled" [class.ki-eye]="isPosted(entry)" [class.ki-notepad-edit]="!isPosted(entry)"></i>
+											</a>
+											@if (!isPosted(entry)) {
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-success" (click)="openActionDialog(entry, 'post')" [attr.title]="'journalEntries.post' | translate">
+													<i class="ki-filled ki-check-circle"></i>
+												</button>
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive" (click)="openActionDialog(entry, 'delete')" [attr.title]="'journalEntries.delete' | translate">
+													<i class="ki-filled ki-trash"></i>
+												</button>
+											} @else {
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="openActionDialog(entry, 'unpost')" [attr.title]="'journalEntries.unpost' | translate">
+													<i class="ki-filled ki-arrow-circle-left"></i>
+												</button>
+												<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-info" (click)="openActionDialog(entry, 'reverse')" [attr.title]="'journalEntries.reverse' | translate">
+													<i class="ki-filled ki-arrows-loop"></i>
+												</button>
+											}
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+		</div>
+	</div>
+
+	@if (actionType()) {
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-[2px] p-4" (click)="closeActionDialog()">
+			<div class="kt-card w-full max-w-md shadow-xl" (click)="$event.stopPropagation()">
+				<div class="kt-card-header px-5 py-4 border-b border-border">
+					<h2 class="text-lg font-semibold text-mono">
+						@switch (actionType()) {
+							@case ('delete') { {{ 'journalEntries.deleteTitle' | translate }} }
+							@case ('post') { {{ 'journalEntries.postTitle' | translate }} }
+							@case ('unpost') { {{ 'journalEntries.unpostTitle' | translate }} }
+							@case ('reverse') { {{ 'journalEntries.reverseTitle' | translate }} }
+							@case ('bulkPost') { {{ 'journalEntries.bulkPostTitle' | translate }} }
+						}
+					</h2>
+				</div>
+				<div class="kt-card-content p-5 flex flex-col gap-3 text-sm text-secondary-foreground">
+					@switch (actionType()) {
+						@case ('delete') { <p>{{ 'journalEntries.deleteConfirm' | translate }}</p> }
+						@case ('post') { <p>{{ 'journalEntries.postConfirm' | translate }}</p> }
+						@case ('unpost') { <p>{{ 'journalEntries.unpostConfirm' | translate }}</p> }
+						@case ('reverse') { <p>{{ 'journalEntries.reverseConfirm' | translate }}</p> }
+						@case ('bulkPost') { <p>{{ 'journalEntries.bulkPostConfirm' | translate }}</p> }
+					}
+					@if (actionTarget()) {
+						<p class="font-medium text-mono text-foreground">#{{ actionTarget()!.entryId }}</p>
+					}
+					@if (actionType() === 'post' || actionType() === 'reverse' || actionType() === 'bulkPost') {
+						<form [formGroup]="actionForm" class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'journalEntries.actorName' | translate }} *</label>
+							<input class="kt-input" formControlName="actorName" type="text" />
+							@if (actionForm.controls.actorName.touched && actionForm.controls.actorName.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'journalEntries.required.actorName' | translate }}</span>
+							}
+						</form>
+					}
+				</div>
+				<div class="flex justify-end gap-2 px-5 py-4 border-t border-border">
+					<button class="kt-btn kt-btn-light" type="button" [disabled]="actionLoading()" (click)="closeActionDialog()">
+						{{ 'journalEntries.cancel' | translate }}
+					</button>
+					<button
+						class="kt-btn"
+						type="button"
+						[class.kt-btn-destructive]="actionType() === 'delete'"
+						[class.kt-btn-primary]="actionType() !== 'delete'"
+						[disabled]="actionLoading()"
+						(click)="confirmAction()">
+						@if (actionLoading()) {
+							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+						}
+						@switch (actionType()) {
+							@case ('delete') { {{ 'journalEntries.delete' | translate }} }
+							@case ('post') { {{ 'journalEntries.post' | translate }} }
+							@case ('unpost') { {{ 'journalEntries.unpost' | translate }} }
+							@case ('reverse') { {{ 'journalEntries.reverse' | translate }} }
+							@case ('bulkPost') { {{ 'journalEntries.bulkPost' | translate }} }
+						}
+					</button>
+				</div>
+			</div>
+		</div>
+	}
+</div>

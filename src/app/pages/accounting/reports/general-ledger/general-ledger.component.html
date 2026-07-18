@@ -1,0 +1,138 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex items-start gap-3">
+		<div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+			<i class="ki-filled ki-book-open text-xl"></i>
+		</div>
+		<div>
+			<h1 class="text-xl font-semibold text-mono tracking-tight">{{ 'generalLedger.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground mt-1 max-w-xl">{{ 'generalLedger.subtitle' | translate }}</p>
+		</div>
+	</div>
+
+	<div class="kt-card overflow-hidden">
+		<div class="px-5 pt-5 pb-4 border-b border-border">
+			<h2 class="text-sm font-semibold text-mono mb-4">{{ 'generalLedger.filters' | translate }}</h2>
+			<form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 items-end" [formGroup]="filterForm" (ngSubmit)="runReport()">
+				<div class="flex flex-col gap-1 xl:col-span-2">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'generalLedger.account' | translate }} *</label>
+					<select class="kt-input" formControlName="accId">
+						<option [ngValue]="null">{{ 'generalLedger.selectAccount' | translate }}</option>
+						@for (account of postingAccounts(); track account.accId) {
+							<option [ngValue]="account.accId">{{ accountLabel(account) }}</option>
+						}
+					</select>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'generalLedger.fromDate' | translate }}</label>
+					<input class="kt-input" formControlName="fromDate" type="date" />
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'generalLedger.toDate' | translate }}</label>
+					<input class="kt-input" formControlName="toDate" type="date" />
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'generalLedger.branch' | translate }}</label>
+					<select class="kt-input" formControlName="branchId">
+						<option [ngValue]="null">{{ 'generalLedger.selectBranch' | translate }}</option>
+						@for (branch of branches(); track branch.branchId) {
+							<option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchCode }}</option>
+						}
+					</select>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'generalLedger.costCenter' | translate }}</label>
+					<select class="kt-input" formControlName="costCenterId">
+						<option [ngValue]="null">{{ 'generalLedger.selectCostCenter' | translate }}</option>
+						@for (center of costCenters(); track center.costCenterId) {
+							<option [ngValue]="center.costCenterId">{{ center.costCenterName || center.costCenterCode }}</option>
+						}
+					</select>
+				</div>
+				<div>
+					<button class="kt-btn kt-btn-primary w-full" type="submit" [disabled]="loading()">
+						@if (loading()) { <span class="size-4 rounded-full border-2 border-current border-t-transparent animate-spin"></span> }
+						{{ 'generalLedger.runReport' | translate }}
+					</button>
+				</div>
+			</form>
+		</div>
+
+		@if (errorMessage()) {
+			<div class="mx-5 mt-4 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
+				<span>{{ errorMessage() }}</span>
+				<button class="kt-btn kt-btn-sm kt-btn-light" type="button" (click)="runReport()">{{ 'generalLedger.retry' | translate }}</button>
+			</div>
+		}
+
+		<div class="kt-card-content p-0">
+			@if (loading()) {
+				<div class="flex flex-col items-center justify-center gap-3 py-20 text-secondary-foreground">
+					<span class="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+					<span class="text-sm">{{ 'generalLedger.loading' | translate }}</span>
+				</div>
+			} @else if (hasRun() && report()) {
+				<div class="px-5 py-4 border-b border-border bg-muted/20">
+					<div class="flex flex-wrap items-center justify-between gap-4">
+						<div>
+							<div class="text-sm font-semibold text-mono">{{ report()?.accCode }} — {{ report()?.accName }}</div>
+						</div>
+						<div class="flex flex-wrap gap-6 text-sm">
+							<div><span class="text-secondary-foreground">{{ 'generalLedger.openingBalance' | translate }}:</span> <span class="font-mono font-semibold">{{ report()?.openingBalance | number: '1.2-2' }}</span></div>
+							<div><span class="text-secondary-foreground">{{ 'generalLedger.closingBalance' | translate }}:</span> <span class="font-mono font-semibold">{{ report()?.netBalance | number: '1.2-2' }}</span></div>
+						</div>
+					</div>
+				</div>
+
+				@if (transactions().length === 0) {
+					<div class="flex flex-col items-center justify-center gap-4 py-20 text-center px-6">
+						<div class="relative"><div class="absolute inset-0 rounded-full bg-primary/10 blur-2xl scale-150"></div><div class="relative flex size-16 items-center justify-center rounded-2xl bg-muted/60 text-muted-foreground"><i class="ki-filled ki-book-open text-3xl"></i></div></div>
+						<div><p class="font-medium text-mono">{{ 'generalLedger.empty' | translate }}</p><p class="text-sm text-secondary-foreground mt-1">{{ 'generalLedger.emptyHint' | translate }}</p></div>
+					</div>
+				} @else {
+					<div class="kt-scrollable-x-auto">
+						<table class="kt-table kt-table-border w-full">
+							<thead>
+								<tr>
+									<th>{{ 'generalLedger.transactionDate' | translate }}</th>
+									<th>{{ 'generalLedger.entryId' | translate }}</th>
+									<th>{{ 'generalLedger.referenceNo' | translate }}</th>
+									<th>{{ 'generalLedger.description' | translate }}</th>
+									<th>{{ 'generalLedger.debit' | translate }}</th>
+									<th>{{ 'generalLedger.credit' | translate }}</th>
+									<th>{{ 'generalLedger.balance' | translate }}</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr class="bg-muted/30 font-medium">
+									<td colspan="4">{{ 'generalLedger.openingBalance' | translate }}</td>
+									<td colspan="2"></td>
+									<td class="font-mono">{{ report()?.openingBalance | number: '1.2-2' }}</td>
+								</tr>
+								@for (tx of transactions(); track tx.ledgerID ?? tx.entryID) {
+									<tr>
+										<td>{{ tx.transactionDate | date: 'mediumDate' }}</td>
+										<td class="font-mono">{{ tx.entryID }}</td>
+										<td>{{ tx.referenceNo || '—' }}</td>
+										<td>{{ tx.description || '—' }}</td>
+										<td class="font-mono">{{ tx.debit | number: '1.2-2' }}</td>
+										<td class="font-mono">{{ tx.credit | number: '1.2-2' }}</td>
+										<td class="font-mono">{{ tx.balance | number: '1.2-2' }}</td>
+									</tr>
+								}
+								<tr class="bg-muted/30 font-semibold">
+									<td colspan="4">{{ 'generalLedger.closingBalance' | translate }}</td>
+									<td colspan="2"></td>
+									<td class="font-mono">{{ report()?.netBalance | number: '1.2-2' }}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				}
+			} @else if (hasRun() && !report()) {
+				<div class="flex flex-col items-center justify-center gap-4 py-20 text-center px-6">
+					<p class="font-medium text-mono">{{ 'generalLedger.empty' | translate }}</p>
+				</div>
+			}
+		</div>
+	</div>
+</div>

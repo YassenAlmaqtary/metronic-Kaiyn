@@ -1,0 +1,238 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div class="flex items-start gap-3">
+			<div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+				<i class="ki-filled ki-wallet text-xl"></i>
+			</div>
+			<div>
+				<h1 class="text-xl font-semibold text-mono tracking-tight">{{ 'bankAccounts.title' | translate }}</h1>
+				<p class="text-sm text-secondary-foreground mt-1 max-w-xl">{{ 'bankAccounts.subtitle' | translate }}</p>
+			</div>
+		</div>
+		<a class="kt-btn kt-btn-primary" routerLink="/demo1/banks/accounts/new">
+			<i class="ki-filled ki-plus"></i>
+			{{ 'bankAccounts.add' | translate }}
+		</a>
+	</div>
+
+	<div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+					<i class="ki-filled ki-wallet"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'bankAccounts.stats.total' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().total }}</div>
+				</div>
+			</div>
+		</div>
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-success/10 text-success">
+					<i class="ki-filled ki-check-circle"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'bankAccounts.stats.active' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().active }}</div>
+				</div>
+			</div>
+		</div>
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-info/10 text-info">
+					<i class="ki-filled ki-chart-line-up"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'bankAccounts.stats.balance' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().balance | number: '1.2-2' }}</div>
+				</div>
+			</div>
+		</div>
+		<div class="kt-card">
+			<div class="kt-card-content p-4 flex items-center gap-3">
+				<div class="flex size-10 items-center justify-center rounded-lg bg-warning/10 text-warning">
+					<i class="ki-filled ki-dollar"></i>
+				</div>
+				<div>
+					<div class="text-xs text-secondary-foreground">{{ 'bankAccounts.stats.available' | translate }}</div>
+					<div class="text-lg font-semibold text-mono">{{ stats().available | number: '1.2-2' }}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-700 flex items-center gap-2">
+			<i class="ki-filled ki-check-circle"></i>
+			{{ successMessage() }}
+		</div>
+	}
+
+	@if (errorMessage()) {
+		<div class="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
+			<span class="flex items-center gap-2">
+				<i class="ki-filled ki-information-2"></i>
+				{{ errorMessage() }}
+			</span>
+			<button class="kt-btn kt-btn-sm kt-btn-light" type="button" (click)="loadAccounts()">
+				{{ 'bankAccounts.retry' | translate }}
+			</button>
+		</div>
+	}
+
+	<div class="kt-card overflow-hidden">
+		<div class="px-5 pt-5 pb-4 border-b border-border space-y-4">
+			<div class="flex flex-wrap items-center justify-between gap-3">
+				@if (hasActiveFilters()) {
+					<button class="kt-btn kt-btn-sm kt-btn-light" type="button" (click)="clearFilters()">
+						{{ 'bankAccounts.clearFilters' | translate }}
+					</button>
+				}
+			</div>
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'bankAccounts.searchLabel' | translate }}</label>
+					<div class="relative">
+						<i class="ki-filled ki-magnifier absolute top-1/2 -translate-y-1/2 start-3 text-muted-foreground text-sm"></i>
+						<input class="kt-input ps-9" type="search" [placeholder]="'bankAccounts.search' | translate" [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)" />
+					</div>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'bankAccounts.bank' | translate }}</label>
+					<select class="kt-input" [ngModel]="bankFilter()" (ngModelChange)="onBankFilterChange($event)">
+						<option value="">{{ 'bankAccounts.filter.bankAll' | translate }}</option>
+						@for (bank of banks(); track bank.bankID) {
+							<option [value]="bank.bankID">{{ bank.bankName || bank.bankCode || bank.bankID }}</option>
+						}
+					</select>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'bankAccounts.accountStatus' | translate }}</label>
+					<select class="kt-input" [ngModel]="statusFilter()" (ngModelChange)="onStatusFilterChange($event)">
+						<option value="">{{ 'bankAccounts.filter.statusAll' | translate }}</option>
+						<option [value]="BankAccountStatus.Active">{{ 'bankAccounts.status.active' | translate }}</option>
+						<option [value]="BankAccountStatus.Inactive">{{ 'bankAccounts.status.inactive' | translate }}</option>
+						<option [value]="BankAccountStatus.Closed">{{ 'bankAccounts.status.closed' | translate }}</option>
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<div class="kt-card-content p-0">
+			@if (loading()) {
+				<div class="flex flex-col items-center justify-center gap-3 py-20 text-secondary-foreground">
+					<span class="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+					<span class="text-sm">{{ 'bankAccounts.loading' | translate }}</span>
+				</div>
+			} @else if (filteredAccounts().length === 0) {
+				<div class="flex flex-col items-center justify-center gap-4 py-20 text-center px-6">
+					<div class="relative">
+						<div class="absolute inset-0 rounded-full bg-primary/10 blur-2xl scale-150"></div>
+						<div class="relative flex size-16 items-center justify-center rounded-2xl bg-muted/60 text-muted-foreground">
+							<i class="ki-filled ki-wallet text-3xl"></i>
+						</div>
+					</div>
+					<div>
+						<p class="font-medium text-mono">{{ 'bankAccounts.empty' | translate }}</p>
+						<p class="text-sm text-secondary-foreground mt-1 max-w-md">{{ 'bankAccounts.emptyHint' | translate }}</p>
+					</div>
+					<a class="kt-btn kt-btn-primary kt-btn-sm" routerLink="/demo1/banks/accounts/new">
+						{{ 'bankAccounts.add' | translate }}
+					</a>
+				</div>
+			} @else {
+				<div class="px-5 py-3 text-xs text-secondary-foreground border-b border-border">
+					{{ 'bankAccounts.showing' | translate }} {{ filteredAccounts().length }}
+				</div>
+				<div class="kt-scrollable-x-auto">
+					<table class="kt-table kt-table-border w-full">
+						<thead>
+							<tr>
+								<th>{{ 'bankAccounts.accountName' | translate }}</th>
+								<th>{{ 'bankAccounts.accountNumber' | translate }}</th>
+								<th>{{ 'bankAccounts.bank' | translate }}</th>
+								<th>{{ 'bankAccounts.currency' | translate }}</th>
+								<th>{{ 'bankAccounts.currentBalance' | translate }}</th>
+								<th>{{ 'bankAccounts.availableBalance' | translate }}</th>
+								<th>{{ 'bankAccounts.status' | translate }}</th>
+								<th class="w-[140px]">{{ 'bankAccounts.actions' | translate }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (account of filteredAccounts(); track account.bankAccountID) {
+								<tr>
+									<td class="font-medium text-mono">{{ account.accountName || '—' }}</td>
+									<td class="font-mono">{{ account.accountNumber || '—' }}</td>
+									<td>{{ account.bankName || '—' }}</td>
+									<td>{{ account.currencyName || account.currencyID }}</td>
+									<td class="font-mono">{{ account.currentBalance | number: '1.2-2' }}</td>
+									<td class="font-mono">{{ account.availableBalance | number: '1.2-2' }}</td>
+									<td>
+										@if (account.accountStatus === BankAccountStatus.Active) {
+											<span class="kt-badge kt-badge-sm kt-badge-success kt-badge-outline">{{ statusLabel(account.accountStatus) }}</span>
+										} @else if (account.accountStatus === BankAccountStatus.Closed) {
+											<span class="kt-badge kt-badge-sm kt-badge-secondary kt-badge-outline">{{ statusLabel(account.accountStatus) }}</span>
+										} @else {
+											<span class="kt-badge kt-badge-sm kt-badge-warning kt-badge-outline">{{ statusLabel(account.accountStatus) }}</span>
+										}
+									</td>
+									<td>
+										<div class="flex items-center gap-1">
+											<a class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" [routerLink]="['/demo1/banks/accounts', account.bankAccountID, 'edit']" [attr.title]="'bankAccounts.edit' | translate">
+												<i class="ki-filled ki-notepad-edit"></i>
+											</a>
+											<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="openActionDialog(account, 'toggle')" [attr.title]="'bankAccounts.toggleStatus' | translate">
+												<i class="ki-filled ki-switch"></i>
+											</button>
+											<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive" (click)="openActionDialog(account, 'delete')" [attr.title]="'bankAccounts.delete' | translate">
+												<i class="ki-filled ki-trash"></i>
+											</button>
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+		</div>
+	</div>
+
+	@if (actionTarget() && actionType()) {
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" (click)="closeActionDialog()">
+			<div class="kt-card w-full max-w-md shadow-xl" (click)="$event.stopPropagation()">
+				<div class="kt-card-header px-5 py-4 border-b border-border">
+					<h2 class="text-lg font-semibold text-mono">
+						@if (actionType() === 'delete') {
+							{{ 'bankAccounts.deleteTitle' | translate }}
+						} @else {
+							{{ 'bankAccounts.toggleTitle' | translate }}
+						}
+					</h2>
+				</div>
+				<div class="kt-card-content px-5 py-4 text-sm text-secondary-foreground">
+					@if (actionType() === 'delete') {
+						{{ 'bankAccounts.deleteConfirm' | translate }}
+					} @else {
+						{{ 'bankAccounts.toggleConfirm' | translate }}
+					}
+				</div>
+				<div class="kt-card-footer px-5 py-4 border-t border-border flex justify-end gap-2">
+					<button class="kt-btn kt-btn-light" type="button" [disabled]="actionLoading()" (click)="closeActionDialog()">
+						{{ 'bankAccounts.cancel' | translate }}
+					</button>
+					<button class="kt-btn" [class.kt-btn-destructive]="actionType() === 'delete'" [class.kt-btn-primary]="actionType() === 'toggle'" type="button" [disabled]="actionLoading()" (click)="confirmAction()">
+						@if (actionLoading()) {
+							<span class="size-4 rounded-full border-2 border-current border-t-transparent animate-spin"></span>
+						} @else if (actionType() === 'delete') {
+							{{ 'bankAccounts.delete' | translate }}
+						} @else {
+							{{ 'bankAccounts.toggleStatus' | translate }}
+						}
+					</button>
+				</div>
+			</div>
+		</div>
+	}
+</div>

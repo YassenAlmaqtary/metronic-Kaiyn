@@ -10,6 +10,20 @@ import { salesInvoicesEn } from './sales-invoices.en';
 import { productGroupsEn } from './product-groups.en';
 import { productsEn } from './products.en';
 import { unitsEn } from './units.en';
+import { accountGroupsEn } from './account-groups.en';
+import { accountingPeriodsEn } from './accounting-periods.en';
+import { fiscalYearsEn } from './fiscal-years.en';
+import { accountsEn } from './accounts.en';
+import { costCentersEn } from './cost-centers.en';
+import { taxSetupsEn } from './tax-setups.en';
+import { openingBalancesEn } from './opening-balances.en';
+import { journalEntriesEn } from './journal-entries.en';
+import { paymentVouchersEn } from './payment-vouchers.en';
+import { receiptVouchersEn } from './receipt-vouchers.en';
+import { generalLedgerEn } from './general-ledger.en';
+import { banksEn } from './banks.en';
+import { bankAccountsEn } from './bank-accounts.en';
+import { checkBooksEn } from './check-books.en';
 import { menuEn } from './menu.en';
 import { navEn } from './nav.en';
 import { permissionsEn } from './permissions.en';
@@ -39,4 +53,18 @@ export const en = mergeLocale(
   productGroupsEn,
   productsEn,
   unitsEn,
+  accountGroupsEn,
+  accountingPeriodsEn,
+  fiscalYearsEn,
+  accountsEn,
+  costCentersEn,
+  taxSetupsEn,
+  openingBalancesEn,
+  journalEntriesEn,
+  paymentVouchersEn,
+  receiptVouchersEn,
+  generalLedgerEn,
+  banksEn,
+  bankAccountsEn,
+  checkBooksEn,
 );

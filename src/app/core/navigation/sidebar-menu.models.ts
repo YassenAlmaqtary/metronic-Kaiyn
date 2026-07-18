@@ -1,6 +1,12 @@
 import { TranslationKey } from '../i18n';
 
-export type SidebarMenuSectionId = 'sales' | 'products' | 'inventory' | 'accounting' | 'settings';
+export type SidebarMenuSectionId =
+  | 'sales'
+  | 'products'
+  | 'inventory'
+  | 'accounting'
+  | 'banks'
+  | 'settings';
 
 export interface SidebarMenuLink {
   id: string;
