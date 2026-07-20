@@ -25,6 +25,7 @@ import { banksEn } from './banks.en';
 import { bankAccountsEn } from './bank-accounts.en';
 import { checkBooksEn } from './check-books.en';
 import { issuedChecksEn } from './issued-checks.en';
+import { warehousesEn } from './warehouses.en';
 import { menuEn } from './menu.en';
 import { navEn } from './nav.en';
 import { permissionsEn } from './permissions.en';
@@ -69,4 +70,5 @@ export const en = mergeLocale(
   bankAccountsEn,
   checkBooksEn,
   issuedChecksEn,
+  warehousesEn,
 );

@@ -76,7 +76,12 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
     icon: 'ki-package',
     matchPaths: ['/inventory'],
     children: [
-      { id: 'inventory-warehouses', labelKey: 'menu.inventory.warehouses' },
+      {
+        id: 'inventory-warehouses',
+        labelKey: 'menu.inventory.warehouses',
+        route: '/demo1/inventory/warehouses',
+        permission: 'stores.view',
+      },
       { id: 'inventory-movements', labelKey: 'menu.inventory.movements' },
     ],
   },

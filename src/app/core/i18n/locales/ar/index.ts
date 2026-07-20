@@ -25,6 +25,7 @@ import { banksAr } from './banks.ar';
 import { bankAccountsAr } from './bank-accounts.ar';
 import { checkBooksAr } from './check-books.ar';
 import { issuedChecksAr } from './issued-checks.ar';
+import { warehousesAr } from './warehouses.ar';
 import { menuAr } from './menu.ar';
 import { navAr } from './nav.ar';
 import { permissionsAr } from './permissions.ar';
@@ -69,4 +70,5 @@ export const ar = mergeLocale(
   bankAccountsAr,
   checkBooksAr,
   issuedChecksAr,
+  warehousesAr,
 );

@@ -60,6 +60,8 @@ import { CheckBooksListComponent } from './pages/banks/check-books/check-books-l
 import { CheckBookFormComponent } from './pages/banks/check-books/check-book-form/check-book-form.component';
 import { IssuedChecksListComponent } from './pages/accounting/issued-checks/issued-checks-list/issued-checks-list.component';
 import { IssuedCheckFormComponent } from './pages/accounting/issued-checks/issued-check-form/issued-check-form.component';
+import { WarehousesListComponent } from './pages/inventory/warehouses/warehouses-list/warehouses-list.component';
+import { WarehouseFormComponent } from './pages/inventory/warehouses/warehouse-form/warehouse-form.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth/sign-in' },
@@ -156,6 +158,9 @@ export const routes: Routes = [
       { path: 'banks/check-books', component: CheckBooksListComponent },
       { path: 'banks/check-books/new', component: CheckBookFormComponent },
       { path: 'banks/check-books/:id/edit', component: CheckBookFormComponent },
+      { path: 'inventory/warehouses', component: WarehousesListComponent },
+      { path: 'inventory/warehouses/new', component: WarehouseFormComponent },
+      { path: 'inventory/warehouses/:id/edit', component: WarehouseFormComponent },
     ],
   },
 ];
