@@ -8,6 +8,29 @@ html[lang="en"] body {
 	font-family: "Inter", sans-serif;
 }
 
+/* Polished form controls across ERP pages */
+.kt-container-fixed .kt-form-label {
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--tw-secondary-foreground, var(--color-secondary-foreground, #78829d));
+}
+
+.kt-container-fixed .kt-form-label.required::after {
+	content: " *";
+	color: var(--color-destructive, #f8285a);
+}
+
+.kt-container-fixed .kt-input.h-11,
+.kt-container-fixed .kt-select.h-11 {
+	min-height: 2.75rem;
+}
+
+.kt-container-fixed .kt-card.shadow-sm {
+	box-shadow:
+		0 1px 2px rgb(0 0 0 / 0.04),
+		0 1px 3px rgb(0 0 0 / 0.06);
+}
+
 .channel-stats-bg {
 	background-image: url('/assets/media/images/2600x1600/bg-3.png');
 }

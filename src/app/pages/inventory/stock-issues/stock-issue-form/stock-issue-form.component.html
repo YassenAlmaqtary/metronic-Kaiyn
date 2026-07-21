@@ -1,0 +1,269 @@
+<div class="kt-container-fixed flex flex-col gap-5 max-w-6xl">
+	<div class="flex flex-wrap items-start justify-between gap-3">
+		<div>
+			<div class="flex items-center gap-2 text-sm text-secondary-foreground mb-1">
+				<a class="hover:text-primary" routerLink="/demo1/inventory/stock-issues">{{ 'stockIssues.title' | translate }}</a>
+				<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+				<span class="text-mono font-medium">
+					@if (isEditMode()) {
+						@if (isReadOnly()) {
+							{{ 'stockIssues.view' | translate }}
+						} @else {
+							{{ 'stockIssues.edit' | translate }}
+						}
+					} @else {
+						{{ 'stockIssues.create' | translate }}
+					}
+				</span>
+			</div>
+			<h1 class="text-xl font-semibold text-mono">
+				@if (isEditMode()) {
+					@if (isReadOnly()) {
+						{{ 'stockIssues.view' | translate }}
+					} @else {
+						{{ 'stockIssues.edit' | translate }}
+					}
+				} @else {
+					{{ 'stockIssues.create' | translate }}
+				}
+			</h1>
+		</div>
+		<div class="flex items-center gap-2">
+			<a class="kt-btn kt-btn-outline" routerLink="/demo1/inventory/stock-issues">{{ 'stockIssues.back' | translate }}</a>
+			@if (!isReadOnly()) {
+				<button
+					class="kt-btn kt-btn-primary"
+					type="button"
+					[disabled]="saving() || loading()"
+					(click)="save()">
+					@if (saving()) {
+						<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+					}
+					{{ 'stockIssues.save' | translate }}
+				</button>
+			}
+		</div>
+	</div>
+
+	@if (loading()) {
+		<div class="kt-card">
+			<div class="kt-card-content flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+				<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'stockIssues.loading' | translate }}
+			</div>
+		</div>
+	} @else {
+		<form id="stockIssueForm" class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="save()">
+			@if (isReadOnly()) {
+				<div class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800">
+					{{ 'stockIssues.readOnly' | translate }}
+				</div>
+			} @else if (!isEditMode()) {
+				<div class="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-secondary-foreground">
+					{{ 'stockIssues.postAfterSave' | translate }}
+				</div>
+			}
+
+			@if (errorMessage()) {
+				<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+					{{ errorMessage() }}
+				</div>
+			}
+
+			<div class="kt-card">
+				<div class="kt-card-header px-5 py-3 border-b border-border">
+					<h2 class="text-sm font-semibold text-mono">{{ 'stockIssues.title' | translate }}</h2>
+				</div>
+				<div class="kt-card-content p-5">
+					<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'stockIssues.number' | translate }}</label>
+							<input class="kt-input" formControlName="issueNumber" type="text" readonly />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'stockIssues.date' | translate }} *</label>
+							<input class="kt-input" formControlName="issueDate" type="date" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'stockIssues.branch' | translate }} *</label>
+							<select class="kt-select" formControlName="branchId">
+								<option [ngValue]="null">{{ 'stockIssues.selectBranch' | translate }}</option>
+								@for (b of branches(); track b.branchId) {
+									<option [ngValue]="b.branchId">{{ branchLabel(b) }}</option>
+								}
+							</select>
+							@if (form.controls.branchId.touched && form.controls.branchId.invalid) {
+								<span class="text-xs text-destructive">{{ 'stockIssues.required.branch' | translate }}</span>
+							}
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'stockIssues.store' | translate }} *</label>
+							<select class="kt-select" formControlName="storeId">
+								<option [ngValue]="null">{{ 'stockIssues.selectStore' | translate }}</option>
+								@for (s of stores(); track s.storeId) {
+									<option [ngValue]="s.storeId">{{ s.storeName || s.storeId }}</option>
+								}
+							</select>
+							@if (form.controls.storeId.touched && form.controls.storeId.invalid) {
+								<span class="text-xs text-destructive">{{ 'stockIssues.required.store' | translate }}</span>
+							}
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'stockIssues.issueType' | translate }}</label>
+							<select class="kt-select" formControlName="issueTypeId">
+								<option [ngValue]="null">{{ 'stockIssues.selectIssueType' | translate }}</option>
+								@for (t of issueTypes(); track t.issueTypeId) {
+									<option [ngValue]="t.issueTypeId">{{ t.issueTypeName }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'stockIssues.issueToName' | translate }}</label>
+							<input class="kt-input" formControlName="issueToName" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'stockIssues.currency' | translate }}</label>
+							<select class="kt-select" formControlName="currencyId">
+								<option [ngValue]="null">{{ 'stockIssues.selectCurrency' | translate }}</option>
+								@for (c of currencies(); track c.id) {
+									<option [ngValue]="c.id">{{ currencyLabel(c) }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'stockIssues.exchangeRate' | translate }}</label>
+							<input class="kt-input" formControlName="exchangeRate" type="number" step="any" min="0" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'stockIssues.reference' | translate }}</label>
+							<input class="kt-input" formControlName="reference" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'stockIssues.responsibleName' | translate }}</label>
+							<input class="kt-input" formControlName="responsibleName" type="text" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'stockIssues.scheduleDate' | translate }}</label>
+							<input class="kt-input" formControlName="scheduleDate" type="date" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'stockIssues.notes' | translate }}</label>
+							<input class="kt-input" formControlName="notes" type="text" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="kt-card overflow-hidden">
+				<div class="kt-card-header flex flex-wrap items-center justify-between gap-2 px-5 py-3 border-b border-border">
+					<h2 class="text-sm font-semibold text-mono">{{ 'stockIssues.details' | translate }}</h2>
+					@if (!isReadOnly()) {
+						<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="addLine()">
+							<i class="ki-filled ki-plus"></i>
+							{{ 'stockIssues.addLine' | translate }}
+						</button>
+					}
+				</div>
+				<div class="kt-card-content p-0">
+					<div class="kt-scrollable-x-auto" formArrayName="details">
+						<table class="kt-table kt-table-border w-full min-w-[1100px]">
+							<thead>
+								<tr>
+									<th>{{ 'stockIssues.product' | translate }}</th>
+									<th>{{ 'stockIssues.unit' | translate }}</th>
+									<th>{{ 'stockIssues.qty' | translate }}</th>
+									<th>{{ 'stockIssues.price' | translate }}</th>
+									<th>{{ 'stockIssues.lineTotal' | translate }}</th>
+									<th>{{ 'stockIssues.barcode' | translate }}</th>
+									<th>{{ 'stockIssues.batch' | translate }}</th>
+									<th>{{ 'stockIssues.expiry' | translate }}</th>
+									<th>{{ 'stockIssues.availableQty' | translate }}</th>
+									<th class="w-12"></th>
+								</tr>
+							</thead>
+							<tbody>
+								@for (line of details.controls; track $index; let i = $index) {
+									<tr [formGroupName]="i">
+										<td>
+											<select class="kt-select min-w-48" formControlName="itemId">
+												<option [ngValue]="null">{{ 'stockIssues.selectProduct' | translate }}</option>
+												@for (p of products(); track p.productId) {
+													<option [ngValue]="p.productId">{{ productLabel(p) }}</option>
+												}
+											</select>
+										</td>
+										<td>
+											<select class="kt-select min-w-28" formControlName="unitId">
+												<option [ngValue]="null">{{ 'stockIssues.selectUnit' | translate }}</option>
+												@for (u of unitsFor(i); track u.unitId) {
+													<option [ngValue]="u.unitId">{{ u.unitName }}</option>
+												}
+											</select>
+										</td>
+										<td>
+											<input
+												class="kt-input w-24"
+												formControlName="quantity"
+												type="number"
+												min="0"
+												step="any"
+												(input)="calculate(line)" />
+										</td>
+										<td>
+											<input
+												class="kt-input w-24"
+												formControlName="price"
+												type="number"
+												min="0"
+												step="any"
+												(input)="calculate(line)" />
+										</td>
+										<td class="font-medium text-mono whitespace-nowrap">
+											{{ line.controls.total.value | number: '1.2-2' }}
+										</td>
+										<td>
+											<input
+												class="kt-input w-32"
+												formControlName="barcode"
+												type="text"
+												[placeholder]="'stockIssues.barcodeHint' | translate"
+												(keydown.enter)="lookup(line, $event)" />
+										</td>
+										<td>
+											<input class="kt-input w-28" formControlName="batchNumber" type="text" />
+										</td>
+										<td>
+											<input class="kt-input" formControlName="expiryDate" type="date" />
+										</td>
+										<td class="text-secondary-foreground whitespace-nowrap">
+											{{ line.controls.availableQty.value != null ? (line.controls.availableQty.value | number: '1.2-2') : '—' }}
+										</td>
+										<td>
+											@if (!isReadOnly()) {
+												<button
+													class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive"
+													type="button"
+													(click)="removeLine(i)">
+													<i class="ki-filled ki-trash"></i>
+												</button>
+											}
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<div class="kt-card">
+				<div class="kt-card-content flex items-center justify-between px-5 py-4">
+					<span class="text-sm text-secondary-foreground">{{ 'stockIssues.details' | translate }}</span>
+					<span class="text-lg font-semibold text-mono">
+						{{ 'stockIssues.total' | translate }}: {{ totalAmount() | number: '1.2-2' }}
+					</span>
+				</div>
+			</div>
+		</form>
+	}
+</div>

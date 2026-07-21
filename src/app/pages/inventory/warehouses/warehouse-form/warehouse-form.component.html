@@ -1,91 +1,152 @@
-<div class="kt-container-fixed flex flex-col gap-5 max-w-3xl">
-	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
-		<a class="hover:text-primary" routerLink="/demo1/inventory/warehouses">{{ 'warehouses.title' | translate }}</a>
-		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
-		<span class="text-mono font-medium">
-			@if (isEditMode()) {
-				{{ 'warehouses.edit' | translate }}
-			} @else {
-				{{ 'warehouses.create' | translate }}
-			}
-		</span>
+﻿<div class="kt-container-fixed flex flex-col gap-6 max-w-5xl pb-10">
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div>
+			<div class="flex items-center gap-2 text-sm text-secondary-foreground mb-2">
+				<a class="hover:text-primary transition-colors" routerLink="/demo1/inventory/warehouses">{{
+					'warehouses.title' | translate
+				}}</a>
+				<i class="ki-filled ki-right text-[10px] rtl:rotate-180 opacity-60"></i>
+				<span class="font-medium text-foreground">
+					@if (isEditMode()) {
+						{{ 'warehouses.edit' | translate }}
+					} @else {
+						{{ 'warehouses.create' | translate }}
+					}
+				</span>
+			</div>
+			<div class="flex items-center gap-3">
+				<div
+					class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+					<i class="ki-filled ki-home-2 text-lg"></i>
+				</div>
+				<div>
+					<h1 class="text-xl font-semibold tracking-tight">
+						@if (isEditMode()) {
+							{{ 'warehouses.edit' | translate }}
+						} @else {
+							{{ 'warehouses.create' | translate }}
+						}
+					</h1>
+					<p class="text-sm text-secondary-foreground mt-0.5">{{ 'warehouses.subtitle' | translate }}</p>
+				</div>
+			</div>
+		</div>
+		<div class="flex items-center gap-2">
+			<a class="kt-btn kt-btn-outline" routerLink="/demo1/inventory/warehouses">{{
+				'warehouses.cancel' | translate
+			}}</a>
+			<button
+				class="kt-btn kt-btn-primary min-w-28"
+				type="button"
+				[disabled]="saving() || loading()"
+				(click)="onSubmit()">
+				@if (saving()) {
+					<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+				} @else {
+					<i class="ki-filled ki-check"></i>
+				}
+				{{ 'warehouses.save' | translate }}
+			</button>
+		</div>
 	</div>
 
-	<div class="kt-card">
-		<div class="kt-card-header px-5 py-4 border-b border-border">
-			<h1 class="text-lg font-semibold text-mono">
-				@if (isEditMode()) {
-					{{ 'warehouses.edit' | translate }}
-				} @else {
-					{{ 'warehouses.create' | translate }}
-				}
-			</h1>
-		</div>
-
-		@if (loading()) {
-			<div class="kt-card-content flex items-center justify-center gap-2 py-16 text-secondary-foreground">
-				<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+	@if (loading()) {
+		<div class="kt-card overflow-hidden">
+			<div class="kt-card-content flex items-center justify-center gap-3 py-24 text-secondary-foreground">
+				<span class="size-5 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
 				{{ 'warehouses.loading' | translate }}
 			</div>
-		} @else {
-			<form class="kt-card-content flex flex-col gap-5 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
-				@if (errorMessage()) {
-					<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-						{{ errorMessage() }}
-					</div>
-				}
+		</div>
+	} @else {
+		<form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+			@if (errorMessage()) {
+				<div
+					class="rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3.5 text-sm text-destructive flex items-start gap-2">
+					<i class="ki-filled ki-information-2 mt-0.5"></i>
+					<span>{{ errorMessage() }}</span>
+				</div>
+			}
 
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div class="flex flex-col gap-1 md:col-span-2">
-						<label class="kt-form-label">{{ 'warehouses.storeName' | translate }} *</label>
-						<input class="kt-input" formControlName="storeName" type="text" />
-						@if (form.controls.storeName.touched && form.controls.storeName.hasError('required')) {
-							<span class="text-xs text-destructive">{{ 'warehouses.required.storeName' | translate }}</span>
-						}
-					</div>
-					<div class="flex flex-col gap-1 md:col-span-2">
-						<label class="kt-form-label">{{ 'warehouses.locationStore' | translate }}</label>
-						<input class="kt-input" formControlName="locationStore" type="text" />
-					</div>
-					<div class="flex flex-col gap-1">
-						<label class="kt-form-label">{{ 'warehouses.branchId' | translate }}</label>
-						<select class="kt-input" formControlName="branchId">
-							<option [ngValue]="null">{{ 'warehouses.selectBranch' | translate }}</option>
-							@for (branch of branches(); track branch.branchId) {
-								<option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchId }}</option>
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="px-6 md:px-8 py-4 border-b border-border bg-muted/30">
+					<h2 class="text-sm font-semibold">{{ 'warehouses.section.basic' | translate }}</h2>
+					<p class="text-xs text-secondary-foreground mt-0.5">{{ 'warehouses.section.basicHint' | translate }}</p>
+				</div>
+				<div class="p-6 md:p-8">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+						<div class="flex flex-col gap-1.5 md:col-span-2">
+							<label class="kt-form-label required">{{ 'warehouses.storeName' | translate }}</label>
+							<input class="kt-input h-11" formControlName="storeName" type="text" />
+							@if (form.controls.storeName.touched && form.controls.storeName.hasError('required')) {
+								<span class="text-xs text-destructive">{{
+									'warehouses.required.storeName' | translate
+								}}</span>
 							}
-						</select>
-					</div>
-					<div class="flex flex-col gap-1">
-						<label class="kt-form-label">{{ 'warehouses.userId' | translate }}</label>
-						<select class="kt-input" formControlName="userId">
-							<option [ngValue]="null">{{ 'warehouses.selectUser' | translate }}</option>
-							@for (user of users(); track user.userId) {
-								<option [ngValue]="user.userId">{{ userLabel(user) }}</option>
-							}
-						</select>
-					</div>
-					<div class="flex flex-col gap-1">
-						<label class="kt-form-label">{{ 'warehouses.orderNumber' | translate }}</label>
-						<input class="kt-input" formControlName="orderNumber" type="number" />
+						</div>
+						<div class="flex flex-col gap-1.5 md:col-span-2">
+							<label class="kt-form-label">{{ 'warehouses.locationStore' | translate }}</label>
+							<input class="kt-input h-11" formControlName="locationStore" type="text" />
+						</div>
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label">{{ 'warehouses.branchId' | translate }}</label>
+							<select class="kt-select h-11" formControlName="branchId">
+								<option [ngValue]="null">{{ 'warehouses.selectBranch' | translate }}</option>
+								@for (branch of branches(); track branch.branchId) {
+									<option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchId }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label">{{ 'warehouses.userId' | translate }}</label>
+							<select class="kt-select h-11" formControlName="userId">
+								<option [ngValue]="null">{{ 'warehouses.selectUser' | translate }}</option>
+								@for (user of users(); track user.userId) {
+									<option [ngValue]="user.userId">{{ userLabel(user) }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label">{{ 'warehouses.orderNumber' | translate }}</label>
+							<input class="kt-input h-11" formControlName="orderNumber" type="number" />
+						</div>
 					</div>
 				</div>
+			</div>
 
-				<label class="flex items-center gap-2 text-sm">
-					<input class="kt-checkbox" formControlName="status" type="checkbox" />
-					{{ 'warehouses.isActive' | translate }}
-				</label>
-
-				<div class="flex justify-end gap-2 pt-2 border-t border-border">
-					<a class="kt-btn kt-btn-outline" routerLink="/demo1/inventory/warehouses">{{ 'warehouses.cancel' | translate }}</a>
-					<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
-						@if (saving()) {
-							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
-						}
-						{{ 'warehouses.save' | translate }}
-					</button>
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="px-6 md:px-8 py-4 border-b border-border bg-muted/30">
+					<h2 class="text-sm font-semibold">{{ 'warehouses.section.status' | translate }}</h2>
 				</div>
-			</form>
-		}
-	</div>
+				<div class="p-6 md:p-8">
+					<label
+						class="flex items-center justify-between gap-4 rounded-xl border border-border bg-background px-4 py-3.5 cursor-pointer hover:border-primary/40 transition-colors">
+						<div class="flex items-center gap-3">
+							<div class="flex size-9 items-center justify-center rounded-lg bg-success/10 text-success">
+								<i class="ki-filled ki-check-circle"></i>
+							</div>
+							<div>
+								<div class="text-sm font-medium">{{ 'warehouses.isActive' | translate }}</div>
+								<div class="text-xs text-secondary-foreground">{{ 'warehouses.isActiveHint' | translate }}</div>
+							</div>
+						</div>
+						<input class="kt-switch" formControlName="status" type="checkbox" />
+					</label>
+				</div>
+			</div>
+
+			<div class="flex justify-end gap-2 pt-1">
+				<a class="kt-btn kt-btn-outline" routerLink="/demo1/inventory/warehouses">{{
+					'warehouses.cancel' | translate
+				}}</a>
+				<button class="kt-btn kt-btn-primary min-w-28" type="submit" [disabled]="saving()">
+					@if (saving()) {
+						<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+					} @else {
+						<i class="ki-filled ki-check"></i>
+					}
+					{{ 'warehouses.save' | translate }}
+				</button>
+			</div>
+		</form>
+	}
 </div>

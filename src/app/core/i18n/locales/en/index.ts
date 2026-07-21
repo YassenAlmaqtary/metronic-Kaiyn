@@ -9,6 +9,7 @@ import { salesmenEn } from './salesmen.en';
 import { salesInvoicesEn } from './sales-invoices.en';
 import { productGroupsEn } from './product-groups.en';
 import { productsEn } from './products.en';
+import { pricingEn } from './pricing.en';
 import { unitsEn } from './units.en';
 import { accountGroupsEn } from './account-groups.en';
 import { accountingPeriodsEn } from './accounting-periods.en';
@@ -26,6 +27,11 @@ import { bankAccountsEn } from './bank-accounts.en';
 import { checkBooksEn } from './check-books.en';
 import { issuedChecksEn } from './issued-checks.en';
 import { warehousesEn } from './warehouses.en';
+import { stockIssuesEn } from './stock-issues.en';
+import { stockTransfersEn } from './stock-transfers.en';
+import { stockReceivingsEn } from './stock-receivings.en';
+import { stockTakingsEn } from './stock-takings.en';
+import { stockAdjustmentsEn } from './stock-adjustments.en';
 import { menuEn } from './menu.en';
 import { navEn } from './nav.en';
 import { permissionsEn } from './permissions.en';
@@ -54,6 +60,7 @@ export const en = mergeLocale(
   salesInvoicesEn,
   productGroupsEn,
   productsEn,
+  pricingEn,
   unitsEn,
   accountGroupsEn,
   accountingPeriodsEn,
@@ -71,4 +78,9 @@ export const en = mergeLocale(
   checkBooksEn,
   issuedChecksEn,
   warehousesEn,
+  stockIssuesEn,
+  stockTransfersEn,
+  stockReceivingsEn,
+  stockTakingsEn,
+  stockAdjustmentsEn,
 );

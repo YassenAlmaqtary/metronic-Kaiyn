@@ -30,6 +30,7 @@ import { ProductFormComponent } from './pages/products/items/product-form/produc
 import { ProductsListComponent } from './pages/products/items/products-list/products-list.component';
 import { UnitFormComponent } from './pages/products/units/unit-form/unit-form.component';
 import { UnitsListComponent } from './pages/products/units/units-list/units-list.component';
+import { ItemPricingPageComponent } from './pages/products/pricing/item-pricing-page/item-pricing-page.component';
 import { AccountGroupFormComponent } from './pages/accounting/account-groups/account-group-form/account-group-form.component';
 import { AccountGroupsListComponent } from './pages/accounting/account-groups/account-groups-list/account-groups-list.component';
 import { AccountingPeriodFormComponent } from './pages/accounting/periods/accounting-period-form/accounting-period-form.component';
@@ -62,6 +63,16 @@ import { IssuedChecksListComponent } from './pages/accounting/issued-checks/issu
 import { IssuedCheckFormComponent } from './pages/accounting/issued-checks/issued-check-form/issued-check-form.component';
 import { WarehousesListComponent } from './pages/inventory/warehouses/warehouses-list/warehouses-list.component';
 import { WarehouseFormComponent } from './pages/inventory/warehouses/warehouse-form/warehouse-form.component';
+import { StockIssuesListComponent } from './pages/inventory/stock-issues/stock-issues-list/stock-issues-list.component';
+import { StockIssueFormComponent } from './pages/inventory/stock-issues/stock-issue-form/stock-issue-form.component';
+import { StockTransfersListComponent } from './pages/inventory/stock-transfers/stock-transfers-list/stock-transfers-list.component';
+import { StockTransferFormComponent } from './pages/inventory/stock-transfers/stock-transfer-form/stock-transfer-form.component';
+import { StockReceivingsListComponent } from './pages/inventory/stock-receivings/stock-receivings-list/stock-receivings-list.component';
+import { StockReceivingFormComponent } from './pages/inventory/stock-receivings/stock-receiving-form/stock-receiving-form.component';
+import { StockTakingsListComponent } from './pages/inventory/stock-takings/stock-takings-list/stock-takings-list.component';
+import { StockTakingFormComponent } from './pages/inventory/stock-takings/stock-taking-form/stock-taking-form.component';
+import { StockAdjustmentsListComponent } from './pages/inventory/stock-adjustments/stock-adjustments-list/stock-adjustments-list.component';
+import { StockAdjustmentFormComponent } from './pages/inventory/stock-adjustments/stock-adjustment-form/stock-adjustment-form.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth/sign-in' },
@@ -111,6 +122,7 @@ export const routes: Routes = [
       { path: 'products/units', component: UnitsListComponent },
       { path: 'products/units/new', component: UnitFormComponent },
       { path: 'products/units/:id/edit', component: UnitFormComponent },
+      { path: 'products/pricing', component: ItemPricingPageComponent },
       { path: 'accounting/account-groups', component: AccountGroupsListComponent },
       { path: 'accounting/account-groups/new', component: AccountGroupFormComponent },
       { path: 'accounting/account-groups/:id/edit', component: AccountGroupFormComponent },
@@ -161,6 +173,21 @@ export const routes: Routes = [
       { path: 'inventory/warehouses', component: WarehousesListComponent },
       { path: 'inventory/warehouses/new', component: WarehouseFormComponent },
       { path: 'inventory/warehouses/:id/edit', component: WarehouseFormComponent },
+      { path: 'inventory/stock-issues', component: StockIssuesListComponent },
+      { path: 'inventory/stock-issues/new', component: StockIssueFormComponent },
+      { path: 'inventory/stock-issues/:id', component: StockIssueFormComponent },
+      { path: 'inventory/stock-transfers', component: StockTransfersListComponent },
+      { path: 'inventory/stock-transfers/new', component: StockTransferFormComponent },
+      { path: 'inventory/stock-transfers/:id', component: StockTransferFormComponent },
+      { path: 'inventory/stock-receivings', component: StockReceivingsListComponent },
+      { path: 'inventory/stock-receivings/new', component: StockReceivingFormComponent },
+      { path: 'inventory/stock-receivings/:id', component: StockReceivingFormComponent },
+      { path: 'inventory/stock-takings', component: StockTakingsListComponent },
+      { path: 'inventory/stock-takings/new', component: StockTakingFormComponent },
+      { path: 'inventory/stock-takings/:id', component: StockTakingFormComponent },
+      { path: 'inventory/stock-adjustments', component: StockAdjustmentsListComponent },
+      { path: 'inventory/stock-adjustments/new', component: StockAdjustmentFormComponent },
+      { path: 'inventory/stock-adjustments/:id', component: StockAdjustmentFormComponent },
     ],
   },
 ];

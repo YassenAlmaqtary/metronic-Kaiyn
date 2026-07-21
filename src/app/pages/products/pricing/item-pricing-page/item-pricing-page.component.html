@@ -1,0 +1,497 @@
+<div class="kt-container-fixed flex flex-col gap-5">
+	<div>
+		<h1 class="text-xl font-semibold text-mono">{{ 'pricing.title' | translate }}</h1>
+		<p class="text-sm text-secondary-foreground mt-1">{{ 'pricing.subtitle' | translate }}</p>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-700">
+			{{ successMessage() }}
+		</div>
+	}
+
+	@if (errorMessage()) {
+		<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+			{{ errorMessage() }}
+		</div>
+	}
+
+	<div class="kt-card overflow-hidden">
+		<div class="flex flex-wrap items-center gap-1 px-3 pt-2 border-b border-border">
+			@for (tab of [
+				{ id: 'dashboard', key: 'pricing.tab.dashboard' },
+				{ id: 'lists', key: 'pricing.tab.lists' },
+				{ id: 'assignments', key: 'pricing.tab.assignments' },
+				{ id: 'bulk', key: 'pricing.tab.bulk' },
+				{ id: 'changelog', key: 'pricing.tab.changelog' }
+			]; track tab.id) {
+				<button
+					type="button"
+					class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors"
+					[class.border-primary]="activeTab() === tab.id"
+					[class.text-primary]="activeTab() === tab.id"
+					[class.border-transparent]="activeTab() !== tab.id"
+					[class.text-secondary-foreground]="activeTab() !== tab.id"
+					(click)="setTab($any(tab.id))">
+					{{ tab.key | translate }}
+				</button>
+			}
+		</div>
+
+		<div class="p-5">
+			<!-- Dashboard -->
+			@if (activeTab() === 'dashboard') {
+				<div class="flex flex-col gap-4">
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'pricing.priceList' | translate }}</label>
+							<select
+								class="kt-select"
+								[ngModel]="selectedPriceListId()"
+								(ngModelChange)="onPriceListFilterChange($event)">
+								<option [ngValue]="null">{{ 'pricing.selectPriceList' | translate }}</option>
+								@for (list of priceLists(); track list.priceListId) {
+									<option [ngValue]="list.priceListId">{{ list.listName }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'pricing.branch' | translate }}</label>
+							<select
+								class="kt-select"
+								[ngModel]="selectedBranchId()"
+								(ngModelChange)="onBranchFilterChange($event)">
+								<option [ngValue]="null">{{ 'pricing.allBranches' | translate }}</option>
+								@for (branch of branches(); track branch.branchId) {
+									<option [ngValue]="branch.branchId">{{ branchLabel(branch) }}</option>
+								}
+							</select>
+						</div>
+						<div class="relative">
+							<i class="ki-filled ki-magnifier absolute top-1/2 -translate-y-1/2 start-3 text-muted-foreground text-sm"></i>
+							<input
+								class="kt-input ps-9"
+								type="search"
+								[placeholder]="'pricing.searchProduct' | translate"
+								[ngModel]="dashboardSearch()"
+								(ngModelChange)="dashboardSearch.set($event)" />
+						</div>
+					</div>
+
+					@if (loading()) {
+						<div class="flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+							<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+							{{ 'pricing.loading' | translate }}
+						</div>
+					} @else if (!selectedPriceListId()) {
+						<p class="text-center text-secondary-foreground py-10">{{ 'pricing.selectPriceListHint' | translate }}</p>
+					} @else if (filteredDashboardItems().length === 0) {
+						<p class="text-center text-secondary-foreground py-10">{{ 'pricing.dashboardEmpty' | translate }}</p>
+					} @else {
+						<div class="kt-scrollable-x-auto rounded-lg border border-border">
+							<table class="kt-table kt-table-border w-full min-w-[900px]">
+								<thead>
+									<tr>
+										<th>{{ 'pricing.product' | translate }}</th>
+										<th>{{ 'pricing.unit' | translate }}</th>
+										<th>{{ 'pricing.unitCost' | translate }}</th>
+										<th>{{ 'pricing.currentPrice' | translate }}</th>
+										<th>{{ 'pricing.minPrice' | translate }}</th>
+										<th class="w-[140px]">{{ 'pricing.actions' | translate }}</th>
+									</tr>
+								</thead>
+								<tbody>
+									@for (item of filteredDashboardItems(); track itemKey(item)) {
+										<tr>
+											<td class="font-medium text-mono">{{ item.proName || item.productId }}</td>
+											<td>{{ item.unitName || item.uomId }}</td>
+											<td>{{ item.unitCost ?? 0 | number: '1.2-2' }}</td>
+											@if (editingPriceKey() === itemKey(item)) {
+												<td>
+													<input
+														class="kt-input kt-input-sm w-28"
+														type="number"
+														step="0.01"
+														[ngModel]="editingPriceValue()"
+														(ngModelChange)="editingPriceValue.set($event)" />
+												</td>
+												<td>
+													<input
+														class="kt-input kt-input-sm w-28"
+														type="number"
+														step="0.01"
+														[ngModel]="editingMinPriceValue()"
+														(ngModelChange)="editingMinPriceValue.set($event)" />
+												</td>
+												<td class="flex items-center gap-1">
+													<button
+														class="kt-btn kt-btn-sm kt-btn-primary"
+														type="button"
+														[disabled]="saving()"
+														(click)="savePrice(item)">
+														{{ 'pricing.save' | translate }}
+													</button>
+													<button class="kt-btn kt-btn-sm kt-btn-ghost" type="button" (click)="cancelEditPrice()">
+														{{ 'pricing.cancel' | translate }}
+													</button>
+												</td>
+											} @else {
+												<td>{{ item.currentPrice ?? 0 | number: '1.2-2' }}</td>
+												<td>{{ item.minPrice ?? 0 | number: '1.2-2' }}</td>
+												<td>
+													<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="startEditPrice(item)">
+														{{ 'pricing.editPrice' | translate }}
+													</button>
+												</td>
+											}
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					}
+				</div>
+			}
+
+			<!-- Price lists -->
+			@if (activeTab() === 'lists') {
+				<div class="flex flex-col gap-5">
+					<form class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end" [formGroup]="listForm" (ngSubmit)="saveList()">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'pricing.listName' | translate }} *</label>
+							<input class="kt-input" formControlName="listName" type="text" />
+						</div>
+						<div class="flex flex-col gap-1 md:col-span-2">
+							<label class="kt-form-label">{{ 'pricing.description' | translate }}</label>
+							<input class="kt-input" formControlName="description" type="text" />
+						</div>
+						<div class="flex items-center gap-3">
+							<label class="flex items-center gap-2 text-sm">
+								<input class="kt-checkbox" formControlName="isActive" type="checkbox" />
+								{{ 'pricing.isActive' | translate }}
+							</label>
+							<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
+								{{ (editingListId() ? 'pricing.update' : 'pricing.addList') | translate }}
+							</button>
+							@if (editingListId()) {
+								<button class="kt-btn kt-btn-outline" type="button" (click)="resetListForm()">
+									{{ 'pricing.cancel' | translate }}
+								</button>
+							}
+						</div>
+					</form>
+
+					<div class="kt-scrollable-x-auto rounded-lg border border-border">
+						<table class="kt-table kt-table-border w-full">
+							<thead>
+								<tr>
+									<th>{{ 'pricing.listId' | translate }}</th>
+									<th>{{ 'pricing.listName' | translate }}</th>
+									<th>{{ 'pricing.description' | translate }}</th>
+									<th>{{ 'pricing.status' | translate }}</th>
+									<th class="w-[160px]">{{ 'pricing.actions' | translate }}</th>
+								</tr>
+							</thead>
+							<tbody>
+								@if (priceLists().length === 0) {
+									<tr>
+										<td colspan="5" class="text-center text-secondary-foreground py-10">
+											{{ 'pricing.listsEmpty' | translate }}
+										</td>
+									</tr>
+								} @else {
+									@for (list of priceLists(); track list.priceListId) {
+										<tr>
+											<td class="text-mono">{{ list.priceListId }}</td>
+											<td class="font-medium">{{ list.listName }}</td>
+											<td>{{ list.description || '—' }}</td>
+											<td>
+												@if (list.isActive !== false) {
+													<span class="badge badge-sm badge-success badge-outline">{{ 'pricing.active' | translate }}</span>
+												} @else {
+													<span class="badge badge-sm badge-destructive badge-outline">{{ 'pricing.inactive' | translate }}</span>
+												}
+											</td>
+											<td class="flex items-center gap-1">
+												<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="editList(list)">
+													{{ 'pricing.edit' | translate }}
+												</button>
+												<button
+													class="kt-btn kt-btn-sm kt-btn-ghost text-destructive"
+													type="button"
+													(click)="openDeleteList(list)">
+													{{ 'pricing.delete' | translate }}
+												</button>
+											</td>
+										</tr>
+									}
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			}
+
+			<!-- Branch assignments -->
+			@if (activeTab() === 'assignments') {
+				<div class="flex flex-col gap-5">
+					<form
+						class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end"
+						[formGroup]="assignmentForm"
+						(ngSubmit)="saveAssignment()">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'pricing.priceList' | translate }} *</label>
+							<select class="kt-select" formControlName="priceListId">
+								<option [ngValue]="null">{{ 'pricing.selectPriceList' | translate }}</option>
+								@for (list of priceLists(); track list.priceListId) {
+									<option [ngValue]="list.priceListId">{{ list.listName }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'pricing.branch' | translate }} *</label>
+							<select class="kt-select" formControlName="branchId">
+								<option [ngValue]="null">{{ 'pricing.selectBranch' | translate }}</option>
+								@for (branch of branches(); track branch.branchId) {
+									<option [ngValue]="branch.branchId">{{ branchLabel(branch) }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'pricing.priority' | translate }}</label>
+							<input class="kt-input" formControlName="priority" type="number" min="1" />
+						</div>
+						<label class="flex items-center gap-2 text-sm mb-2">
+							<input class="kt-checkbox" formControlName="isDefault" type="checkbox" />
+							{{ 'pricing.isDefault' | translate }}
+						</label>
+						<div class="flex items-center gap-2">
+							<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
+								{{ (editingAssignmentId() ? 'pricing.update' : 'pricing.addAssignment') | translate }}
+							</button>
+							@if (editingAssignmentId()) {
+								<button class="kt-btn kt-btn-outline" type="button" (click)="resetAssignmentForm()">
+									{{ 'pricing.cancel' | translate }}
+								</button>
+							}
+						</div>
+					</form>
+
+					@if (loading()) {
+						<div class="flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+							<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+							{{ 'pricing.loading' | translate }}
+						</div>
+					} @else {
+						<div class="kt-scrollable-x-auto rounded-lg border border-border">
+							<table class="kt-table kt-table-border w-full">
+								<thead>
+									<tr>
+										<th>{{ 'pricing.priceList' | translate }}</th>
+										<th>{{ 'pricing.branch' | translate }}</th>
+										<th>{{ 'pricing.priority' | translate }}</th>
+										<th>{{ 'pricing.isDefault' | translate }}</th>
+										<th class="w-[160px]">{{ 'pricing.actions' | translate }}</th>
+									</tr>
+								</thead>
+								<tbody>
+									@if (assignments().length === 0) {
+										<tr>
+											<td colspan="5" class="text-center text-secondary-foreground py-10">
+												{{ 'pricing.assignmentsEmpty' | translate }}
+											</td>
+										</tr>
+									} @else {
+										@for (item of assignments(); track item.assignmentId) {
+											<tr>
+												<td>{{ item.listName || item.priceListId }}</td>
+												<td>{{ item.branchName || item.branchId }}</td>
+												<td>{{ item.priority }}</td>
+												<td>
+													@if (item.isDefault) {
+														<span class="badge badge-sm badge-success badge-outline">{{ 'pricing.yes' | translate }}</span>
+													} @else {
+														<span class="text-secondary-foreground">{{ 'pricing.no' | translate }}</span>
+													}
+												</td>
+												<td class="flex items-center gap-1">
+													<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="editAssignment(item)">
+														{{ 'pricing.edit' | translate }}
+													</button>
+													<button
+														class="kt-btn kt-btn-sm kt-btn-ghost text-destructive"
+														type="button"
+														(click)="openDeleteAssignment(item)">
+														{{ 'pricing.delete' | translate }}
+													</button>
+												</td>
+											</tr>
+										}
+									}
+								</tbody>
+							</table>
+						</div>
+					}
+				</div>
+			}
+
+			<!-- Bulk update -->
+			@if (activeTab() === 'bulk') {
+				<form class="max-w-xl flex flex-col gap-4" [formGroup]="bulkForm" (ngSubmit)="submitBulkUpdate()">
+					<p class="text-sm text-secondary-foreground">{{ 'pricing.bulkHint' | translate }}</p>
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'pricing.priceList' | translate }} *</label>
+						<select class="kt-select" formControlName="priceListId">
+							<option [ngValue]="null">{{ 'pricing.selectPriceList' | translate }}</option>
+							@for (list of priceLists(); track list.priceListId) {
+								<option [ngValue]="list.priceListId">{{ list.listName }}</option>
+							}
+						</select>
+					</div>
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'pricing.percentageChange' | translate }} *</label>
+						<input class="kt-input" formControlName="percentageChange" type="number" step="0.01" />
+						<span class="text-xs text-secondary-foreground">{{ 'pricing.percentageHint' | translate }}</span>
+					</div>
+					<div class="flex flex-col gap-1">
+						<label class="kt-form-label">{{ 'pricing.categoryOptional' | translate }}</label>
+						<select class="kt-select" formControlName="categoryId">
+							<option [ngValue]="null">{{ 'pricing.allCategories' | translate }}</option>
+							@for (group of groups(); track group.groupId) {
+								<option [ngValue]="group.groupId">{{ group.groupName }}</option>
+							}
+						</select>
+					</div>
+					<button class="kt-btn kt-btn-primary self-start" type="submit" [disabled]="saving()">
+						@if (saving()) {
+							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+						}
+						{{ 'pricing.applyBulk' | translate }}
+					</button>
+				</form>
+			}
+
+			<!-- Change log -->
+			@if (activeTab() === 'changelog') {
+				<div class="flex flex-col gap-4">
+					<form class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end" [formGroup]="changeLogForm" (ngSubmit)="loadChangeLog()">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'pricing.priceList' | translate }}</label>
+							<select class="kt-select" formControlName="priceListId">
+								<option [ngValue]="null">{{ 'pricing.allPriceLists' | translate }}</option>
+								@for (list of priceLists(); track list.priceListId) {
+									<option [ngValue]="list.priceListId">{{ list.listName }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'pricing.product' | translate }}</label>
+							<select class="kt-select" formControlName="productId">
+								<option [ngValue]="null">{{ 'pricing.allProducts' | translate }}</option>
+								@for (product of products(); track product.productId) {
+									<option [ngValue]="product.productId">{{ productLabel(product) }}</option>
+								}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'pricing.startDate' | translate }}</label>
+							<input class="kt-input" formControlName="startDate" type="date" />
+						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'pricing.endDate' | translate }}</label>
+							<input class="kt-input" formControlName="endDate" type="date" />
+						</div>
+						<button class="kt-btn kt-btn-primary" type="submit" [disabled]="loading()">
+							{{ 'pricing.search' | translate }}
+						</button>
+					</form>
+
+					@if (loading()) {
+						<div class="flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+							<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+							{{ 'pricing.loading' | translate }}
+						</div>
+					} @else {
+						<div class="kt-scrollable-x-auto rounded-lg border border-border">
+							<table class="kt-table kt-table-border w-full min-w-[760px]">
+								<thead>
+									<tr>
+										<th>{{ 'pricing.product' | translate }}</th>
+										<th>{{ 'pricing.priceList' | translate }}</th>
+										<th>{{ 'pricing.oldPrice' | translate }}</th>
+										<th>{{ 'pricing.newPrice' | translate }}</th>
+										<th>{{ 'pricing.changeDate' | translate }}</th>
+										<th>{{ 'pricing.user' | translate }}</th>
+									</tr>
+								</thead>
+								<tbody>
+									@if (changeLogs().length === 0) {
+										<tr>
+											<td colspan="6" class="text-center text-secondary-foreground py-10">
+												{{ 'pricing.changelogEmpty' | translate }}
+											</td>
+										</tr>
+									} @else {
+										@for (log of changeLogs(); track log.logId) {
+											<tr>
+												<td class="font-medium">{{ log.proName || '—' }}</td>
+												<td>{{ log.listName || '—' }}</td>
+												<td>{{ log.oldPrice ?? 0 | number: '1.2-2' }}</td>
+												<td>{{ log.newPrice ?? 0 | number: '1.2-2' }}</td>
+												<td>{{ log.changeDate ? (log.changeDate | date: 'medium') : '—' }}</td>
+												<td>{{ log.userName || '—' }}</td>
+											</tr>
+										}
+									}
+								</tbody>
+							</table>
+						</div>
+					}
+				</div>
+			}
+		</div>
+	</div>
+</div>
+
+@if (deleteListTarget(); as list) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" (click)="closeDeleteList()">
+		<div class="kt-card w-full max-w-md" (click)="$event.stopPropagation()">
+			<div class="kt-card-header px-5 py-4 border-b border-border">
+				<h3 class="font-semibold text-mono">{{ 'pricing.deleteListTitle' | translate }}</h3>
+			</div>
+			<div class="kt-card-content p-5 text-sm text-secondary-foreground">
+				{{ 'pricing.deleteListConfirm' | translate }}
+				<span class="font-medium text-foreground"> {{ list.listName }}</span>
+			</div>
+			<div class="flex justify-end gap-2 px-5 pb-5">
+				<button class="kt-btn kt-btn-outline" type="button" [disabled]="saving()" (click)="closeDeleteList()">
+					{{ 'pricing.cancel' | translate }}
+				</button>
+				<button class="kt-btn kt-btn-danger" type="button" [disabled]="saving()" (click)="confirmDeleteList()">
+					{{ 'pricing.delete' | translate }}
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+@if (deleteAssignmentTarget(); as item) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" (click)="closeDeleteAssignment()">
+		<div class="kt-card w-full max-w-md" (click)="$event.stopPropagation()">
+			<div class="kt-card-header px-5 py-4 border-b border-border">
+				<h3 class="font-semibold text-mono">{{ 'pricing.deleteAssignmentTitle' | translate }}</h3>
+			</div>
+			<div class="kt-card-content p-5 text-sm text-secondary-foreground">
+				{{ 'pricing.deleteAssignmentConfirm' | translate }}
+			</div>
+			<div class="flex justify-end gap-2 px-5 pb-5">
+				<button class="kt-btn kt-btn-outline" type="button" [disabled]="saving()" (click)="closeDeleteAssignment()">
+					{{ 'pricing.cancel' | translate }}
+				</button>
+				<button class="kt-btn kt-btn-danger" type="button" [disabled]="saving()" (click)="confirmDeleteAssignment()">
+					{{ 'pricing.delete' | translate }}
+				</button>
+			</div>
+		</div>
+	</div>
+}

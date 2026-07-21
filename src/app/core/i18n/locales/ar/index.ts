@@ -9,6 +9,7 @@ import { salesmenAr } from './salesmen.ar';
 import { salesInvoicesAr } from './sales-invoices.ar';
 import { productGroupsAr } from './product-groups.ar';
 import { productsAr } from './products.ar';
+import { pricingAr } from './pricing.ar';
 import { unitsAr } from './units.ar';
 import { accountGroupsAr } from './account-groups.ar';
 import { accountingPeriodsAr } from './accounting-periods.ar';
@@ -26,6 +27,11 @@ import { bankAccountsAr } from './bank-accounts.ar';
 import { checkBooksAr } from './check-books.ar';
 import { issuedChecksAr } from './issued-checks.ar';
 import { warehousesAr } from './warehouses.ar';
+import { stockIssuesAr } from './stock-issues.ar';
+import { stockTransfersAr } from './stock-transfers.ar';
+import { stockReceivingsAr } from './stock-receivings.ar';
+import { stockTakingsAr } from './stock-takings.ar';
+import { stockAdjustmentsAr } from './stock-adjustments.ar';
 import { menuAr } from './menu.ar';
 import { navAr } from './nav.ar';
 import { permissionsAr } from './permissions.ar';
@@ -54,6 +60,7 @@ export const ar = mergeLocale(
   salesInvoicesAr,
   productGroupsAr,
   productsAr,
+  pricingAr,
   unitsAr,
   accountGroupsAr,
   accountingPeriodsAr,
@@ -71,4 +78,9 @@ export const ar = mergeLocale(
   checkBooksAr,
   issuedChecksAr,
   warehousesAr,
+  stockIssuesAr,
+  stockTransfersAr,
+  stockReceivingsAr,
+  stockTakingsAr,
+  stockAdjustmentsAr,
 );

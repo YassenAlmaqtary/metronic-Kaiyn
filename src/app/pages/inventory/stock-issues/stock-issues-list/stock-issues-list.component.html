@@ -1,0 +1,124 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex justify-between gap-4">
+		<div>
+			<h1 class="text-xl font-semibold">{{ 'stockIssues.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground">{{ 'stockIssues.subtitle' | translate }}</p>
+		</div>
+		<a class="kt-btn kt-btn-primary" routerLink="/demo1/inventory/stock-issues/new">
+			<i class="ki-filled ki-plus"></i>
+			{{ 'stockIssues.add' | translate }}
+		</a>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded border border-success/30 bg-success/10 p-3 text-success">
+			{{ successMessage() }}
+		</div>
+	}
+	@if (errorMessage()) {
+		<div class="rounded border border-destructive/30 bg-destructive/10 p-3 text-destructive">
+			{{ errorMessage() }}
+		</div>
+	}
+
+	<div class="kt-card">
+		<div class="kt-card-content p-5">
+			<div class="flex flex-wrap gap-3 mb-4">
+				<button
+					class="kt-btn kt-btn-sm"
+					type="button"
+					[class.kt-btn-primary]="filter() === 'all'"
+					(click)="setFilter('all')">
+					{{ 'stockIssues.filters.all' | translate }}
+				</button>
+				<button
+					class="kt-btn kt-btn-sm"
+					type="button"
+					[class.kt-btn-primary]="filter() === 'pending'"
+					(click)="setFilter('pending')">
+					{{ 'stockIssues.filters.pending' | translate }}
+				</button>
+				<input
+					class="kt-input ms-auto max-w-xs"
+					type="search"
+					[ngModel]="searchTerm()"
+					(ngModelChange)="searchTerm.set($event)"
+					[placeholder]="'stockIssues.search' | translate" />
+			</div>
+
+			@if (loading()) {
+				<div class="py-12 text-center">{{ 'stockIssues.loading' | translate }}</div>
+			} @else if (!filteredIssues().length) {
+				<div class="py-12 text-center text-secondary-foreground">
+					{{ 'stockIssues.empty' | translate }}
+				</div>
+			} @else {
+				<div class="kt-scrollable-x-auto">
+					<table class="kt-table">
+						<thead>
+							<tr>
+								<th>{{ 'stockIssues.number' | translate }}</th>
+								<th>{{ 'stockIssues.date' | translate }}</th>
+								<th>{{ 'stockIssues.branch' | translate }}</th>
+								<th>{{ 'stockIssues.store' | translate }}</th>
+								<th>{{ 'stockIssues.total' | translate }}</th>
+								<th>{{ 'stockIssues.status' | translate }}</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (issue of filteredIssues(); track issue.issueId) {
+								<tr>
+									<td>
+										<a
+											class="font-medium text-primary"
+											[routerLink]="['/demo1/inventory/stock-issues', issue.issueId]">
+											{{ issue.issueNumber || issue.issueId }}
+										</a>
+									</td>
+									<td>{{ issue.issueDate | date: 'mediumDate' }}</td>
+									<td>{{ issue.branchName || '—' }}</td>
+									<td>{{ issue.storeName || '—' }}</td>
+									<td>{{ issue.totalAmount || 0 | number: '1.2-2' }}</td>
+									<td>
+										<span
+											class="kt-badge"
+											[class.kt-badge-warning]="isPending(issue)"
+											[class.kt-badge-success]="!isPending(issue)">
+											{{ statusKey(issue.status, issue.datePosted) | translate }}
+										</span>
+									</td>
+									<td>
+										<div class="flex gap-1">
+											<a
+												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
+												[routerLink]="['/demo1/inventory/stock-issues', issue.issueId]">
+												<i class="ki-filled ki-notepad-edit"></i>
+											</a>
+											@if (isPending(issue)) {
+												<button
+													class="kt-btn kt-btn-sm kt-btn-success"
+													type="button"
+													[disabled]="actionLoading() === issue.issueId"
+													(click)="post(issue)">
+													{{ 'stockIssues.post' | translate }}
+												</button>
+												<button
+													class="kt-btn kt-btn-sm kt-btn-destructive"
+													type="button"
+													[disabled]="actionLoading() === issue.issueId"
+													(click)="delete(issue)">
+													<i class="ki-filled ki-trash"></i>
+												</button>
+											}
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+		</div>
+	</div>
+</div>

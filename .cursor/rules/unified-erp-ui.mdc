@@ -1,0 +1,53 @@
+---
+description: Unified list/form UI structure for new KayianERP sections
+alwaysApply: true
+---
+
+# Unified UI for new sections
+
+When adding any new module/section (list + form), match the existing unified structure. Do not invent a different layout.
+
+## List pages
+
+Reference: `src/app/pages/inventory/stock-receivings/stock-receivings-list/`
+
+- Shell: `kt-container-fixed flex flex-col gap-5 pb-8`
+- Header: title + subtitle + primary add button (`kt-btn kt-btn-primary` with `ki-plus`)
+- Alerts: `rounded border border-success|destructive/30 bg-*/10 p-3`
+- One `kt-card` → `kt-card-content p-5`
+- Toolbar: filter buttons first, then search `kt-input ms-auto max-w-xs`
+- Loading/empty: `py-12 text-center`
+- Table: `kt-table` (no `kt-table-border`)
+- Primary column: `<a class="font-medium text-primary" routerLink>`
+- Status: `kt-badge` + `kt-badge-success|warning`
+- Actions: edit `kt-btn-sm kt-btn-icon kt-btn-ghost`; post `kt-btn-sm kt-btn-success`; delete `kt-btn-sm kt-btn-destructive`
+- Also wire: routes, sidebar menu, AR/EN i18n locale files
+
+## Simple CRUD forms (master data)
+
+Reference: `src/app/pages/sales/salesmen/salesman-form/`
+
+- Shell: `kt-container-fixed flex flex-col gap-6 max-w-5xl pb-10` (use `max-w-6xl` if many fields)
+- Top bar: breadcrumb + icon tile + title/subtitle + Cancel/Save
+- No sticky headers (`sticky` + high `z-index` causes layout overlap)
+- Sections as separate `kt-card overflow-hidden shadow-sm` with `bg-muted/30` section header
+- Inputs: `kt-input h-11` / `kt-select h-11`; labels `kt-form-label` (+ `required` when needed)
+- Active flags: switch row with `kt-switch`, not a bare checkbox
+- Save button also at bottom; show validation/API errors in a destructive banner
+- Prefer ISO dates and clear validation messages before API calls
+
+## Document forms (invoices / stock docs)
+
+Reference: `src/app/pages/inventory/stock-receivings/stock-receiving-form/` or `stock-issue-form/`
+
+- Same non-sticky header pattern with Back/Save
+- Header fields card + lines table card + totals card
+- `max-w-6xl` (or `max-w-7xl` for heavy journals/vouchers)
+
+## Checklist for every new section
+
+1. models + service
+2. list + form components using patterns above
+3. routes under `/demo1/...`
+4. sidebar entry in `sidebar-menu.config.ts`
+5. AR + EN i18n keys registered in locale indexes

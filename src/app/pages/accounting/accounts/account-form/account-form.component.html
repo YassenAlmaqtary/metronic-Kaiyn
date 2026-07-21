@@ -1,4 +1,4 @@
-<div class="kt-container-fixed flex flex-col gap-5 max-w-4xl">
+﻿<div class="kt-container-fixed flex flex-col gap-5 max-w-6xl">
 	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
 		<a class="hover:text-primary" routerLink="/demo1/accounting/accounts">{{ 'accounts.title' | translate }}</a>
 		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
@@ -14,7 +14,7 @@
 	</div>
 
 	<div class="kt-card">
-		<div class="kt-card-header px-5 py-4 border-b border-border">
+		<div class="kt-card-header px-6 py-5 border-b border-border">
 			<h1 class="text-lg font-semibold text-mono">
 				@if (isEditMode()) {
 					{{ 'accounts.edit' | translate }}
@@ -48,7 +48,7 @@
 				<div>
 					<h2 class="text-sm font-semibold text-mono mb-1">{{ 'accounts.section.basic' | translate }}</h2>
 					<p class="text-xs text-secondary-foreground mb-3">{{ 'accounts.hint.code' | translate }}</p>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
 						<div class="flex flex-col gap-1">
 							<label class="kt-form-label">{{ 'accounts.accCode' | translate }} *</label>
 							<div class="flex gap-2">
@@ -103,7 +103,7 @@
 						{{ 'accounts.hint.main' | translate }}
 						{{ 'accounts.hint.sub' | translate }}
 					</p>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
 						<div class="flex flex-col gap-1">
 							<label class="kt-form-label">{{ 'accounts.accType' | translate }}</label>
 							<select class="kt-select" formControlName="accType">

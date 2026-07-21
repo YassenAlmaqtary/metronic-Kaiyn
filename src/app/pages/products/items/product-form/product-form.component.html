@@ -1,43 +1,66 @@
-<div class="kt-container-fixed flex flex-col gap-5 max-w-4xl">
-	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
-		<a class="hover:text-primary" routerLink="/demo1/products/items">{{ 'products.title' | translate }}</a>
-		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
-		<span class="text-mono font-medium">
-			@if (isEditMode()) {
-				{{ 'products.edit' | translate }}
-			} @else {
-				{{ 'products.create' | translate }}
-			}
-		</span>
-	</div>
-
-	<div class="kt-card">
-		<div class="kt-card-header px-5 py-4 border-b border-border">
-			<h1 class="text-lg font-semibold text-mono">
+<div class="kt-container-fixed flex flex-col gap-5">
+	<div class="flex flex-wrap items-start justify-between gap-3">
+		<div>
+			<div class="flex items-center gap-2 text-sm text-secondary-foreground mb-1">
+				<a class="hover:text-primary" routerLink="/demo1/products/items">{{ 'products.title' | translate }}</a>
+				<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+				<span class="text-mono font-medium">
+					@if (isEditMode()) {
+						{{ 'products.edit' | translate }}
+					} @else {
+						{{ 'products.create' | translate }}
+					}
+				</span>
+			</div>
+			<h1 class="text-xl font-semibold text-mono">
 				@if (isEditMode()) {
 					{{ 'products.edit' | translate }}
 				} @else {
 					{{ 'products.create' | translate }}
 				}
 			</h1>
+			<p class="text-sm text-secondary-foreground mt-1">{{ 'products.formSubtitle' | translate }}</p>
 		</div>
+		<div class="flex items-center gap-2">
+			<a class="kt-btn kt-btn-outline" routerLink="/demo1/products/items">
+				{{ 'products.backToList' | translate }}
+			</a>
+			<button class="kt-btn kt-btn-primary" type="submit" form="productForm" [disabled]="saving() || loading()">
+				@if (saving()) {
+					<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+				}
+				{{ 'products.saveProduct' | translate }}
+			</button>
+		</div>
+	</div>
 
-		@if (loading()) {
+	@if (loading()) {
+		<div class="kt-card">
 			<div class="kt-card-content flex items-center justify-center gap-2 py-16 text-secondary-foreground">
 				<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
 				{{ 'products.loading' | translate }}
 			</div>
-		} @else {
-			<form class="kt-card-content flex flex-col gap-6 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
-				@if (errorMessage()) {
-					<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-						{{ errorMessage() }}
-					</div>
-				}
+		</div>
+	} @else {
+		<form id="productForm" class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+			@if (errorMessage()) {
+				<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+					{{ errorMessage() }}
+				</div>
+			}
 
-				<div>
-					<h2 class="text-sm font-semibold text-mono mb-3">{{ 'products.section.basic' | translate }}</h2>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<!-- Three cards like the previous system -->
+			<div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+				<!-- Card 1: Basic + Tax -->
+				<div class="kt-card h-full">
+					<div class="kt-card-header px-5 py-3 border-b border-border">
+						<h2 class="text-sm font-semibold text-mono">{{ 'products.section.basicTax' | translate }}</h2>
+					</div>
+					<div class="kt-card-content flex flex-col gap-3 p-5">
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'products.proCode' | translate }}</label>
+							<input class="kt-input" formControlName="proCode" type="text" />
+						</div>
 						<div class="flex flex-col gap-1">
 							<label class="kt-form-label">{{ 'products.productName' | translate }} *</label>
 							<input class="kt-input" formControlName="productName" type="text" />
@@ -45,12 +68,37 @@
 								<span class="text-xs text-destructive">{{ 'products.required.productName' | translate }}</span>
 							}
 						</div>
-
 						<div class="flex flex-col gap-1">
-							<label class="kt-form-label">{{ 'products.proCode' | translate }}</label>
-							<input class="kt-input" formControlName="proCode" type="text" />
+							<label class="kt-form-label">{{ 'products.productNameScientific' | translate }}</label>
+							<input class="kt-input" formControlName="productNameScientific" type="text" />
 						</div>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'products.primaryBarcode' | translate }}</label>
+							<input class="kt-input" formControlName="primaryBarcode" type="text" />
+						</div>
+						<div class="flex flex-col gap-2 pt-2 border-t border-border">
+							<label class="flex items-center gap-2 text-sm">
+								<input class="kt-checkbox" formControlName="isTax" type="checkbox" />
+								{{ 'products.isTax' | translate }}
+							</label>
+							<label class="flex items-center gap-2 text-sm">
+								<input class="kt-checkbox" formControlName="priceTaxInclusive" type="checkbox" />
+								{{ 'products.priceTaxInclusive' | translate }}
+							</label>
+							<label class="flex items-center gap-2 text-sm">
+								<input class="kt-checkbox" formControlName="isBundle" type="checkbox" />
+								{{ 'products.isBundle' | translate }}
+							</label>
+						</div>
+					</div>
+				</div>
 
+				<!-- Card 2: Classification + Operation -->
+				<div class="kt-card h-full">
+					<div class="kt-card-header px-5 py-3 border-b border-border">
+						<h2 class="text-sm font-semibold text-mono">{{ 'products.section.classification' | translate }}</h2>
+					</div>
+					<div class="kt-card-content flex flex-col gap-3 p-5">
 						<div class="flex flex-col gap-1">
 							<label class="kt-form-label">{{ 'products.group' | translate }} *</label>
 							<select class="kt-select" formControlName="groupId">
@@ -63,49 +111,45 @@
 								<span class="text-xs text-destructive">{{ 'products.required.groupId' | translate }}</span>
 							}
 						</div>
-
 						<div class="flex flex-col gap-1">
-							<label class="kt-form-label">{{ 'products.productNameScientific' | translate }}</label>
-							<input class="kt-input" formControlName="productNameScientific" type="text" />
+							<label class="kt-form-label">{{ 'products.typeId' | translate }}</label>
+							<input class="kt-input" formControlName="typeId" type="number" />
 						</div>
-
 						<div class="flex flex-col gap-1">
 							<label class="kt-form-label">{{ 'products.shelfsName' | translate }}</label>
 							<input class="kt-input" formControlName="shelfsName" type="text" />
 						</div>
-					</div>
-
-					<div class="flex flex-wrap gap-4 mt-4">
-						<label class="flex items-center gap-2 text-sm">
-							<input class="kt-checkbox" formControlName="status" type="checkbox" />
-							{{ 'products.isActive' | translate }}
-						</label>
-						<label class="flex items-center gap-2 text-sm">
-							<input class="kt-checkbox" formControlName="isTax" type="checkbox" />
-							{{ 'products.isTax' | translate }}
-						</label>
-						<label class="flex items-center gap-2 text-sm">
-							<input class="kt-checkbox" formControlName="priceTaxInclusive" type="checkbox" />
-							{{ 'products.priceTaxInclusive' | translate }}
-						</label>
-						<label class="flex items-center gap-2 text-sm">
-							<input class="kt-checkbox" formControlName="hasExpiry" type="checkbox" />
-							{{ 'products.hasExpiry' | translate }}
-						</label>
-						<label class="flex items-center gap-2 text-sm">
-							<input class="kt-checkbox" formControlName="isBatchManaged" type="checkbox" />
-							{{ 'products.isBatchManaged' | translate }}
-						</label>
-						<label class="flex items-center gap-2 text-sm">
-							<input class="kt-checkbox" formControlName="isBundle" type="checkbox" />
-							{{ 'products.isBundle' | translate }}
-						</label>
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'products.minQty' | translate }}</label>
+							<input class="kt-input" formControlName="minQty" type="number" step="any" />
+						</div>
+						<div class="flex flex-col gap-2 pt-2 border-t border-border">
+							<label class="flex items-center gap-2 text-sm">
+								<input class="kt-checkbox" formControlName="hasExpiry" type="checkbox" />
+								{{ 'products.hasExpiry' | translate }}
+							</label>
+							<div class="flex flex-col gap-1">
+								<label class="kt-form-label">{{ 'products.warningExpiry' | translate }}</label>
+								<input class="kt-input" formControlName="warningExpiry" type="number" />
+							</div>
+							<label class="flex items-center gap-2 text-sm">
+								<input class="kt-checkbox" formControlName="isBatchManaged" type="checkbox" />
+								{{ 'products.isBatchManaged' | translate }}
+							</label>
+							<label class="flex items-center gap-2 text-sm">
+								<input class="kt-checkbox" formControlName="status" type="checkbox" />
+								{{ 'products.isActive' | translate }}
+							</label>
+						</div>
 					</div>
 				</div>
 
-				<div>
-					<h2 class="text-sm font-semibold text-mono mb-3">{{ 'products.section.pricing' | translate }}</h2>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<!-- Card 3: Price & Cost -->
+				<div class="kt-card h-full">
+					<div class="kt-card-header px-5 py-3 border-b border-border">
+						<h2 class="text-sm font-semibold text-mono">{{ 'products.section.priceCost' | translate }}</h2>
+					</div>
+					<div class="kt-card-content flex flex-col gap-3 p-5">
 						<div class="flex flex-col gap-1">
 							<label class="kt-form-label">{{ 'products.defaultSalesPrice' | translate }} *</label>
 							<input class="kt-input" formControlName="defaultSalesPrice" type="number" step="0.01" />
@@ -113,7 +157,10 @@
 								<span class="text-xs text-destructive">{{ 'products.required.defaultSalesPrice' | translate }}</span>
 							}
 						</div>
-
+						<div class="flex flex-col gap-1">
+							<label class="kt-form-label">{{ 'products.minSalesPrice' | translate }}</label>
+							<input class="kt-input" formControlName="minSalesPrice" type="number" step="0.01" />
+						</div>
 						<div class="flex flex-col gap-1">
 							<label class="kt-form-label">{{ 'products.currentCost' | translate }} *</label>
 							<input class="kt-input" formControlName="currentCost" type="number" step="0.01" />
@@ -121,99 +168,341 @@
 								<span class="text-xs text-destructive">{{ 'products.required.currentCost' | translate }}</span>
 							}
 						</div>
-
-						<div class="flex flex-col gap-1">
-							<label class="kt-form-label">{{ 'products.minSalesPrice' | translate }}</label>
-							<input class="kt-input" formControlName="minSalesPrice" type="number" step="0.01" />
-						</div>
-
-						<div class="flex flex-col gap-1">
-							<label class="kt-form-label">{{ 'products.minQty' | translate }}</label>
-							<input class="kt-input" formControlName="minQty" type="number" step="any" />
-						</div>
-
 						<div class="flex flex-col gap-1">
 							<label class="kt-form-label">{{ 'products.maxDiscount' | translate }}</label>
 							<input class="kt-input" formControlName="maxDiscount" type="number" step="0.01" />
 						</div>
 					</div>
 				</div>
+			</div>
 
-				<div>
-					<div class="flex items-center justify-between gap-3 mb-3">
-						<h2 class="text-sm font-semibold text-mono">{{ 'products.section.units' | translate }}</h2>
-						<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="addUnitRow()">
-							<i class="ki-filled ki-plus"></i>
-							{{ 'products.units.add' | translate }}
-						</button>
-					</div>
+			<!-- Tabs: Units / Alternatives / Images -->
+			<div class="kt-card overflow-hidden">
+				<div class="px-5 py-3 border-b border-border">
+					<h2 class="text-sm font-semibold text-mono">{{ 'products.section.detailsTabs' | translate }}</h2>
+				</div>
 
-					@if (units.length === 0) {
-						<p class="text-sm text-destructive mb-2">{{ 'products.required.units' | translate }}</p>
-					}
+				<div class="flex items-center gap-1 px-3 pt-2 border-b border-border">
+					<button
+						type="button"
+						class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors"
+						[class.border-primary]="activeTab() === 'units'"
+						[class.text-primary]="activeTab() === 'units'"
+						[class.border-transparent]="activeTab() !== 'units'"
+						[class.text-secondary-foreground]="activeTab() !== 'units'"
+						(click)="setTab('units')">
+						{{ 'products.tab.units' | translate }}
+						@if (units.length) {
+							<span class="ms-1 text-xs opacity-70">({{ units.length }})</span>
+						}
+					</button>
+					<button
+						type="button"
+						class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors"
+						[class.border-primary]="activeTab() === 'alternatives'"
+						[class.text-primary]="activeTab() === 'alternatives'"
+						[class.border-transparent]="activeTab() !== 'alternatives'"
+						[class.text-secondary-foreground]="activeTab() !== 'alternatives'"
+						(click)="setTab('alternatives')">
+						{{ 'products.tab.alternatives' | translate }}
+						@if (alternatives.length) {
+							<span class="ms-1 text-xs opacity-70">({{ alternatives.length }})</span>
+						}
+					</button>
+					<button
+						type="button"
+						class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors"
+						[class.border-primary]="activeTab() === 'images'"
+						[class.text-primary]="activeTab() === 'images'"
+						[class.border-transparent]="activeTab() !== 'images'"
+						[class.text-secondary-foreground]="activeTab() !== 'images'"
+						(click)="setTab('images')">
+						{{ 'products.tab.images' | translate }}
+						@if (images.length) {
+							<span class="ms-1 text-xs opacity-70">({{ images.length }})</span>
+						}
+					</button>
+				</div>
 
-					<div class="flex flex-col gap-3" formArrayName="units">
-						@for (unitCtrl of units.controls; track $index; let i = $index) {
-							<div class="rounded-lg border border-border p-4 grid grid-cols-1 md:grid-cols-6 gap-3" [formGroupName]="i">
-								<div class="flex flex-col gap-1 md:col-span-2">
-									<label class="kt-form-label">{{ 'products.units.unit' | translate }} *</label>
-									<select class="kt-select" formControlName="unitId">
-										<option [ngValue]="null">{{ 'products.selectUnit' | translate }}</option>
-										@for (unit of catalogUnits(); track unit.unitId) {
-											<option [ngValue]="unit.unitId">{{ unit.unitName }}</option>
-										}
-									</select>
-								</div>
+				<div class="p-5">
+					@if (activeTab() === 'units') {
+						<div class="flex flex-col gap-4">
+							<p class="text-sm text-secondary-foreground">{{ 'products.units.hint' | translate }}</p>
 
+							<div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end" [formGroup]="unitDraft">
 								<div class="flex flex-col gap-1">
 									<label class="kt-form-label">{{ 'products.units.conversionFactor' | translate }}</label>
 									<input class="kt-input" formControlName="conversionFactor" type="number" step="0.0001" />
 								</div>
-
+								<div class="flex flex-col gap-1">
+									<label class="kt-form-label">{{ 'products.units.unit' | translate }}</label>
+									<select class="kt-select" formControlName="unitId">
+										<option [ngValue]="null">{{ 'products.selectUnit' | translate }}</option>
+										@for (unit of availableUnitsForDraft(); track unit.unitId) {
+											<option [ngValue]="unit.unitId">{{ unit.unitName }}</option>
+										}
+									</select>
+								</div>
 								<div class="flex flex-col gap-1">
 									<label class="kt-form-label">{{ 'products.units.barcode' | translate }}</label>
 									<input class="kt-input" formControlName="barcode" type="text" />
 								</div>
+								<button class="kt-btn kt-btn-primary" type="button" (click)="insertUnitFromDraft()">
+									{{ 'products.units.insert' | translate }}
+								</button>
+							</div>
 
-								<div class="flex flex-wrap items-end gap-3 md:col-span-2">
-									<label class="flex items-center gap-2 text-sm">
-										<input class="kt-checkbox" formControlName="isBaseUnit" type="checkbox" />
-										{{ 'products.units.isBaseUnit' | translate }}
-									</label>
-									<label class="flex items-center gap-2 text-sm">
-										<input class="kt-checkbox" formControlName="isSalesUnit" type="checkbox" />
-										{{ 'products.units.isSalesUnit' | translate }}
-									</label>
-									<label class="flex items-center gap-2 text-sm">
-										<input class="kt-checkbox" formControlName="isPurchasingUnit" type="checkbox" />
-										{{ 'products.units.isPurchasingUnit' | translate }}
-									</label>
-									@if (units.length > 1) {
-										<button
-											class="kt-btn kt-btn-sm kt-btn-ghost text-destructive"
-											type="button"
-											(click)="removeUnitRow(i)">
-											{{ 'products.units.remove' | translate }}
-										</button>
-									}
+							@if (unitDraftError()) {
+								<p class="text-sm text-destructive">{{ unitDraftError() }}</p>
+							}
+
+							<div class="kt-scrollable-x-auto rounded-lg border border-border">
+								<table class="kt-table kt-table-border w-full min-w-[760px]">
+									<thead>
+										<tr>
+											<th>{{ 'products.units.unitId' | translate }}</th>
+											<th>{{ 'products.units.unitName' | translate }}</th>
+											<th>{{ 'products.units.conversionFactor' | translate }}</th>
+											<th>{{ 'products.units.barcode' | translate }}</th>
+											<th class="text-center">{{ 'products.units.isBaseUnit' | translate }}</th>
+											<th class="text-center">{{ 'products.units.isPurchasingUnit' | translate }}</th>
+											<th class="text-center">{{ 'products.units.isSalesUnit' | translate }}</th>
+											<th class="w-[90px]">{{ 'products.actions' | translate }}</th>
+										</tr>
+									</thead>
+									<tbody formArrayName="units">
+										@if (units.length === 0) {
+											<tr>
+												<td colspan="8" class="text-center text-secondary-foreground py-10">
+													{{ 'products.units.empty' | translate }}
+												</td>
+											</tr>
+										} @else {
+											@for (unitCtrl of units.controls; track $index; let i = $index) {
+												<tr [formGroupName]="i">
+													<td class="font-medium text-mono">{{ unitCtrl.controls.unitId.value }}</td>
+													<td>{{ unitCtrl.controls.unitName.value || '—' }}</td>
+													<td>
+														<input class="kt-input kt-input-sm w-28" formControlName="conversionFactor" type="number" step="0.0001" />
+													</td>
+													<td>
+														<input class="kt-input kt-input-sm" formControlName="barcode" type="text" />
+													</td>
+													<td class="text-center">
+														<input
+															class="kt-radio"
+															type="radio"
+															name="baseUnit"
+															[checked]="unitCtrl.controls.isBaseUnit.value"
+															(change)="setBaseUnit(i)" />
+													</td>
+													<td class="text-center">
+														<input class="kt-checkbox" formControlName="isPurchasingUnit" type="checkbox" />
+													</td>
+													<td class="text-center">
+														<input class="kt-checkbox" formControlName="isSalesUnit" type="checkbox" />
+													</td>
+													<td>
+														<button
+															class="kt-btn kt-btn-sm kt-btn-ghost text-destructive"
+															type="button"
+															(click)="removeUnitRow(i)">
+															{{ 'products.units.remove' | translate }}
+														</button>
+													</td>
+												</tr>
+											}
+										}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					}
+
+					@if (activeTab() === 'alternatives') {
+						<div class="flex flex-col gap-4">
+							<div class="flex flex-wrap items-center justify-between gap-2">
+								<p class="text-sm text-secondary-foreground">{{ 'products.alternatives.hint' | translate }}</p>
+								<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="insertAlternativeFromDraft()">
+									<i class="ki-filled ki-plus"></i>
+									{{ 'products.alternatives.add' | translate }}
+								</button>
+							</div>
+
+							<div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end" [formGroup]="alternativeDraft">
+								<div class="flex flex-col gap-1 md:col-span-2">
+									<label class="kt-form-label">{{ 'products.alternatives.product' | translate }}</label>
+									<select class="kt-select" formControlName="alternativeProductId">
+										<option [ngValue]="null">{{ 'products.alternatives.selectProduct' | translate }}</option>
+										@for (product of availableProductsForDraft(); track product.productId) {
+											<option [ngValue]="product.productId">{{ productLabel(product) }}</option>
+										}
+									</select>
+								</div>
+								<div class="flex flex-col gap-1">
+									<label class="kt-form-label">{{ 'products.alternatives.type' | translate }}</label>
+									<select class="kt-select" formControlName="alternativeType">
+										@for (type of alternativeTypes; track type.value) {
+											<option [ngValue]="type.value">{{ type.labelKey | translate }}</option>
+										}
+									</select>
+								</div>
+								<div class="flex flex-col gap-1">
+									<label class="kt-form-label">{{ 'products.alternatives.priority' | translate }}</label>
+									<input class="kt-input" formControlName="priority" type="number" min="1" />
 								</div>
 							</div>
-						}
-					</div>
-				</div>
 
-				<div class="flex justify-end gap-2 pt-2 border-t border-border">
-					<a class="kt-btn kt-btn-outline" routerLink="/demo1/products/items">
-						{{ 'products.cancel' | translate }}
-					</a>
-					<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
-						@if (saving()) {
-							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
-						}
-						{{ 'products.save' | translate }}
-					</button>
+							<div class="grid grid-cols-1 md:grid-cols-2 gap-3" [formGroup]="alternativeDraft">
+								<div class="flex flex-col gap-1">
+									<label class="kt-form-label">{{ 'products.alternatives.notes' | translate }}</label>
+									<input class="kt-input" formControlName="notes" type="text" />
+								</div>
+								<label class="flex items-center gap-2 text-sm mt-6">
+									<input class="kt-checkbox" formControlName="isActive" type="checkbox" />
+									{{ 'products.alternatives.isActive' | translate }}
+								</label>
+							</div>
+
+							@if (alternativeDraftError()) {
+								<p class="text-sm text-destructive">{{ alternativeDraftError() }}</p>
+							}
+
+							<div class="kt-scrollable-x-auto rounded-lg border border-border">
+								<table class="kt-table kt-table-border w-full min-w-[780px]">
+									<thead>
+										<tr>
+											<th>{{ 'products.alternatives.product' | translate }}</th>
+											<th>{{ 'products.alternatives.type' | translate }}</th>
+											<th>{{ 'products.alternatives.priority' | translate }}</th>
+											<th>{{ 'products.alternatives.notes' | translate }}</th>
+											<th class="text-center">{{ 'products.alternatives.isActive' | translate }}</th>
+											<th class="w-[90px]">{{ 'products.actions' | translate }}</th>
+										</tr>
+									</thead>
+									<tbody formArrayName="alternatives">
+										@if (alternatives.length === 0) {
+											<tr>
+												<td colspan="6" class="text-center text-secondary-foreground py-10">
+													{{ 'products.alternatives.empty' | translate }}
+												</td>
+											</tr>
+										} @else {
+											@for (altCtrl of alternatives.controls; track $index; let i = $index) {
+												<tr [formGroupName]="i">
+													<td class="font-medium text-mono">
+														{{ altCtrl.controls.alternativeProductName.value || altCtrl.controls.alternativeProductId.value }}
+													</td>
+													<td>
+														<select class="kt-select kt-select-sm" formControlName="alternativeType">
+															@for (type of alternativeTypes; track type.value) {
+																<option [ngValue]="type.value">{{ type.labelKey | translate }}</option>
+															}
+														</select>
+													</td>
+													<td>
+														<input class="kt-input kt-input-sm w-20" formControlName="priority" type="number" min="1" />
+													</td>
+													<td>
+														<input class="kt-input kt-input-sm" formControlName="notes" type="text" />
+													</td>
+													<td class="text-center">
+														<input class="kt-checkbox" formControlName="isActive" type="checkbox" />
+													</td>
+													<td>
+														<button
+															class="kt-btn kt-btn-sm kt-btn-ghost text-destructive"
+															type="button"
+															(click)="removeAlternativeRow(i)">
+															{{ 'products.delete' | translate }}
+														</button>
+													</td>
+												</tr>
+											}
+										}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					}
+
+					@if (activeTab() === 'images') {
+						<div class="flex flex-col gap-4">
+							<p class="text-sm text-secondary-foreground">{{ 'products.images.hint' | translate }}</p>
+
+							<div class="flex flex-wrap items-center gap-3">
+								<input
+									class="kt-input max-w-sm"
+									type="file"
+									accept="image/*"
+									(change)="onImageFileSelected($event)"
+									[disabled]="uploadingImage()" />
+								@if (uploadingImage()) {
+									<span class="text-sm text-secondary-foreground flex items-center gap-2">
+										<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+										{{ 'products.images.uploading' | translate }}
+									</span>
+								}
+							</div>
+
+							@if (imageDraftError()) {
+								<p class="text-sm text-destructive">{{ imageDraftError() }}</p>
+							}
+
+							<div class="kt-scrollable-x-auto rounded-lg border border-border">
+								<table class="kt-table kt-table-border w-full min-w-[640px]">
+									<thead>
+										<tr>
+											<th>{{ 'products.images.path' | translate }}</th>
+											<th class="text-center">{{ 'products.images.main' | translate }}</th>
+											<th>{{ 'products.images.order' | translate }}</th>
+											<th>{{ 'products.images.type' | translate }}</th>
+											<th class="w-[90px]">{{ 'products.actions' | translate }}</th>
+										</tr>
+									</thead>
+									<tbody formArrayName="images">
+										@if (images.length === 0) {
+											<tr>
+												<td colspan="5" class="text-center text-secondary-foreground py-10">
+													{{ 'products.images.empty' | translate }}
+												</td>
+											</tr>
+										} @else {
+											@for (imageCtrl of images.controls; track $index; let i = $index) {
+												<tr [formGroupName]="i">
+													<td class="font-medium text-mono text-xs break-all">{{ imageCtrl.controls.imagePath.value }}</td>
+													<td class="text-center">
+														<input
+															class="kt-radio"
+															type="radio"
+															name="mainImage"
+															[checked]="imageCtrl.controls.isMainImage.value"
+															(change)="setMainImage(i)" />
+													</td>
+													<td>
+														<input class="kt-input kt-input-sm w-20" formControlName="sortOrder" type="number" min="1" />
+													</td>
+													<td>
+														<input class="kt-input kt-input-sm" formControlName="imageType" type="text" />
+													</td>
+													<td>
+														<button
+															class="kt-btn kt-btn-sm kt-btn-ghost text-destructive"
+															type="button"
+															(click)="removeImageRow(i)">
+															{{ 'products.delete' | translate }}
+														</button>
+													</td>
+												</tr>
+											}
+										}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					}
 				</div>
-			</form>
-		}
-	</div>
+			</div>
+		</form>
+	}
 </div>

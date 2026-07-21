@@ -68,6 +68,12 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         route: '/demo1/products/units',
         permission: 'units.view',
       },
+      {
+        id: 'products-pricing',
+        labelKey: 'menu.products.pricing',
+        route: '/demo1/products/pricing',
+        permission: 'products.view',
+      },
     ],
   },
   {
@@ -82,7 +88,36 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         route: '/demo1/inventory/warehouses',
         permission: 'stores.view',
       },
-      { id: 'inventory-movements', labelKey: 'menu.inventory.movements' },
+      {
+        id: 'inventory-stock-receivings',
+        labelKey: 'menu.inventory.stockReceivings',
+        route: '/demo1/inventory/stock-receivings',
+        permission: 'stores.view',
+      },
+      {
+        id: 'inventory-stock-issues',
+        labelKey: 'menu.inventory.stockIssues',
+        route: '/demo1/inventory/stock-issues',
+        permission: 'stores.view',
+      },
+      {
+        id: 'inventory-stock-transfers',
+        labelKey: 'menu.inventory.stockTransfers',
+        route: '/demo1/inventory/stock-transfers',
+        permission: 'stores.view',
+      },
+      {
+        id: 'inventory-stock-takings',
+        labelKey: 'menu.inventory.stockTakings',
+        route: '/demo1/inventory/stock-takings',
+        permission: 'stores.view',
+      },
+      {
+        id: 'inventory-stock-adjustments',
+        labelKey: 'menu.inventory.stockAdjustments',
+        route: '/demo1/inventory/stock-adjustments',
+        permission: 'stores.view',
+      },
     ],
   },
   {

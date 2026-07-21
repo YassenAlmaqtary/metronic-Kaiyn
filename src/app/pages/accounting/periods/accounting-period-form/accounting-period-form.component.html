@@ -1,4 +1,4 @@
-<div class="kt-container-fixed flex flex-col gap-5 max-w-3xl">
+﻿<div class="kt-container-fixed flex flex-col gap-5 max-w-5xl">
 	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
 		<a class="hover:text-primary" routerLink="/demo1/accounting/periods">{{ 'accountingPeriods.title' | translate }}</a>
 		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
@@ -12,7 +12,7 @@
 	</div>
 
 	<div class="kt-card">
-		<div class="kt-card-header px-5 py-4 border-b border-border">
+		<div class="kt-card-header px-6 py-5 border-b border-border">
 			<h1 class="text-lg font-semibold text-mono">
 				@if (isEditMode()) {
 					{{ 'accountingPeriods.edit' | translate }}
@@ -28,14 +28,14 @@
 				{{ 'accountingPeriods.loading' | translate }}
 			</div>
 		} @else {
-			<form class="kt-card-content flex flex-col gap-5 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+			<form class="kt-card-content flex flex-col gap-6 p-6 md:p-8" [formGroup]="form" (ngSubmit)="onSubmit()">
 				@if (errorMessage()) {
 					<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
 						{{ errorMessage() }}
 					</div>
 				}
 
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
 					<div class="flex flex-col gap-1 md:col-span-2">
 						<label class="kt-form-label">{{ 'accountingPeriods.periodName' | translate }} *</label>
 						<input class="kt-input" formControlName="periodName" type="text" />

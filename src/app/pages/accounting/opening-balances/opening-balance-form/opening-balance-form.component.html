@@ -1,4 +1,4 @@
-<div class="kt-container-fixed flex flex-col gap-5 max-w-7xl">
+﻿<div class="kt-container-fixed flex flex-col gap-5 max-w-7xl">
 	<div class="flex items-center gap-2 text-sm text-secondary-foreground">
 		<a class="hover:text-primary" routerLink="/demo1/accounting/opening-balances">{{ 'openingBalances.title' | translate }}</a>
 		<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
@@ -16,7 +16,7 @@
 	</div>
 
 	<div class="kt-card">
-		<div class="kt-card-header px-5 py-4 border-b border-border">
+		<div class="kt-card-header px-6 py-5 border-b border-border">
 			<h1 class="text-lg font-semibold text-mono">
 				@if (isEditMode()) {
 					@if (isReadOnly()) {
@@ -36,7 +36,7 @@
 				{{ 'openingBalances.loading' | translate }}
 			</div>
 		} @else {
-			<form class="kt-card-content flex flex-col gap-5 p-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+			<form class="kt-card-content flex flex-col gap-6 p-6 md:p-8" [formGroup]="form" (ngSubmit)="onSubmit()">
 				@if (isReadOnly()) {
 					<div class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800">
 						{{ 'openingBalances.readOnly' | translate }}
