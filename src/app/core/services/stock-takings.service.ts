@@ -45,10 +45,21 @@ export class StockTakingsService {
 
   getStoreItems(storeId: number): Observable<StoreItemForTaking[]> {
     return this.http
-      .get<ApiResponse<StoreItemForTaking[]>>(
+      .get<ApiResponse<StoreItemForTaking[] | { $values?: StoreItemForTaking[] }>>(
         buildApiUrl(toApiPath(`${this.basePath}/store-items/{storeId}`, { storeId })),
       )
-      .pipe(map((r) => unwrapApiResponse(r)));
+      .pipe(
+        map((r) => {
+          const data = unwrapApiResponse(r);
+          if (Array.isArray(data)) {
+            return data;
+          }
+          if (data && typeof data === 'object' && Array.isArray(data.$values)) {
+            return data.$values;
+          }
+          return [];
+        }),
+      );
   }
 
   getAvailableForAdjustment(): Observable<TakingAvailableForAdjustment[]> {
