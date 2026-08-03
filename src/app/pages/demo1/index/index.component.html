@@ -1,14 +1,13 @@
-<div class="kt-container-fixed flex flex-col gap-6 pb-10">
+<div class="kt-container-fixed flex flex-col gap-6 pb-24 dash-page">
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div>
-			<div class="text-sm text-secondary-foreground mb-1">
-				{{ 'dashboard.welcome' | translate }}
-				@if (userName()) {
-					<span class="font-medium text-foreground">{{ userName() }}</span>
-				}
-			</div>
-			<h1 class="text-xl font-semibold text-mono">{{ 'dashboard.title' | translate }}</h1>
-			<p class="text-sm text-secondary-foreground mt-1 max-w-xl">{{ 'dashboard.subtitle' | translate }}</p>
+			<h1 class="text-2xl font-semibold text-foreground tracking-tight">
+				{{ greetingKey() | translate }}@if (userName()) {، {{ userName() }}}
+			</h1>
+			<p class="text-sm text-secondary-foreground mt-1">
+				{{ 'dashboard.summaryFor' | translate }}
+				{{ today | date: 'd MMMM y' }}
+			</p>
 		</div>
 		<div class="flex flex-wrap items-center gap-2">
 			<label class="flex items-center gap-2">
@@ -24,215 +23,301 @@
 					}
 				</select>
 			</label>
-			<button type="button" class="kt-btn kt-btn-light" [disabled]="loading()" (click)="load()">
-				<i class="ki-filled ki-arrows-circle"></i>
-				{{ 'dashboard.refresh' | translate }}
-			</button>
 		</div>
 	</div>
 
 	@if (errorMessage()) {
-		<div class="rounded border border-destructive/30 bg-destructive/10 p-3 text-destructive">
+		<div class="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-destructive">
 			{{ errorMessage() }}
 		</div>
 	}
 
 	@if (loading() && !overview()) {
-		<div class="kt-card shadow-sm">
-			<div class="kt-card-content py-16 text-center text-secondary-foreground">
-				{{ 'dashboard.loading' | translate }}
+		<div class="flex flex-col gap-5 animate-pulse">
+			<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+				@for (_ of [1, 2, 3, 4]; track _) {
+					<div class="dash-kpi-card h-40 bg-muted/50"></div>
+				}
+			</div>
+			<div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+				<div class="dash-panel h-96 bg-muted/40"></div>
+				<div class="dash-panel h-96 bg-muted/40"></div>
 			</div>
 		</div>
 	} @else if (overview(); as data) {
-		<div class="flex flex-col gap-2">
-			<div class="text-xs font-medium uppercase tracking-wide text-secondary-foreground">
-				{{ 'dashboard.quickActions' | translate }}
+		@if (data.kpis.stalePendingCount > 0) {
+			<div class="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-foreground">
+				{{ 'dashboard.staleBanner' | translate }} ({{ data.kpis.stalePendingCount }})
 			</div>
-			<div class="flex flex-wrap gap-2">
-				<a class="kt-btn kt-btn-primary" routerLink="/demo1/sales/sales-invoices/new">
-					<i class="ki-filled ki-plus"></i>
-					{{ 'dashboard.quick.newInvoice' | translate }}
-				</a>
-				<a class="kt-btn kt-btn-light" routerLink="/demo1/inventory/stock-issues/new">
-					<i class="ki-filled ki-exit-right"></i>
-					{{ 'dashboard.quick.newIssue' | translate }}
-				</a>
-				<a class="kt-btn kt-btn-light" routerLink="/demo1/inventory/stock-receivings/new">
-					<i class="ki-filled ki-entrance-right"></i>
-					{{ 'dashboard.quick.newReceiving' | translate }}
-				</a>
-				<a class="kt-btn kt-btn-light" routerLink="/demo1/inventory/stock-takings/new">
-					<i class="ki-filled ki-questionnaire-tablet"></i>
-					{{ 'dashboard.quick.newTaking' | translate }}
-				</a>
+		}
+
+		<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+			<div class="dash-kpi-card dash-kpi-sales">
+				<div class="dash-kpi-top">
+					<div>
+						<div class="dash-kpi-label">{{ 'dashboard.kpi.salesTotal' | translate }}</div>
+						<div class="dash-kpi-value">{{ data.kpis.salesTotal | number: '1.2-2' }}</div>
+					</div>
+					<span class="dash-kpi-icon"><i class="ki-filled ki-chart-line-up"></i></span>
+				</div>
+				<div id="erp_spark_sales" class="dash-spark"></div>
+				<div class="dash-kpi-foot">
+					@if (data.kpis.salesGrowthPct != null) {
+						<span class="dash-chip" [class.is-up]="data.kpis.salesGrowthPct >= 0" [class.is-down]="data.kpis.salesGrowthPct < 0">
+							<i class="ki-filled" [class.ki-arrow-up]="data.kpis.salesGrowthPct >= 0" [class.ki-arrow-down]="data.kpis.salesGrowthPct < 0"></i>
+							{{ data.kpis.salesGrowthPct | number: '1.0-1' }}%
+							{{ 'dashboard.kpi.salesGrowth' | translate }}
+						</span>
+					} @else {
+						<span class="text-xs text-secondary-foreground">{{ 'dashboard.kpi.salesGrowthEmpty' | translate }}</span>
+					}
+				</div>
+			</div>
+
+			<div class="dash-kpi-card dash-kpi-purchases">
+				<div class="dash-kpi-top">
+					<div>
+						<div class="dash-kpi-label">{{ 'dashboard.kpi.purchases' | translate }}</div>
+						<div class="dash-kpi-value">{{ data.kpis.purchasesTotal | number: '1.2-2' }}</div>
+					</div>
+					<span class="dash-kpi-icon"><i class="ki-filled ki-basket"></i></span>
+				</div>
+				<div class="dash-meter">
+					<span class="dash-meter-fill tone-red" [style.width.%]="kpiShare(data.kpis.purchasesTotal, data.kpis.salesTotal)"></span>
+				</div>
+				<div class="dash-kpi-foot">
+					<span class="dash-chip is-down">
+						{{ data.kpis.purchasesCount }} {{ 'dashboard.kpi.purchasesHint' | translate }}
+					</span>
+				</div>
+			</div>
+
+			<div class="dash-kpi-card dash-kpi-debts">
+				<div class="dash-kpi-top">
+					<div>
+						<div class="dash-kpi-label">{{ 'dashboard.kpi.customerDebts' | translate }}</div>
+						<div class="dash-kpi-value">{{ data.kpis.customerDebts | number: '1.2-2' }}</div>
+					</div>
+					<span class="dash-kpi-icon"><i class="ki-filled ki-wallet"></i></span>
+				</div>
+				<div class="dash-meter">
+					<span class="dash-meter-fill tone-amber" [style.width.%]="kpiShare(data.kpis.customerDebts, data.kpis.salesTotal || data.kpis.customerDebts)"></span>
+				</div>
+				<div class="dash-kpi-foot">
+					@if (data.kpis.customerDebts > 0) {
+						<span class="dash-chip is-warn">{{ 'dashboard.kpi.debtsUrgent' | translate }}</span>
+					} @else {
+						<span class="dash-chip is-up">{{ 'dashboard.kpi.debtsClear' | translate }}</span>
+					}
+				</div>
+			</div>
+
+			<div class="dash-kpi-card dash-kpi-customers">
+				<div class="dash-kpi-top">
+					<div>
+						<div class="dash-kpi-label">{{ 'dashboard.kpi.customersTotal' | translate }}</div>
+						<div class="dash-kpi-value">
+							{{ data.kpis.customersCount }}
+							<span class="dash-kpi-unit">{{ 'dashboard.kpi.customersUnit' | translate }}</span>
+						</div>
+					</div>
+					<span class="dash-kpi-icon"><i class="ki-filled ki-people"></i></span>
+				</div>
+				<div class="dash-meter">
+					<span class="dash-meter-fill tone-blue" [style.width.%]="customersMeter(data.kpis.customersCount)"></span>
+				</div>
+				<div class="dash-kpi-foot">
+					<span class="dash-chip is-info">{{ 'dashboard.kpi.statsUpdated' | translate }}</span>
+				</div>
 			</div>
 		</div>
 
-		<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
-			<div class="kt-card shadow-sm border border-border">
-				<div class="kt-card-content p-5 flex flex-col gap-2 min-h-[7.5rem]">
-					<div class="flex items-center justify-between gap-2">
-						<span class="text-sm text-secondary-foreground">{{ 'dashboard.kpi.salesMonth' | translate }}</span>
-						<span class="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-							<i class="ki-filled ki-chart-line-up"></i>
-						</span>
+		<div class="grid grid-cols-1 xl:grid-cols-5 gap-5 items-stretch">
+			<div class="dash-panel xl:col-span-2 overflow-hidden flex flex-col">
+				<div class="dash-panel-head">
+					<div>
+						<h2 class="dash-panel-title">{{ 'dashboard.recentTitle' | translate }}</h2>
+						<p class="dash-panel-sub">{{ 'dashboard.recentHint' | translate }}</p>
 					</div>
-					<div class="text-2xl font-semibold text-mono tracking-tight">
-						{{ data.kpis.salesMonthTotal | number: '1.0-2' }}
-					</div>
-					<div class="text-xs text-secondary-foreground mt-auto">
-						@if (data.kpis.salesMonthCount > 0) {
-							{{ data.kpis.salesMonthCount }} {{ 'dashboard.kpi.salesMonthHint' | translate }}
-						} @else {
-							{{ 'dashboard.kpi.salesMonthEmpty' | translate }}
-						}
-					</div>
+					<a class="text-xs text-primary font-medium" routerLink="/demo1/sales/sales-invoices">
+						{{ 'dashboard.pendingViewAll' | translate }}
+					</a>
+				</div>
+				<div class="flex-1 max-h-[24rem] overflow-y-auto">
+					@if (!data.recentOperations.length) {
+						<div class="py-16 px-5 text-center text-sm text-secondary-foreground">
+							{{ 'dashboard.recentEmpty' | translate }}
+						</div>
+					} @else {
+						<ul class="dash-ops">
+							@for (item of data.recentOperations; track trackRecent($index, item)) {
+								<li>
+									<a class="dash-op-row" [routerLink]="item.route">
+										<span class="dash-op-icon" [class.in]="item.amount >= 0" [class.out]="item.amount < 0">
+											<i [class]="recentKindIcon(item.kind)"></i>
+										</span>
+										<span class="min-w-0 flex-1">
+											<span class="block text-sm font-medium text-foreground truncate">
+												{{ recentKindLabel(item.kind) | translate }}
+												<span class="text-secondary-foreground font-normal">#{{ item.title }}</span>
+											</span>
+											<span class="block text-xs text-secondary-foreground mt-0.5">
+												{{ relativeTime(item.date) }}
+											</span>
+										</span>
+										<span class="dash-op-amount" [class.in]="item.amount >= 0" [class.out]="item.amount < 0">
+											{{ formatSigned(item.amount) }}
+										</span>
+									</a>
+								</li>
+							}
+						</ul>
+					}
 				</div>
 			</div>
 
-			<div class="kt-card shadow-sm border border-border">
-				<div class="kt-card-content p-5 flex flex-col gap-2 min-h-[7.5rem]">
-					<div class="flex items-center justify-between gap-2">
-						<span class="text-sm text-secondary-foreground">{{ 'dashboard.kpi.salesToday' | translate }}</span>
-						<span class="flex size-9 items-center justify-center rounded-lg bg-success/10 text-success">
-							<i class="ki-filled ki-calendar-tick"></i>
+			<div class="dash-panel xl:col-span-3 overflow-hidden">
+				<div class="dash-panel-head">
+					<div>
+						<h2 class="dash-panel-title">{{ 'dashboard.salesChart7' | translate }}</h2>
+						<p class="dash-panel-sub">{{ 'dashboard.salesChartHint' | translate }}</p>
+					</div>
+					<div class="flex flex-wrap gap-2">
+						<span class="dash-stat-pill">
+							<span class="dash-stat-pill-label">{{ 'dashboard.chart.weekTotal' | translate }}</span>
+							<strong>{{ weekSalesTotal(data) | number: '1.0-0' }}</strong>
 						</span>
-					</div>
-					<div class="text-2xl font-semibold text-mono tracking-tight">
-						{{ data.kpis.salesTodayTotal | number: '1.0-2' }}
-					</div>
-					<div class="text-xs text-secondary-foreground mt-auto">
-						@if (data.kpis.salesTodayTotal > 0) {
-							&nbsp;
-						} @else {
-							{{ 'dashboard.kpi.salesTodayEmpty' | translate }}
+						@if (weekPeak(data); as peak) {
+							<span class="dash-stat-pill accent">
+								<span class="dash-stat-pill-label">{{ 'dashboard.chart.peakDay' | translate }}</span>
+								<strong>{{ peak.label }}</strong>
+							</span>
 						}
+					</div>
+				</div>
+				<div class="p-3 sm:p-4">
+					<div id="erp_sales_chart" class="dash-chart dash-chart-main"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="flex flex-col gap-2">
+			<div class="text-xs font-semibold uppercase tracking-wide text-secondary-foreground">
+				{{ 'dashboard.chartsSection' | translate }}
+			</div>
+			<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+				<div class="dash-panel overflow-hidden">
+					<div class="dash-panel-head">
+						<div>
+							<h2 class="dash-panel-title">{{ 'dashboard.chart.cashflow' | translate }}</h2>
+							<p class="dash-panel-sub">{{ 'dashboard.chart.cashflowHint' | translate }}</p>
+						</div>
+					</div>
+					<div class="p-3">
+						@if (cashIn(data) <= 0 && cashOut(data) <= 0) {
+							<div class="py-14 text-center text-sm text-secondary-foreground">
+								{{ 'dashboard.chart.cashflowEmpty' | translate }}
+							</div>
+						}
+						<div
+							id="erp_cashflow_chart"
+							class="dash-chart"
+							[class.hidden]="cashIn(data) <= 0 && cashOut(data) <= 0"
+						></div>
+					</div>
+				</div>
+
+				<div class="dash-panel overflow-hidden">
+					<div class="dash-panel-head">
+						<div>
+							<h2 class="dash-panel-title">{{ 'dashboard.chart.attention' | translate }}</h2>
+							<p class="dash-panel-sub">{{ 'dashboard.chart.attentionHint' | translate }}</p>
+						</div>
+					</div>
+					<div class="p-3">
+						@if (!data.attentionMix.length) {
+							<div class="py-14 text-center text-sm text-secondary-foreground">
+								{{ 'dashboard.chart.attentionEmpty' | translate }}
+							</div>
+						}
+						<div
+							id="erp_attention_chart"
+							class="dash-chart"
+							[class.hidden]="!data.attentionMix.length"
+						></div>
+					</div>
+				</div>
+
+				<div class="dash-panel overflow-hidden">
+					<div class="dash-panel-head">
+						<div>
+							<h2 class="dash-panel-title">{{ 'dashboard.chart.lowStock' | translate }}</h2>
+							<p class="dash-panel-sub">{{ 'dashboard.chart.lowStockHint' | translate }}</p>
+						</div>
+					</div>
+					<div class="p-3">
+						@if (!data.lowStockBars.length) {
+							<div class="py-14 text-center text-sm text-secondary-foreground">
+								{{ 'dashboard.lowStockEmpty' | translate }}
+							</div>
+						}
+						<div
+							id="erp_low_stock_chart"
+							class="dash-chart"
+							[class.hidden]="!data.lowStockBars.length"
+						></div>
 					</div>
 				</div>
 			</div>
+		</div>
 
-			<a
-				class="kt-card shadow-sm border transition-colors hover:border-primary/40"
-				[class.border-warning/40]="data.kpis.draftInvoices > 0"
-				[class.border-border]="data.kpis.draftInvoices === 0"
-				routerLink="/demo1/sales/sales-invoices"
-			>
-				<div class="kt-card-content p-5 flex flex-col gap-2 min-h-[7.5rem]">
-					<div class="flex items-center justify-between gap-2">
-						<span class="text-sm text-secondary-foreground">{{ 'dashboard.kpi.draftInvoices' | translate }}</span>
-						<span class="flex size-9 items-center justify-center rounded-lg bg-warning/10 text-warning">
-							<i class="ki-filled ki-notepad-edit"></i>
-						</span>
-					</div>
-					<div class="text-2xl font-semibold text-mono tracking-tight">{{ data.kpis.draftInvoices }}</div>
-					<div
-						class="text-xs mt-auto"
-						[class.text-warning]="data.kpis.draftInvoices > 0"
-						[class.text-secondary-foreground]="data.kpis.draftInvoices === 0"
-					>
-						@if (data.kpis.draftInvoices > 0) {
-							{{ 'dashboard.kpi.draftAction' | translate }}
-						} @else {
-							{{ 'dashboard.kpi.draftEmpty' | translate }}
-						}
-					</div>
-				</div>
+		<div class="flex flex-wrap gap-2">
+			<a class="kt-btn kt-btn-primary" routerLink="/demo1/sales/sales-invoices/new">
+				<i class="ki-filled ki-plus"></i>
+				{{ 'dashboard.quick.newInvoice' | translate }}
 			</a>
-
-			<a
-				class="kt-card shadow-sm border transition-colors"
-				[class.border-destructive/40]="data.kpis.pendingStockDocs > 0"
-				[class.ring-1]="data.kpis.pendingStockDocs > 0"
-				[class.ring-destructive/20]="data.kpis.pendingStockDocs > 0"
-				[class.border-border]="data.kpis.pendingStockDocs === 0"
-				routerLink="/demo1/inventory/stock-issues"
-			>
-				<div class="kt-card-content p-5 flex flex-col gap-2 min-h-[7.5rem]">
-					<div class="flex items-center justify-between gap-2">
-						<span class="text-sm text-secondary-foreground">{{ 'dashboard.kpi.pendingStock' | translate }}</span>
-						<span class="flex size-9 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
-							<i class="ki-filled ki-parcel"></i>
-						</span>
-					</div>
-					<div class="text-2xl font-semibold text-mono tracking-tight">{{ data.kpis.pendingStockDocs }}</div>
-					<div class="text-xs text-secondary-foreground mt-auto">
-						@if (data.kpis.pendingStockDocs > 0) {
-							{{ 'dashboard.kpi.pendingAction' | translate }}
-						} @else {
-							{{ 'dashboard.kpi.pendingEmpty' | translate }}
-						}
-					</div>
-				</div>
+			<a class="kt-btn kt-btn-light" routerLink="/demo1/inventory/stock-issues/new">
+				<i class="ki-filled ki-exit-right"></i>
+				{{ 'dashboard.quick.newIssue' | translate }}
 			</a>
-
-			<a
-				class="kt-card shadow-sm border transition-colors"
-				[class.border-warning/50]="data.kpis.lowStockCount > 0"
-				[class.ring-1]="data.kpis.lowStockCount > 0"
-				[class.ring-warning/25]="data.kpis.lowStockCount > 0"
-				[class.border-border]="data.kpis.lowStockCount === 0"
-				routerLink="/demo1/products/items"
-			>
-				<div class="kt-card-content p-5 flex flex-col gap-2 min-h-[7.5rem]">
-					<div class="flex items-center justify-between gap-2">
-						<span class="text-sm text-secondary-foreground">{{ 'dashboard.kpi.lowStock' | translate }}</span>
-						<span class="flex size-9 items-center justify-center rounded-lg bg-warning/10 text-warning">
-							<i class="ki-filled ki-information-2"></i>
-						</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<div class="text-2xl font-semibold text-mono tracking-tight">{{ data.kpis.lowStockCount }}</div>
-						@if (data.kpis.lowStockCount > 0) {
-							<span class="kt-badge kt-badge-warning kt-badge-sm">{{ 'dashboard.kpi.lowStockAction' | translate }}</span>
-						}
-					</div>
-					<div class="text-xs text-secondary-foreground mt-auto">
-						@if (data.kpis.lowStockCount > 0) {
-							{{ data.kpis.productsCount }} {{ 'dashboard.kpi.products' | translate }}
-						} @else {
-							{{ 'dashboard.kpi.lowStockEmpty' | translate }}
-						}
-					</div>
-				</div>
+			<a class="kt-btn kt-btn-light" routerLink="/demo1/inventory/stock-receivings/new">
+				<i class="ki-filled ki-entrance-right"></i>
+				{{ 'dashboard.quick.newReceiving' | translate }}
+			</a>
+			<a class="kt-btn kt-btn-light" routerLink="/demo1/inventory/stock-takings/new">
+				<i class="ki-filled ki-questionnaire-tablet"></i>
+				{{ 'dashboard.quick.newTaking' | translate }}
 			</a>
 		</div>
 
 		<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 items-start">
-			<div
-				class="kt-card shadow-sm overflow-hidden border"
-				[class.border-destructive/30]="data.pendingActions.length > 0"
-				[class.border-border]="data.pendingActions.length === 0"
-			>
-				<div class="border-b border-border bg-muted/30 px-5 py-3 flex items-center justify-between gap-3">
-					<div class="flex items-center gap-2 min-w-0">
-						<h2 class="text-sm font-semibold">{{ 'dashboard.pendingTitle' | translate }}</h2>
+			<div class="dash-panel overflow-hidden" [class.has-alert]="data.pendingActions.length > 0">
+				<div class="dash-panel-head">
+					<div class="flex items-center gap-2">
+						<h2 class="dash-panel-title">{{ 'dashboard.pendingTitle' | translate }}</h2>
 						@if (data.pendingActions.length > 0) {
 							<span class="kt-badge kt-badge-destructive kt-badge-sm">
-								{{ data.pendingActions.length }} {{ 'dashboard.pendingCount' | translate }}
+								{{ data.pendingActions.length }}
 							</span>
 						}
 					</div>
-					<a class="text-xs text-primary font-medium shrink-0" routerLink="/demo1/inventory/stock-issues">
-						{{ 'dashboard.pendingViewAll' | translate }}
-					</a>
+					@if (data.pendingActions.length > 0) {
+						<button type="button" class="kt-btn kt-btn-sm kt-btn-light" (click)="exportPending(data)">
+							{{ 'dashboard.exportCsv' | translate }}
+						</button>
+					}
 				</div>
-				<div class="kt-card-content p-0 max-h-[22rem] overflow-y-auto">
+				<div class="max-h-[18rem] overflow-y-auto">
 					@if (!data.pendingActions.length) {
-						<div class="py-12 px-5 text-center">
-							<div class="mx-auto mb-3 flex size-11 items-center justify-center rounded-full bg-success/10 text-success">
-								<i class="ki-filled ki-check-circle text-lg"></i>
-							</div>
-							<div class="text-sm text-secondary-foreground">{{ 'dashboard.emptyPending' | translate }}</div>
+						<div class="py-10 px-5 text-center text-sm text-secondary-foreground">
+							{{ 'dashboard.emptyPending' | translate }}
 						</div>
 					} @else {
 						<ul class="divide-y divide-border">
 							@for (item of data.pendingActions; track trackPending($index, item)) {
 								<li>
-									<a
-										class="flex items-start gap-3 px-5 py-3.5 hover:bg-muted/40 transition-colors"
-										[routerLink]="item.route"
-									>
-										<span class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
+									<a class="flex items-start gap-3 px-5 py-3 hover:bg-muted/40 transition-colors" [routerLink]="item.route">
+										<span class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
 											<i [class]="moduleIcon(item.module)"></i>
 										</span>
 										<span class="min-w-0 flex-1">
@@ -244,10 +329,8 @@
 												}
 											</span>
 										</span>
-										@if (item.date) {
-											<span class="text-xs text-secondary-foreground whitespace-nowrap">
-												{{ item.date | date: 'mediumDate' }}
-											</span>
+										@if (item.isStale) {
+											<span class="kt-badge kt-badge-warning kt-badge-sm">{{ 'dashboard.pendingStale' | translate }}</span>
 										}
 									</a>
 								</li>
@@ -257,62 +340,41 @@
 				</div>
 			</div>
 
-			<div
-				class="kt-card shadow-sm overflow-hidden border"
-				[class.border-warning/40]="data.lowStockItems.length > 0"
-				[class.border-border]="data.lowStockItems.length === 0"
-			>
-				<div class="border-b border-border bg-muted/30 px-5 py-3 flex items-center justify-between gap-3">
-					<div class="flex items-center gap-2 min-w-0">
-						<h2 class="text-sm font-semibold">{{ 'dashboard.lowStockTitle' | translate }}</h2>
+			<div class="dash-panel overflow-hidden" [class.has-warn]="data.lowStockItems.length > 0">
+				<div class="dash-panel-head">
+					<div class="flex items-center gap-2">
+						<h2 class="dash-panel-title">{{ 'dashboard.lowStockTitle' | translate }}</h2>
 						@if (data.lowStockItems.length > 0) {
-							<span class="kt-badge kt-badge-warning kt-badge-sm">
-								{{ data.kpis.lowStockCount }}
-							</span>
+							<span class="kt-badge kt-badge-warning kt-badge-sm">{{ data.kpis.lowStockCount }}</span>
 						}
 					</div>
-					<a class="text-xs text-primary font-medium shrink-0" routerLink="/demo1/products/items">
-						{{ 'dashboard.lowStockViewProducts' | translate }}
-					</a>
+					@if (data.lowStockItems.length > 0) {
+						<button type="button" class="kt-btn kt-btn-sm kt-btn-light" (click)="exportLowStock(data)">
+							{{ 'dashboard.exportCsv' | translate }}
+						</button>
+					}
 				</div>
-				<div class="kt-card-content p-0 max-h-[22rem] overflow-y-auto">
+				<div class="max-h-[18rem] overflow-y-auto">
 					@if (!data.lowStockItems.length) {
-						<div class="py-12 px-5 text-center">
-							<div class="mx-auto mb-3 flex size-11 items-center justify-center rounded-full bg-success/10 text-success">
-								<i class="ki-filled ki-shield-tick text-lg"></i>
-							</div>
-							<div class="text-sm font-medium text-foreground">{{ 'dashboard.lowStockEmpty' | translate }}</div>
-							<div class="text-xs text-secondary-foreground mt-1">{{ 'dashboard.lowStockEmptyHint' | translate }}</div>
+						<div class="py-10 px-5 text-center text-sm text-secondary-foreground">
+							{{ 'dashboard.lowStockEmpty' | translate }}
 						</div>
 					} @else {
 						<ul class="divide-y divide-border">
 							@for (item of data.lowStockItems; track trackLowStock($index, item)) {
 								<li>
-									<a
-										class="flex items-start gap-3 px-5 py-3.5 hover:bg-muted/40 transition-colors"
-										[routerLink]="item.route"
-									>
-										<span class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-warning/10 text-warning">
-											<i class="ki-filled ki-basket"></i>
-										</span>
+									<a class="flex items-center gap-3 px-5 py-3 hover:bg-muted/40 transition-colors" [routerLink]="item.route">
 										<span class="min-w-0 flex-1">
 											<span class="block text-sm font-medium text-primary truncate">{{ item.itemName }}</span>
-											<span class="block text-xs text-secondary-foreground truncate">
-												@if (item.itemCode) {
-													{{ item.itemCode }} ·
-												}
+											<span class="block text-xs text-secondary-foreground truncate mb-1.5">
 												{{ item.storeName || item.branchName || '—' }}
 											</span>
+											<span class="dash-stock-bar">
+												<span class="dash-stock-bar-fill" [style.width.%]="stockRatio(item)"></span>
+											</span>
 										</span>
-										<span class="text-xs text-end whitespace-nowrap">
-											<span class="block font-medium text-warning">
-												{{ 'dashboard.lowStockAvailable' | translate }}:
-												{{ item.availableQty | number: '1.0-2' }}
-											</span>
-											<span class="block text-secondary-foreground">
-												{{ 'dashboard.lowStockMin' | translate }}:
-												{{ item.minQty | number: '1.0-2' }}
-											</span>
+										<span class="text-xs text-end text-warning font-semibold whitespace-nowrap">
+											{{ item.availableQty | number: '1.0-2' }} / {{ item.minQty | number: '1.0-2' }}
 										</span>
 									</a>
 								</li>
@@ -322,23 +384,15 @@
 				</div>
 			</div>
 		</div>
-
-		<div class="kt-card shadow-sm overflow-hidden border border-border">
-			<div class="border-b border-border bg-muted/30 px-5 py-3">
-				<h2 class="text-sm font-semibold">{{ 'dashboard.salesChart' | translate }}</h2>
-			</div>
-			<div class="kt-card-content p-5">
-				@if (data.salesSeries.every((p) => p.total === 0)) {
-					<div class="py-12 text-center">
-						<div class="mx-auto mb-3 flex size-11 items-center justify-center rounded-full bg-muted text-secondary-foreground">
-							<i class="ki-filled ki-chart-simple text-lg"></i>
-						</div>
-						<div class="text-sm font-medium text-foreground">{{ 'dashboard.salesChartEmpty' | translate }}</div>
-						<div class="text-xs text-secondary-foreground mt-1">{{ 'dashboard.salesChartEmptyHint' | translate }}</div>
-					</div>
-				}
-				<div id="erp_sales_chart" [class.hidden]="data.salesSeries.every((p) => p.total === 0)"></div>
-			</div>
-		</div>
 	}
+
+	<button
+		type="button"
+		class="dash-fab kt-btn kt-btn-primary"
+		[disabled]="loading()"
+		(click)="load()"
+	>
+		<i class="ki-filled ki-arrows-circle" [class.animate-spin]="loading()"></i>
+		{{ 'dashboard.refreshFigures' | translate }}
+	</button>
 </div>

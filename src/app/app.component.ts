@@ -5,6 +5,7 @@ import { filter } from 'rxjs/operators';
 import { MetronicInitService } from './core/services/metronic-init.service';
 import { LanguageService } from './core/services/language.service';
 import { AuthService } from './core/api/auth.service';
+import { AccessControlService } from './core/services/access-control.service';
 import { ThemeToggleService } from './partials/theme-toggle/theme-toggle.service';
 
 @Component({
@@ -22,6 +23,7 @@ export class AppComponent {
   private metronicInitService = inject(MetronicInitService);
   private languageService = inject(LanguageService);
   private authService = inject(AuthService);
+  private accessControl = inject(AccessControlService);
   private themeService = inject(ThemeToggleService);
 
   private demoClassMap: Record<string, string> = {
@@ -32,6 +34,9 @@ export class AppComponent {
   constructor() {
     this.languageService.init();
     this.authService.initFromStorage();
+    if (this.authService.isAuthenticated()) {
+      this.accessControl.load().subscribe();
+    }
     this.renderer.removeClass(this.document.body, 'kt-sidebar-collapse');
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
       this.updateDemo();

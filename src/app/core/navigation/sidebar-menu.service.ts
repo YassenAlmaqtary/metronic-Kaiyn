@@ -30,6 +30,11 @@ export class SidebarMenuService {
     this.grantedPermissions.set(permissions ? new Set(permissions) : null);
   }
 
+  /** Public check used by dashboard cards / quick actions. */
+  hasPermission(permission?: string): boolean {
+    return this.canAccess(permission);
+  }
+
   private filterSection(section: SidebarMenuSection): SidebarMenuSection | null {
     if (!this.canAccess(section.permission)) {
       return null;
@@ -49,12 +54,12 @@ export class SidebarMenuService {
     }
 
     const granted = this.grantedPermissions();
-    // Until auth permissions are wired, show all configured items.
+    // Until auth permissions are wired / loaded, show all configured items.
     if (!granted) {
       return true;
     }
 
-    return granted.has(permission);
+    return granted.has(permission) || granted.has(permission.toLowerCase());
   }
 }
 

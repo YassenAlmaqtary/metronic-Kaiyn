@@ -2,11 +2,18 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of } from 'rxjs';
 
 import { CurrentStockDetail } from '../api/models/inventory-reports.models';
+import { PaymentVoucher, ReceiptVoucher } from '../api/models/payment-voucher.models';
 import { Product } from '../api/models/product.models';
-import { SalesInvoiceListItem, SalesInvoiceStatus } from '../api/models/sales-invoice.models';
+import {
+  SalesInvoiceListItem,
+  SalesInvoiceStatus,
+} from '../api/models/sales-invoice.models';
+import { StockReceivingListItem } from '../api/models/stock-receiving.models';
 import { CustomersService } from './customers.service';
 import { InventoryReportsService } from './inventory-reports.service';
+import { PaymentVouchersService } from './payment-vouchers.service';
 import { ProductsService } from './products.service';
+import { ReceiptVouchersService } from './receipt-vouchers.service';
 import { SalesInvoicesService } from './sales-invoices.service';
 import { StockAdjustmentsService } from './stock-adjustments.service';
 import { StockIssuesService } from './stock-issues.service';
@@ -15,20 +22,39 @@ import { StockTakingsService } from './stock-takings.service';
 import { StockTransfersService } from './stock-transfers.service';
 
 export interface DashboardKpis {
+  salesTotal: number;
+  salesGrowthPct: number | null;
+  purchasesTotal: number;
+  purchasesCount: number;
+  customerDebts: number;
+  customersCount: number;
   salesMonthTotal: number;
   salesMonthCount: number;
   salesTodayTotal: number;
   draftInvoices: number;
   pendingStockDocs: number;
+  stalePendingCount: number;
   lowStockCount: number;
   productsCount: number;
-  customersCount: number;
 }
 
 export interface DashboardSalesPoint {
   dateKey: string;
   label: string;
+  weekday: string;
   total: number;
+  count: number;
+}
+
+export interface DashboardChartSlice {
+  key: string;
+  value: number;
+}
+
+export interface DashboardLowStockBar {
+  name: string;
+  available: number;
+  min: number;
 }
 
 export type DashboardActionModule =
@@ -39,6 +65,12 @@ export type DashboardActionModule =
   | 'stockTaking'
   | 'stockAdjustment';
 
+export type DashboardRecentKind =
+  | 'salesInvoice'
+  | 'paymentVoucher'
+  | 'receiptVoucher'
+  | 'stockReceiving';
+
 export interface DashboardPendingAction {
   id: string;
   module: DashboardActionModule;
@@ -46,6 +78,8 @@ export interface DashboardPendingAction {
   subtitle: string;
   date?: string | null;
   route: string;
+  ageDays: number;
+  isStale: boolean;
 }
 
 export interface DashboardLowStockItem {
@@ -61,15 +95,36 @@ export interface DashboardLowStockItem {
   route: string;
 }
 
+export interface DashboardRecentOp {
+  id: string;
+  kind: DashboardRecentKind;
+  title: string;
+  amount: number;
+  date: string;
+  route: string;
+}
+
 export interface DashboardOverview {
   kpis: DashboardKpis;
   salesSeries: DashboardSalesPoint[];
+  recentOperations: DashboardRecentOp[];
+  documentsMix: DashboardChartSlice[];
+  attentionMix: DashboardChartSlice[];
+  lowStockBars: DashboardLowStockBar[];
   pendingActions: DashboardPendingAction[];
   lowStockItems: DashboardLowStockItem[];
 }
 
+type InvoiceRow = SalesInvoiceListItem & {
+  remainingAmount?: number | null;
+  paidAmount?: number | null;
+  invoiceType?: number | null;
+};
+
 @Injectable({ providedIn: 'root' })
 export class DashboardOverviewService {
+  static readonly STALE_DAYS = 3;
+
   private salesInvoices = inject(SalesInvoicesService);
   private products = inject(ProductsService);
   private customers = inject(CustomersService);
@@ -79,6 +134,8 @@ export class DashboardOverviewService {
   private stockTransfers = inject(StockTransfersService);
   private stockTakings = inject(StockTakingsService);
   private stockAdjustments = inject(StockAdjustmentsService);
+  private paymentVouchers = inject(PaymentVouchersService);
+  private receiptVouchers = inject(ReceiptVouchersService);
 
   load(branchId: number | null = null): Observable<DashboardOverview> {
     return forkJoin({
@@ -88,11 +145,14 @@ export class DashboardOverviewService {
       draftInvoices: this.safeList(() => this.salesInvoices.getDrafts()),
       products: this.safeList(() => this.products.getAll() as Observable<Product[]>),
       customers: this.safeList(() => this.customers.getAll()),
+      receivings: this.safeList(() => this.stockReceivings.getAll()),
       pendingReceivings: this.safeList(() => this.stockReceivings.getPending()),
       pendingIssues: this.safeList(() => this.stockIssues.getPending()),
       pendingTransfers: this.safeList(() => this.stockTransfers.getPending()),
       draftTakings: this.safeList(() => this.stockTakings.getDrafts()),
       draftAdjustments: this.safeList(() => this.stockAdjustments.getDrafts()),
+      payments: this.safeList(() => this.paymentVouchers.getAll()),
+      receipts: this.safeList(() => this.receiptVouchers.getAll()),
       currentStock: this.inventoryReports
         .getCurrentStock({ branchId, hideZeroes: false })
         .pipe(catchError(() => of({ items: [] as CurrentStockDetail[] }))),
@@ -109,6 +169,7 @@ export class DashboardOverviewService {
       draftInvoices: SalesInvoiceListItem[];
       products: Product[];
       customers: unknown[];
+      receivings: StockReceivingListItem[];
       pendingReceivings: Array<{
         receivingId: number;
         receivingNumber?: string | null;
@@ -146,6 +207,8 @@ export class DashboardOverviewService {
         storeName?: string | null;
         branchId?: number | null;
       }>;
+      payments: PaymentVoucher[];
+      receipts: ReceiptVoucher[];
       currentStock: { items?: CurrentStockDetail[] | null };
     },
     branchId: number | null,
@@ -154,11 +217,11 @@ export class DashboardOverviewService {
     const todayKey = this.toDateKey(now);
     const month = now.getMonth();
     const year = now.getFullYear();
-
     const matchBranch = (id?: number | null) => branchId == null || id == null || id === branchId;
 
-    const invoices = data.invoices.filter((inv) => matchBranch(inv.branchId));
+    const invoices = (data.invoices as InvoiceRow[]).filter((inv) => matchBranch(inv.branchId));
     const draftInvoices = data.draftInvoices.filter((inv) => matchBranch(inv.branchId));
+    const receivings = data.receivings.filter((x) => matchBranch(x.branchId));
     const pendingReceivings = data.pendingReceivings.filter((x) => matchBranch(x.branchId));
     const pendingIssues = data.pendingIssues.filter((x) => matchBranch(x.branchId));
     const pendingTransfers = data.pendingTransfers.filter(
@@ -166,15 +229,41 @@ export class DashboardOverviewService {
     );
     const draftTakings = data.draftTakings.filter((x) => matchBranch(x.branchId));
     const draftAdjustments = data.draftAdjustments.filter((x) => matchBranch(x.branchId));
+    const payments = data.payments.filter((x) => matchBranch(x.branchId));
+    const receipts = data.receipts.filter((x) => matchBranch(x.branchId));
 
-    const monthInvoices = invoices.filter((inv) => {
+    const activeInvoices = invoices.filter((inv) => inv.status !== SalesInvoiceStatus.Cancelled);
+    const monthInvoices = activeInvoices.filter((inv) => {
       const d = this.parseDate(inv.invoiceDate);
       return d && d.getFullYear() === year && d.getMonth() === month;
     });
-    const todayInvoices = invoices.filter((inv) => {
+    const todayInvoices = activeInvoices.filter((inv) => {
       const d = this.parseDate(inv.invoiceDate);
       return d && this.toDateKey(d) === todayKey;
     });
+
+    const salesTotal = this.sumAmount(activeInvoices);
+    const salesSeries = this.buildSalesSeries(activeInvoices, 7);
+    const salesGrowthPct = this.calcGrowthPct(activeInvoices);
+
+    const purchasesTotal = receivings.reduce((sum, x) => sum + Number(x.totalAmount || 0), 0);
+    const purchasesCount = receivings.length;
+
+    const remainingFromInvoices = activeInvoices.reduce((sum, inv) => {
+      const remaining = Number(inv.remainingAmount);
+      if (Number.isFinite(remaining) && remaining >= 0) {
+        return sum + remaining;
+      }
+      return sum;
+    }, 0);
+    const hasRemaining = activeInvoices.some((inv) => {
+      const remaining = Number(inv.remainingAmount);
+      return Number.isFinite(remaining) && remaining >= 0;
+    });
+    const receiptsTotal = receipts.reduce((sum, x) => sum + Number(x.totalAmount || 0), 0);
+    const customerDebts = hasRemaining
+      ? remainingFromInvoices
+      : Math.max(0, salesTotal - receiptsTotal);
 
     const pendingStockDocs =
       pendingReceivings.length +
@@ -184,75 +273,225 @@ export class DashboardOverviewService {
       draftAdjustments.length;
 
     const pendingActions: DashboardPendingAction[] = [
-      ...draftInvoices.slice(0, 8).map((inv) => ({
-        id: `inv-${inv.invoiceId}`,
-        module: 'salesInvoice' as const,
-        title: inv.invoiceNo || `#${inv.invoiceId}`,
-        subtitle: '',
-        date: inv.invoiceDate,
-        route: `/demo1/sales/sales-invoices/${inv.invoiceId}`,
-      })),
-      ...pendingReceivings.slice(0, 5).map((x) => ({
-        id: `rcv-${x.receivingId}`,
-        module: 'stockReceiving' as const,
-        title: x.receivingNumber || `#${x.receivingId}`,
-        subtitle: x.storeName || '',
-        date: x.receivingDate,
-        route: `/demo1/inventory/stock-receivings/${x.receivingId}`,
-      })),
-      ...pendingIssues.slice(0, 5).map((x) => ({
-        id: `iss-${x.issueId}`,
-        module: 'stockIssue' as const,
-        title: x.issueNumber || `#${x.issueId}`,
-        subtitle: x.storeName || '',
-        date: x.issueDate,
-        route: `/demo1/inventory/stock-issues/${x.issueId}`,
-      })),
-      ...pendingTransfers.slice(0, 5).map((x) => ({
-        id: `tr-${x.transferId}`,
-        module: 'stockTransfer' as const,
-        title: x.transferNumber || `#${x.transferId}`,
-        subtitle: [x.fromStoreName, x.toStoreName].filter(Boolean).join(' → '),
-        date: x.transferDate,
-        route: `/demo1/inventory/stock-transfers/${x.transferId}`,
-      })),
-      ...draftTakings.slice(0, 5).map((x) => ({
-        id: `tk-${x.takingId}`,
-        module: 'stockTaking' as const,
-        title: x.takingNo || `#${x.takingId}`,
-        subtitle: x.storeName || '',
-        date: x.takingDate,
-        route: `/demo1/inventory/stock-takings/${x.takingId}`,
-      })),
-      ...draftAdjustments.slice(0, 5).map((x) => ({
-        id: `adj-${x.adjId}`,
-        module: 'stockAdjustment' as const,
-        title: x.adjNo || `#${x.adjId}`,
-        subtitle: x.storeName || '',
-        date: x.adjDate,
-        route: `/demo1/inventory/stock-adjustments/${x.adjId}`,
-      })),
+      ...draftInvoices.slice(0, 8).map((inv) =>
+        this.toPendingAction({
+          id: `inv-${inv.invoiceId}`,
+          module: 'salesInvoice',
+          title: inv.invoiceNo || `#${inv.invoiceId}`,
+          subtitle: '',
+          date: inv.invoiceDate,
+          route: `/demo1/sales/sales-invoices/${inv.invoiceId}`,
+        }),
+      ),
+      ...pendingReceivings.slice(0, 5).map((x) =>
+        this.toPendingAction({
+          id: `rcv-${x.receivingId}`,
+          module: 'stockReceiving',
+          title: x.receivingNumber || `#${x.receivingId}`,
+          subtitle: x.storeName || '',
+          date: x.receivingDate,
+          route: `/demo1/inventory/stock-receivings/${x.receivingId}`,
+        }),
+      ),
+      ...pendingIssues.slice(0, 5).map((x) =>
+        this.toPendingAction({
+          id: `iss-${x.issueId}`,
+          module: 'stockIssue',
+          title: x.issueNumber || `#${x.issueId}`,
+          subtitle: x.storeName || '',
+          date: x.issueDate,
+          route: `/demo1/inventory/stock-issues/${x.issueId}`,
+        }),
+      ),
+      ...pendingTransfers.slice(0, 5).map((x) =>
+        this.toPendingAction({
+          id: `tr-${x.transferId}`,
+          module: 'stockTransfer',
+          title: x.transferNumber || `#${x.transferId}`,
+          subtitle: [x.fromStoreName, x.toStoreName].filter(Boolean).join(' → '),
+          date: x.transferDate,
+          route: `/demo1/inventory/stock-transfers/${x.transferId}`,
+        }),
+      ),
+      ...draftTakings.slice(0, 5).map((x) =>
+        this.toPendingAction({
+          id: `tk-${x.takingId}`,
+          module: 'stockTaking',
+          title: x.takingNo || `#${x.takingId}`,
+          subtitle: x.storeName || '',
+          date: x.takingDate,
+          route: `/demo1/inventory/stock-takings/${x.takingId}`,
+        }),
+      ),
+      ...draftAdjustments.slice(0, 5).map((x) =>
+        this.toPendingAction({
+          id: `adj-${x.adjId}`,
+          module: 'stockAdjustment',
+          title: x.adjNo || `#${x.adjId}`,
+          subtitle: x.storeName || '',
+          date: x.adjDate,
+          route: `/demo1/inventory/stock-adjustments/${x.adjId}`,
+        }),
+      ),
     ]
       .sort((a, b) => this.dateValue(b.date) - this.dateValue(a.date))
       .slice(0, 12);
 
     const lowStockItems = this.buildLowStock(data.currentStock.items ?? [], data.products);
+    const stalePendingCount = pendingActions.filter((x) => x.isStale).length;
+
+    const documentsMix: DashboardChartSlice[] = [
+      { key: 'salesInvoice', value: draftInvoices.length },
+      { key: 'stockReceiving', value: pendingReceivings.length },
+      { key: 'stockIssue', value: pendingIssues.length },
+      { key: 'stockTransfer', value: pendingTransfers.length },
+      { key: 'stockTaking', value: draftTakings.length },
+      { key: 'stockAdjustment', value: draftAdjustments.length },
+    ].filter((x) => x.value > 0);
+
+    const attentionMix: DashboardChartSlice[] = [
+      { key: 'drafts', value: draftInvoices.length },
+      { key: 'pending', value: pendingStockDocs },
+      { key: 'lowStock', value: lowStockItems.length },
+      { key: 'stale', value: stalePendingCount },
+    ].filter((x) => x.value > 0);
+
+    const lowStockBars: DashboardLowStockBar[] = lowStockItems.slice(0, 8).map((item) => ({
+      name: item.itemName.length > 22 ? `${item.itemName.slice(0, 20)}…` : item.itemName,
+      available: item.availableQty,
+      min: item.minQty,
+    }));
+
+    const recentOperations = this.buildRecentOperations(activeInvoices, payments, receipts, receivings);
 
     return {
       kpis: {
+        salesTotal,
+        salesGrowthPct,
+        purchasesTotal,
+        purchasesCount,
+        customerDebts,
+        customersCount: data.customers.length,
         salesMonthTotal: this.sumAmount(monthInvoices),
         salesMonthCount: monthInvoices.length,
         salesTodayTotal: this.sumAmount(todayInvoices),
         draftInvoices: draftInvoices.length,
         pendingStockDocs,
+        stalePendingCount,
         lowStockCount: lowStockItems.length,
         productsCount: data.products.length,
-        customersCount: data.customers.length,
       },
-      salesSeries: this.buildSalesSeries(invoices, 14),
+      salesSeries,
+      recentOperations,
+      documentsMix,
+      attentionMix,
+      lowStockBars,
       pendingActions,
       lowStockItems: lowStockItems.slice(0, 10),
     };
+  }
+
+  private buildRecentOperations(
+    invoices: InvoiceRow[],
+    payments: PaymentVoucher[],
+    receipts: ReceiptVoucher[],
+    receivings: StockReceivingListItem[],
+  ): DashboardRecentOp[] {
+    const ops: DashboardRecentOp[] = [
+      ...invoices.map((inv) => ({
+        id: `inv-${inv.invoiceId}`,
+        kind: 'salesInvoice' as const,
+        title: inv.invoiceNo || `#${inv.invoiceId}`,
+        amount: Number(inv.netAmount || 0),
+        date: inv.invoiceDate,
+        route: `/demo1/sales/sales-invoices/${inv.invoiceId}`,
+      })),
+      ...payments.map((v) => ({
+        id: `pay-${v.voucherId}`,
+        kind: 'paymentVoucher' as const,
+        title: v.voucherNumber || `#${v.voucherId}`,
+        amount: -Math.abs(Number(v.totalAmount || 0)),
+        date: v.voucherDate || v.createdDate || '',
+        route: `/demo1/accounting/payment-vouchers/${v.voucherId}/edit`,
+      })),
+      ...receipts.map((v) => ({
+        id: `rcp-${v.voucherId}`,
+        kind: 'receiptVoucher' as const,
+        title: v.voucherNumber || `#${v.voucherId}`,
+        amount: Math.abs(Number(v.totalAmount || 0)),
+        date: v.voucherDate || v.createdDate || '',
+        route: `/demo1/accounting/receipt-vouchers/${v.voucherId}/edit`,
+      })),
+      ...receivings.slice(0, 20).map((x) => ({
+        id: `rcv-${x.receivingId}`,
+        kind: 'stockReceiving' as const,
+        title: x.receivingNumber || `#${x.receivingId}`,
+        amount: -Math.abs(Number(x.totalAmount || 0)),
+        date: x.receivingDate || x.dateCreated || '',
+        route: `/demo1/inventory/stock-receivings/${x.receivingId}`,
+      })),
+    ];
+
+    return ops
+      .filter((x) => !!x.date)
+      .sort((a, b) => this.dateValue(b.date) - this.dateValue(a.date))
+      .slice(0, 10);
+  }
+
+  private calcGrowthPct(invoices: InvoiceRow[]): number | null {
+    const last7 = this.sumInRange(invoices, 0, 6);
+    const prev7 = this.sumInRange(invoices, 7, 13);
+    if (prev7 <= 0) {
+      return last7 > 0 ? 100 : null;
+    }
+    return ((last7 - prev7) / prev7) * 100;
+  }
+
+  private sumInRange(invoices: InvoiceRow[], fromDaysAgo: number, toDaysAgo: number): number {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let sum = 0;
+    for (const inv of invoices) {
+      const d = this.parseDate(inv.invoiceDate);
+      if (!d) {
+        continue;
+      }
+      const day = new Date(d);
+      day.setHours(0, 0, 0, 0);
+      const age = Math.floor((today.getTime() - day.getTime()) / 86_400_000);
+      if (age >= fromDaysAgo && age <= toDaysAgo) {
+        sum += Number(inv.netAmount || 0);
+      }
+    }
+    return sum;
+  }
+
+  private toPendingAction(input: {
+    id: string;
+    module: DashboardActionModule;
+    title: string;
+    subtitle: string;
+    date?: string | null;
+    route: string;
+  }): DashboardPendingAction {
+    const ageDays = this.ageInDays(input.date);
+    return {
+      ...input,
+      ageDays,
+      isStale: ageDays >= DashboardOverviewService.STALE_DAYS,
+    };
+  }
+
+  private ageInDays(value?: string | null): number {
+    const d = this.parseDate(value);
+    if (!d) {
+      return 0;
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const day = new Date(d);
+    day.setHours(0, 0, 0, 0);
+    return Math.max(0, Math.floor((today.getTime() - day.getTime()) / 86_400_000));
   }
 
   private buildLowStock(
@@ -267,7 +506,6 @@ export class DashboardOverviewService {
       }
     }
 
-    // Aggregate available qty by item+store (batches may repeat)
     const aggregated = new Map<string, CurrentStockDetail & { availableQuantity: number }>();
     for (const row of stockItems) {
       if (!row.itemId) {
@@ -310,19 +548,29 @@ export class DashboardOverviewService {
     return alerts.sort((a, b) => a.availableQty / a.minQty - b.availableQty / b.minQty);
   }
 
-  private buildSalesSeries(invoices: SalesInvoiceListItem[], days: number): DashboardSalesPoint[] {
-    const mapTotals = new Map<string, number>();
+  private buildSalesSeries(invoices: InvoiceRow[], days: number): DashboardSalesPoint[] {
+    const mapTotals = new Map<string, { total: number; count: number }>();
     for (const inv of invoices) {
-      if (inv.status === SalesInvoiceStatus.Cancelled) {
-        continue;
-      }
       const d = this.parseDate(inv.invoiceDate);
       if (!d) {
         continue;
       }
       const key = this.toDateKey(d);
-      mapTotals.set(key, (mapTotals.get(key) ?? 0) + Number(inv.netAmount || 0));
+      const prev = mapTotals.get(key) ?? { total: 0, count: 0 };
+      prev.total += Number(inv.netAmount || 0);
+      prev.count += 1;
+      mapTotals.set(key, prev);
     }
+
+    const weekdayKeys = [
+      'dashboard.weekday.sun',
+      'dashboard.weekday.mon',
+      'dashboard.weekday.tue',
+      'dashboard.weekday.wed',
+      'dashboard.weekday.thu',
+      'dashboard.weekday.fri',
+      'dashboard.weekday.sat',
+    ] as const;
 
     const points: DashboardSalesPoint[] = [];
     const today = new Date();
@@ -332,20 +580,21 @@ export class DashboardOverviewService {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
       const key = this.toDateKey(d);
+      const bucket = mapTotals.get(key);
       points.push({
         dateKey: key,
         label: `${d.getDate()}/${d.getMonth() + 1}`,
-        total: mapTotals.get(key) ?? 0,
+        weekday: weekdayKeys[d.getDay()],
+        total: bucket?.total ?? 0,
+        count: bucket?.count ?? 0,
       });
     }
 
     return points;
   }
 
-  private sumAmount(items: SalesInvoiceListItem[]): number {
-    return items
-      .filter((x) => x.status !== SalesInvoiceStatus.Cancelled)
-      .reduce((sum, x) => sum + Number(x.netAmount || 0), 0);
+  private sumAmount(items: InvoiceRow[]): number {
+    return items.reduce((sum, x) => sum + Number(x.netAmount || 0), 0);
   }
 
   private parseDate(value?: string | null): Date | null {

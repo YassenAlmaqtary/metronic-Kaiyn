@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/api/auth.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { AccessControlService } from '../../../core/services/access-control.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { MetronicInitService } from '../../../core/services/metronic-init.service';
 import { LanguageToggleComponent } from '../../../partials/language-toggle/language-toggle.component';
@@ -25,6 +26,7 @@ export class SignInComponent implements AfterViewInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+  private accessControl = inject(AccessControlService);
   private languageService = inject(LanguageService);
   private metronicInitService = inject(MetronicInitService);
 
@@ -66,8 +68,16 @@ export class SignInComponent implements AfterViewInit {
 
     this.authService.login({ userName, password }).subscribe({
       next: () => {
-        this.loading.set(false);
-        this.router.navigate(['/demo1']);
+        this.accessControl.load().subscribe({
+          next: () => {
+            this.loading.set(false);
+            this.router.navigate(['/demo1']);
+          },
+          error: () => {
+            this.loading.set(false);
+            this.router.navigate(['/demo1']);
+          },
+        });
       },
       error: (error: { error?: { message?: string; errors?: string[] }; message?: string }) => {
         this.loading.set(false);
