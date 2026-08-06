@@ -2,6 +2,7 @@ export const menuAr = {
   'menu.dashboard': 'لوحة التحكم',
   'menu.sales': 'المبيعات',
   'menu.sales.invoices': 'الفواتير',
+  'menu.sales.pos': 'نقاط البيع',
   'menu.sales.customerGroups': 'مجموعات العملاء',
   'menu.sales.customers': 'العملاء',
   'menu.sales.salesmen': 'المندوبون',

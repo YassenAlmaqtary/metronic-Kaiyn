@@ -7,6 +7,7 @@ import { customerGroupsEn } from './customer-groups.en';
 import { customersEn } from './customers.en';
 import { salesmenEn } from './salesmen.en';
 import { salesInvoicesEn } from './sales-invoices.en';
+import { posEn } from './pos.en';
 import { productGroupsEn } from './product-groups.en';
 import { productsEn } from './products.en';
 import { pricingEn } from './pricing.en';
@@ -58,6 +59,7 @@ export const en = mergeLocale(
   customersEn,
   salesmenEn,
   salesInvoicesEn,
+  posEn,
   productGroupsEn,
   productsEn,
   pricingEn,

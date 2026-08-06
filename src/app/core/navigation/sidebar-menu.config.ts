@@ -36,6 +36,12 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         permission: 'salesmen.view',
       },
       {
+        id: 'sales-pos',
+        labelKey: 'menu.sales.pos',
+        route: '/demo1/sales/pos',
+        permission: 'salesInvoices.view',
+      },
+      {
         id: 'sales-invoices',
         labelKey: 'menu.sales.invoices',
         route: '/demo1/sales/sales-invoices',

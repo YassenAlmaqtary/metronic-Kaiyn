@@ -2,6 +2,7 @@ export const menuEn = {
   'menu.dashboard': 'Dashboard',
   'menu.sales': 'Sales',
   'menu.sales.invoices': 'Invoices',
+  'menu.sales.pos': 'Point of Sale',
   'menu.sales.customerGroups': 'Customer Groups',
   'menu.sales.customers': 'Customers',
   'menu.sales.salesmen': 'Salesmen',

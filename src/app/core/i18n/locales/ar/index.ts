@@ -7,6 +7,7 @@ import { customerGroupsAr } from './customer-groups.ar';
 import { customersAr } from './customers.ar';
 import { salesmenAr } from './salesmen.ar';
 import { salesInvoicesAr } from './sales-invoices.ar';
+import { posAr } from './pos.ar';
 import { productGroupsAr } from './product-groups.ar';
 import { productsAr } from './products.ar';
 import { pricingAr } from './pricing.ar';
@@ -58,6 +59,7 @@ export const ar = mergeLocale(
   customersAr,
   salesmenAr,
   salesInvoicesAr,
+  posAr,
   productGroupsAr,
   productsAr,
   pricingAr,
