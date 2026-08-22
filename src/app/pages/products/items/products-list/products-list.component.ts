@@ -7,6 +7,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
 import { ProductsService } from '../../../../core/services/products.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type ProductFilter = 'all' | 'active';
 
@@ -82,6 +84,26 @@ export class ProductsListComponent implements OnInit {
 
   setFilter(filter: ProductFilter): void {
     this.filter.set(filter);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('products'),
+      [
+        this.language.translate('products.productName'),
+        this.language.translate('products.proCode'),
+        this.language.translate('products.group'),
+        this.language.translate('products.status'),
+      ],
+      this.filteredProducts().map((product) => [
+        product.productName ?? '',
+        product.proCode ?? '',
+        product.groupName ?? '',
+        product.status !== false
+          ? this.language.translate('products.active')
+          : this.language.translate('products.inactive'),
+      ]),
+    );
   }
 
   openDeleteDialog(product: Product): void {

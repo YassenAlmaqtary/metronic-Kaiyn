@@ -7,6 +7,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { CustomerGroupsService } from '../../../../core/services/customer-groups.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type CustomerGroupFilter = 'all' | 'active';
 
@@ -89,6 +91,26 @@ export class CustomerGroupsListComponent implements OnInit {
 
   setFilter(filter: CustomerGroupFilter): void {
     this.filter.set(filter);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('customer-groups'),
+      [
+        this.language.translate('customerGroups.groupNameAr'),
+        this.language.translate('customerGroups.groupNameEn'),
+        this.language.translate('customerGroups.accountName'),
+        this.language.translate('customerGroups.status'),
+      ],
+      this.filteredCustomerGroups().map((group) => [
+        group.groupNameAr ?? '',
+        group.groupNameEn ?? '',
+        group.accountName ?? '',
+        group.isActive
+          ? this.language.translate('customerGroups.active')
+          : this.language.translate('customerGroups.inactive'),
+      ]),
+    );
   }
 
   openDeleteDialog(group: CustomerGroup): void {

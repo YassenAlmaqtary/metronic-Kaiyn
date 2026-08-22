@@ -39,18 +39,34 @@
 					{{ 'stockTransfers.filters.pending' | translate }}
 				</button>
 				<input
-					class="kt-input ms-auto max-w-xs"
+					class="kt-input max-w-xs"
 					type="search"
 					[ngModel]="searchTerm()"
 					(ngModelChange)="searchTerm.set($event)"
 					[placeholder]="'stockTransfers.search' | translate" />
+				<button type="button" class="kt-btn kt-btn-sm kt-btn-light ms-auto" [disabled]="!filtered().length" (click)="exportCsv()">
+					<i class="ki-filled ki-file-down"></i>
+					{{ 'common.exportCsv' | translate }}
+				</button>
 			</div>
 
 			@if (loading()) {
 				<div class="py-12 text-center">{{ 'stockTransfers.loading' | translate }}</div>
 			} @else if (!filtered().length) {
-				<div class="py-12 text-center text-secondary-foreground">
-					{{ 'stockTransfers.empty' | translate }}
+				<div class="flex flex-col items-center justify-center gap-4 py-20 text-center px-6">
+					<div class="relative">
+						<div class="absolute inset-0 rounded-full bg-primary/10 blur-2xl scale-150"></div>
+						<div class="relative flex size-16 items-center justify-center rounded-2xl bg-muted/60 text-muted-foreground">
+							<i class="ki-filled ki-arrows-loop text-3xl"></i>
+						</div>
+					</div>
+					<div>
+						<p class="font-medium text-mono">{{ 'stockTransfers.empty' | translate }}</p>
+						<p class="text-sm text-secondary-foreground mt-1 max-w-md">{{ 'stockTransfers.emptyHint' | translate }}</p>
+					</div>
+					<a class="kt-btn kt-btn-primary kt-btn-sm" routerLink="/demo1/inventory/stock-transfers/new">
+						{{ 'stockTransfers.add' | translate }}
+					</a>
 				</div>
 			} @else {
 				<div class="kt-scrollable-x-auto">

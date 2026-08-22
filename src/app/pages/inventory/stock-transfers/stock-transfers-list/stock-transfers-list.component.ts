@@ -9,6 +9,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
 import { StockTransfersService } from '../../../../core/services/stock-transfers.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type ListFilter = 'all' | 'pending';
 
@@ -98,6 +100,26 @@ export class StockTransfersListComponent implements OnInit {
     const from = [x.fromBranchName || '—', x.fromStoreName || '—'].join(' / ');
     const to = [x.toBranchName || '—', x.toStoreName || '—'].join(' / ');
     return `${from} → ${to}`;
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('stock-transfers'),
+      [
+        this.language.translate('stockTransfers.number'),
+        this.language.translate('stockTransfers.date'),
+        `${this.language.translate('stockTransfers.fromStore')} → ${this.language.translate('stockTransfers.toStore')}`,
+        this.language.translate('stockTransfers.total'),
+        this.language.translate('stockTransfers.status'),
+      ],
+      this.filtered().map((x) => [
+        x.transferNumber ?? x.transferId,
+        x.transferDate ?? '',
+        this.routeLabel(x),
+        x.totalAmount ?? 0,
+        this.language.translate(this.statusKey(x.status, x.datePosted)),
+      ]),
+    );
   }
 
   post(x: StockTransferListItem): void {

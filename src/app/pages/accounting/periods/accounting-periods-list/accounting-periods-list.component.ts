@@ -9,6 +9,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { AccountingPeriodsService } from '../../../../core/services/accounting-periods.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type PeriodFilter = 'all' | 'open' | 'closed';
 type PeriodAction = 'delete' | 'close' | 'reopen';
@@ -89,6 +91,28 @@ export class AccountingPeriodsListComponent implements OnInit {
 
   setFilter(filter: PeriodFilter): void {
     this.filter.set(filter);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('accounting-periods'),
+      [
+        this.language.translate('accountingPeriods.periodName'),
+        this.language.translate('accountingPeriods.fiscalYear'),
+        this.language.translate('accountingPeriods.startDate'),
+        this.language.translate('accountingPeriods.endDate'),
+        this.language.translate('accountingPeriods.status'),
+      ],
+      this.filteredPeriods().map((period) => [
+        period.periodName ?? '',
+        period.fiscalYear ?? '',
+        period.startDate ?? '',
+        period.endDate ?? '',
+        period.isClosed
+          ? this.language.translate('accountingPeriods.closed')
+          : this.language.translate('accountingPeriods.open'),
+      ]),
+    );
   }
 
   openActionDialog(period: AccountingPeriod, action: PeriodAction): void {

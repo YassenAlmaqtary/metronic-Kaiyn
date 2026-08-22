@@ -8,6 +8,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
 import { OpeningBalancesService } from '../../../../core/services/opening-balances.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type OpeningBalanceFilter = 'all' | 'draft' | 'posted';
 type OpeningBalanceAction = 'delete' | 'post';
@@ -101,6 +103,30 @@ export class OpeningBalancesListComponent implements OnInit {
       (item.accounts?.length ?? 0) +
       (item.partners?.length ?? 0) +
       (item.inventoryItems?.length ?? 0)
+    );
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('opening-balances'),
+      [
+        this.language.translate('openingBalances.openingId'),
+        this.language.translate('openingBalances.period'),
+        this.language.translate('openingBalances.year'),
+        this.language.translate('openingBalances.branch'),
+        this.language.translate('openingBalances.currency'),
+        this.language.translate('openingBalances.status'),
+      ],
+      this.filteredItems().map((item) => [
+        item.openingId,
+        item.periodName ?? item.periodId ?? '',
+        item.year ?? '',
+        item.branchName ?? '',
+        item.currencyName ?? '',
+        item.isPosted
+          ? this.language.translate('openingBalances.posted')
+          : this.language.translate('openingBalances.draft'),
+      ]),
     );
   }
 

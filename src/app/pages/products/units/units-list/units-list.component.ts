@@ -7,6 +7,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
 import { UnitsService } from '../../../../core/services/units.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type UnitFilter = 'all' | 'active';
 
@@ -82,6 +84,22 @@ export class UnitsListComponent implements OnInit {
 
   setFilter(filter: UnitFilter): void {
     this.filter.set(filter);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('units'),
+      [
+        this.language.translate('units.unitName'),
+        this.language.translate('units.status'),
+      ],
+      this.filteredUnits().map((unit) => [
+        unit.unitName ?? '',
+        unit.statusUnit !== false
+          ? this.language.translate('units.active')
+          : this.language.translate('units.inactive'),
+      ]),
+    );
   }
 
   openDeleteDialog(unit: Unit): void {

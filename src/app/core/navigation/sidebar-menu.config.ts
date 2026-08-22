@@ -41,7 +41,7 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         route: '/demo1/sales/sales-invoices',
         permission: 'salesInvoices.view',
       },
-      { id: 'sales-quotes', labelKey: 'menu.sales.quotes' },
+      { id: 'sales-quotes', labelKey: 'menu.sales.quotes', route: '/demo1/sales/quotes' },
     ],
   },
   {

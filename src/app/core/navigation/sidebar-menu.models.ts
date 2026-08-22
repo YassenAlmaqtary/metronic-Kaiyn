@@ -19,7 +19,7 @@ export interface SidebarMenuLink {
    * `group` = visual subgroup header (e.g. العمليات) — not navigable.
    * Default / omitted = normal link.
    */
-  kind?: 'link' | 'group';
+  kind?: 'link' | 'group' | 'comingSoon';
 }
 
 export interface SidebarMenuSection {

@@ -10,6 +10,8 @@ import { BranchesService } from '../../../core/services/branches.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { PosService } from '../../../core/services/pos.service';
 import { StoresService } from '../../../core/services/stores.service';
+import { csvExportFilename } from '../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../core/utils/download-csv';
 
 @Component({
   selector: 'app-pos-devices-list',
@@ -100,6 +102,28 @@ export class PosDevicesListComponent implements OnInit {
     this.formStoreId.set(this.stores()[0]?.storeId ?? null);
     this.showForm.set(true);
     this.successMessage.set('');
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('pos-devices'),
+      [
+        '#',
+        this.language.translate('posAdmin.devices.name'),
+        this.language.translate('posAdmin.common.branch'),
+        this.language.translate('posAdmin.common.store'),
+        this.language.translate('posAdmin.common.status'),
+      ],
+      this.filtered().map((device) => [
+        device.deviceId,
+        device.deviceName ?? '',
+        this.branchName().get(device.branchId) ?? device.branchId,
+        this.storeName().get(device.storeId) ?? device.storeId,
+        device.isActive !== false
+          ? this.language.translate('posAdmin.common.active')
+          : this.language.translate('posAdmin.common.inactive'),
+      ]),
+    );
   }
 
   create(): void {

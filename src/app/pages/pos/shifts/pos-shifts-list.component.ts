@@ -9,6 +9,8 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../core/services/branches.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { PosService } from '../../../core/services/pos.service';
+import { csvExportFilename } from '../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../core/utils/download-csv';
 
 @Component({
   selector: 'app-pos-shifts-list',
@@ -26,6 +28,7 @@ export class PosShiftsListComponent implements OnInit {
   saving = signal(false);
   errorMessage = signal('');
   successMessage = signal('');
+  searchTerm = signal('');
   statusFilter = signal<'all' | 'Open' | 'Closed'>('all');
   branchFilter = signal<number | null>(null);
   closeTarget = signal<PosShift | null>(null);
@@ -42,6 +45,7 @@ export class PosShiftsListComponent implements OnInit {
   filtered = computed(() => {
     const status = this.statusFilter();
     const branchId = this.branchFilter();
+    const term = this.searchTerm().trim().toLowerCase();
     return this.shifts().filter((s) => {
       if (status !== 'all') {
         const st = String(s.status || '').toLowerCase();
@@ -54,6 +58,15 @@ export class PosShiftsListComponent implements OnInit {
       }
       if (branchId != null && s.branchId !== branchId) {
         return false;
+      }
+      if (term) {
+        const haystack = [s.shiftId, s.cashierId, s.deviceId, s.branchId, s.status]
+          .filter((v) => v != null)
+          .map((v) => String(v).toLowerCase())
+          .join(' ');
+        if (!haystack.includes(term)) {
+          return false;
+        }
       }
       return true;
     });
@@ -90,6 +103,32 @@ export class PosShiftsListComponent implements OnInit {
 
   isOpen(shift: PosShift): boolean {
     return String(shift.status || '').toLowerCase() !== 'closed';
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('pos-shifts'),
+      [
+        '#',
+        this.language.translate('posAdmin.common.branch'),
+        this.language.translate('posAdmin.shifts.cashier'),
+        this.language.translate('posAdmin.shifts.device'),
+        this.language.translate('posAdmin.shifts.openedAt'),
+        this.language.translate('posAdmin.shifts.opening'),
+        this.language.translate('posAdmin.common.status'),
+      ],
+      this.filtered().map((shift) => [
+        shift.shiftId,
+        shift.branchId != null ? this.branchName().get(shift.branchId) ?? shift.branchId : '',
+        shift.cashierId,
+        shift.deviceId,
+        shift.openedAt ?? '',
+        shift.openingBalance ?? 0,
+        this.isOpen(shift)
+          ? this.language.translate('posAdmin.shifts.open')
+          : this.language.translate('posAdmin.shifts.closed'),
+      ]),
+    );
   }
 
   askClose(shift: PosShift): void {

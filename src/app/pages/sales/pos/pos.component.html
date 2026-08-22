@@ -119,6 +119,10 @@
 						<div class="pos-gate-icon warn"><i class="ki-filled ki-profile-user"></i></div>
 						<h2>{{ 'pos.cashierRequiredTitle' | translate }}</h2>
 						<p>{{ 'pos.cashierRequired' | translate }}</p>
+						<a class="kt-btn pos-pay-btn mt-4" routerLink="/demo1/pos/cashiers">
+							<i class="ki-filled ki-setting-2"></i>
+							{{ 'pos.cashierSetup' | translate }}
+						</a>
 					} @else {
 						<div class="pos-gate-icon"><i class="ki-filled ki-shop"></i></div>
 						<h2>{{ 'pos.selectStoreTitle' | translate }}</h2>
@@ -602,6 +606,64 @@
 					</button>
 					<button type="button" class="kt-btn pos-pay-btn" [disabled]="saving() || stillDue() > 0" (click)="confirmPay()">
 						{{ saving() ? ('pos.saving' | translate) : ('pos.confirmPay' | translate) }}
+					</button>
+				</div>
+			</div>
+		</div>
+	}
+
+	@if (confirmOpen()) {
+		<div class="pos-modal-backdrop" (click)="closeConfirmDialog()">
+			<div class="pos-modal pos-modal-enter" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+				<div class="pos-modal-head">
+					<div>
+						<div class="pos-modal-kicker">POS</div>
+						<h3>{{ 'pos.confirmTitle' | translate }}</h3>
+					</div>
+				</div>
+				<div class="pos-modal-body">
+					<p class="text-sm text-secondary-foreground">{{ confirmMessage() }}</p>
+				</div>
+				<div class="pos-modal-foot">
+					<button type="button" class="kt-btn kt-btn-light" (click)="closeConfirmDialog()">
+						{{ 'pos.cancel' | translate }}
+					</button>
+					<button type="button" class="kt-btn pos-pay-btn" (click)="confirmDialogYes()">
+						{{ 'common.confirm' | translate }}
+					</button>
+				</div>
+			</div>
+		</div>
+	}
+
+	@if (batchPickerOpen()) {
+		<div class="pos-modal-backdrop" (click)="cancelBatchPicker()">
+			<div class="pos-modal pos-modal-enter" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+				<div class="pos-modal-head">
+					<div>
+						<div class="pos-modal-kicker">POS</div>
+						<h3>{{ 'pos.selectBatchTitle' | translate }}</h3>
+					</div>
+				</div>
+				<div class="pos-modal-body space-y-2">
+					@for (batch of batchOptions(); track $index) {
+						<button
+							type="button"
+							class="flex w-full items-center justify-between rounded-lg border border-border px-4 py-3 text-start hover:bg-muted/50 transition-colors"
+							(click)="selectBatchOption(batch)">
+							<span class="font-medium">{{ batch.batchNumber || '—' }}</span>
+							<span class="text-xs text-secondary-foreground">
+								{{ batch.availableQty ?? 0 }}
+								@if (batch.expiryDate) {
+									· {{ batch.expiryDate | date: 'shortDate' }}
+								}
+							</span>
+						</button>
+					}
+				</div>
+				<div class="pos-modal-foot">
+					<button type="button" class="kt-btn kt-btn-light" (click)="cancelBatchPicker()">
+						{{ 'pos.cancel' | translate }}
 					</button>
 				</div>
 			</div>

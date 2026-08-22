@@ -15,6 +15,7 @@ import { RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
 
 import { AuthService } from '../../../core/api/auth.service';
+import { extractApiErrorMessage } from '../../../core/api/utils/api-response.util';
 import { Branch } from '../../../core/api/models/branch.models';
 import { TranslationKey } from '../../../core/i18n';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
@@ -146,9 +147,11 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
           this.loading.set(false);
           setTimeout(() => this.renderAllCharts(data), 0);
         },
-        error: () => {
+        error: (err) => {
           this.loading.set(false);
-          this.errorMessage.set(this.language.translate('dashboard.loadError'));
+          this.errorMessage.set(
+            extractApiErrorMessage(err, this.language.translate('dashboard.loadError')),
+          );
         },
       });
   }
@@ -408,6 +411,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderSalesChart(data);
     this.renderCashflowChart(data);
     this.renderAttentionChart(data);
+    this.renderDocsMixChart(data);
     this.renderLowStockChart(data);
   }
 
@@ -693,6 +697,76 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
         strokeDashArray: 5,
         yaxis: { lines: { show: true } },
         xaxis: { lines: { show: false } },
+      },
+      tooltip: {
+        y: { formatter: (v: number) => String(v) },
+      },
+    });
+  }
+
+  private renderDocsMixChart(data: DashboardOverview): void {
+    if (!data.documentsMix.length) {
+      this.charts.get('erp_docs_mix_chart')?.destroy();
+      this.charts.delete('erp_docs_mix_chart');
+      return;
+    }
+
+    const labelMap: Record<string, TranslationKey> = {
+      salesInvoice: 'dashboard.module.salesInvoice',
+      stockReceiving: 'dashboard.module.stockReceiving',
+      stockIssue: 'dashboard.module.stockIssue',
+      stockTransfer: 'dashboard.module.stockTransfer',
+      stockTaking: 'dashboard.module.stockTaking',
+      stockAdjustment: 'dashboard.module.stockAdjustment',
+    };
+
+    this.upsertChart('erp_docs_mix_chart', {
+      series: data.documentsMix.map((x) => x.value),
+      labels: data.documentsMix.map((x) =>
+        this.language.translate(labelMap[x.key] ?? 'dashboard.module.salesInvoice'),
+      ),
+      chart: {
+        type: 'donut',
+        height: 280,
+        fontFamily: 'inherit',
+        animations: { enabled: true, speed: 700 },
+      },
+      colors: ['#6366f1', '#22c55e', '#f59e0b', '#0ea5e9', '#ec4899', '#8b5cf6'],
+      stroke: { width: 0 },
+      legend: {
+        position: 'bottom',
+        fontSize: '11px',
+        labels: { colors: 'var(--color-muted-foreground)' },
+      },
+      dataLabels: { enabled: false },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: '72%',
+            labels: {
+              show: true,
+              name: {
+                show: true,
+                fontSize: '12px',
+                color: 'var(--color-muted-foreground)',
+              },
+              value: {
+                show: true,
+                fontSize: '18px',
+                fontWeight: 700,
+                color: 'var(--color-foreground)',
+              },
+              total: {
+                show: true,
+                label: this.language.translate('dashboard.chart.docsTotal'),
+                fontSize: '12px',
+                color: 'var(--color-muted-foreground)',
+                formatter: () =>
+                  String(data.documentsMix.reduce((sum, x) => sum + x.value, 0)),
+              },
+            },
+          },
+        },
       },
       tooltip: {
         y: { formatter: (v: number) => String(v) },

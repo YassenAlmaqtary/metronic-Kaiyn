@@ -48,6 +48,10 @@
 						{{ 'openingBalances.filter.posted' | translate }}
 					</button>
 				</div>
+				<button type="button" class="kt-btn kt-btn-sm kt-btn-light" [disabled]="!filteredItems().length" (click)="exportCsv()">
+					<i class="ki-filled ki-file-down"></i>
+					{{ 'common.exportCsv' | translate }}
+				</button>
 			</div>
 			<span class="text-sm text-secondary-foreground">{{ filteredItems().length }}</span>
 		</div>

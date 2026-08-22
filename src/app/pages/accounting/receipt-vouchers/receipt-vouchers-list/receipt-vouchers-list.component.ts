@@ -10,6 +10,8 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { ReceiptVouchersService } from '../../../../core/services/receipt-vouchers.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type VoucherFilter = 'all' | 'pending' | 'approved';
 type VoucherAction = 'delete' | 'approve';
@@ -136,6 +138,32 @@ export class ReceiptVouchersListComponent implements OnInit {
     this.searchTerm.set('');
     this.filter.set('all');
     this.branchFilter.set(null);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('receipt-vouchers'),
+      [
+        this.language.translate('receiptVouchers.voucherNumber'),
+        this.language.translate('receiptVouchers.voucherDate'),
+        this.language.translate('receiptVouchers.payerName'),
+        this.language.translate('receiptVouchers.paymentType'),
+        this.language.translate('receiptVouchers.branch'),
+        this.language.translate('receiptVouchers.totalAmount'),
+        this.language.translate('receiptVouchers.status'),
+      ],
+      this.filteredVouchers().map((voucher) => [
+        voucher.voucherNumber ?? voucher.voucherId,
+        voucher.voucherDate ?? '',
+        voucher.payerName ?? '',
+        voucher.paymentTypeName ?? voucher.paymentTypeId ?? '',
+        voucher.branchName ?? '',
+        voucher.totalAmount ?? 0,
+        voucher.isApproved
+          ? this.language.translate('receiptVouchers.approved')
+          : this.language.translate('receiptVouchers.pending'),
+      ]),
+    );
   }
 
   openActionDialog(voucher: ReceiptVoucher, action: VoucherAction): void {

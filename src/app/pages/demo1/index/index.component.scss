@@ -7,7 +7,8 @@
 }
 
 .dash-kpi-card,
-.dash-panel {
+.dash-panel,
+.dash-mini-kpi {
 	border-radius: var(--dash-radius);
 	border: 1px solid var(--color-border);
 	background: var(--color-card, #fff);
@@ -16,6 +17,40 @@
 		transform 0.2s ease,
 		box-shadow 0.2s ease,
 		border-color 0.2s ease;
+}
+
+.dash-mini-kpi {
+	display: block;
+	padding: 0.9rem 1rem;
+	text-decoration: none;
+	color: inherit;
+}
+
+.dash-mini-kpi:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 10px 24px -16px color-mix(in oklab, var(--color-foreground) 24%, transparent);
+	border-color: color-mix(in oklab, var(--color-primary) 30%, var(--color-border));
+}
+
+.dash-mini-kpi-label {
+	font-size: 0.72rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--color-secondary-foreground);
+}
+
+.dash-mini-kpi-value {
+	font-size: 1.35rem;
+	font-weight: 700;
+	color: var(--color-foreground);
+	margin-top: 0.15rem;
+}
+
+.dash-mini-kpi-hint {
+	font-size: 0.72rem;
+	color: var(--color-secondary-foreground);
+	margin-top: 0.2rem;
 }
 
 .dash-kpi-card:hover,

@@ -8,6 +8,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
 import { SystemLogService } from '../../../../core/services/system-log.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 @Component({
   selector: 'app-system-logs-list',
@@ -73,6 +75,28 @@ export class SystemLogsListComponent implements OnInit {
 
   onSearchChange(value: string): void {
     this.searchTerm.set(value);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('system-logs'),
+      [
+        this.language.translate('systemLogs.actionDate'),
+        this.language.translate('systemLogs.userName'),
+        this.language.translate('systemLogs.actionType'),
+        this.language.translate('systemLogs.tableName'),
+        this.language.translate('systemLogs.recordId'),
+        this.language.translate('systemLogs.description'),
+      ],
+      this.filteredLogs().map((log) => [
+        log.actionDate ?? '',
+        log.userName ?? '',
+        log.actionType ?? '',
+        log.tableName ?? '',
+        log.recordID ?? '',
+        log.description ?? '',
+      ]),
+    );
   }
 
   openDetails(log: SystemLog): void {

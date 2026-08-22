@@ -61,6 +61,14 @@
 					<option [value]="SalesInvoiceStatus.Posted">{{ 'salesInvoices.status.posted' | translate }}</option>
 					<option [value]="SalesInvoiceStatus.Cancelled">{{ 'salesInvoices.status.cancelled' | translate }}</option>
 				</select>
+				<button
+					type="button"
+					class="kt-btn kt-btn-sm kt-btn-light ms-auto"
+					[disabled]="!filteredInvoices().length"
+					(click)="exportCsv()">
+					<i class="ki-filled ki-file-down"></i>
+					{{ 'common.exportCsv' | translate }}
+				</button>
 			</div>
 			<span class="text-sm text-secondary-foreground">{{ filteredInvoices().length }}</span>
 		</div>

@@ -8,6 +8,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { FiscalYearsService } from '../../../../core/services/fiscal-years.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type FiscalYearFilter = 'all' | 'open' | 'closed';
 type FiscalYearAction = 'delete' | 'close' | 'reopen';
@@ -87,6 +89,28 @@ export class FiscalYearsListComponent implements OnInit {
 
   setFilter(filter: FiscalYearFilter): void {
     this.filter.set(filter);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('fiscal-years'),
+      [
+        this.language.translate('fiscalYears.year'),
+        this.language.translate('fiscalYears.description'),
+        this.language.translate('fiscalYears.startDate'),
+        this.language.translate('fiscalYears.endDate'),
+        this.language.translate('fiscalYears.status'),
+      ],
+      this.filteredFiscalYears().map((item) => [
+        item.year ?? '',
+        item.description ?? '',
+        item.startDate ?? '',
+        item.endDate ?? '',
+        item.isClosed
+          ? this.language.translate('fiscalYears.closed')
+          : this.language.translate('fiscalYears.open'),
+      ]),
+    );
   }
 
   openActionDialog(item: FiscalYear, action: FiscalYearAction): void {

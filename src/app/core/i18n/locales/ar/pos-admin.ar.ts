@@ -22,6 +22,7 @@ export const posAdminAr = {
   'posAdmin.devices.loadError': 'تعذر تحميل الأجهزة',
   'posAdmin.devices.saveError': 'تعذر حفظ الجهاز',
   'posAdmin.devices.nameRequired': 'اسم الجهاز مطلوب',
+  'posAdmin.devices.emptyHint': 'سجّل جهاز نقطة بيع واربطه بالفرع والمخزن',
 
   'posAdmin.cashiers.title': 'إدارة الكاشير',
   'posAdmin.cashiers.subtitle': 'ربط المستخدمين بصلاحية الكاشير لنقاط البيع',
@@ -31,6 +32,7 @@ export const posAdminAr = {
   'posAdmin.cashiers.saveSuccess': 'تم حفظ الكاشير',
   'posAdmin.cashiers.loadError': 'تعذر تحميل الكاشيرين',
   'posAdmin.cashiers.saveError': 'تعذر حفظ الكاشير',
+  'posAdmin.cashiers.emptyHint': 'أضف مستخدماً ككاشير لنقاط البيع للبدء',
 
   'posAdmin.shifts.title': 'إدارة الورديات',
   'posAdmin.shifts.subtitle': 'متابعة الورديات المفتوحة والمغلقة',
@@ -47,6 +49,7 @@ export const posAdminAr = {
   'posAdmin.shifts.loadError': 'تعذر تحميل الورديات',
   'posAdmin.shifts.closeError': 'تعذر إغلاق الوردية',
   'posAdmin.shifts.closingBalance': 'رصيد الإغلاق',
+  'posAdmin.shifts.emptyHint': 'تظهر الورديات هنا عند فتحها من نقطة البيع',
 
   'posAdmin.settings.title': 'إعدادات نقاط البيع',
   'posAdmin.settings.subtitle': 'ضبط سلوك نقطة البيع حسب الفرع والجهاز',

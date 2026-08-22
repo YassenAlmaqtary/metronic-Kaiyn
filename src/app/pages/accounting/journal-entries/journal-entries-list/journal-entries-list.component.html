@@ -123,6 +123,14 @@
 				</div>
 
 				<div class="flex items-center gap-2">
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm kt-btn-light"
+						[disabled]="!filteredEntries().length"
+						(click)="exportCsv()">
+						<i class="ki-filled ki-file-down"></i>
+						{{ 'common.exportCsv' | translate }}
+					</button>
 					@if (hasActiveFilters()) {
 						<button type="button" class="kt-btn kt-btn-sm kt-btn-ghost" (click)="clearFilters()">
 							<i class="ki-filled ki-cross-circle"></i>

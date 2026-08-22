@@ -18,6 +18,7 @@ import { BranchesService } from '../../../../core/services/branches.service';
 import { CustomersService } from '../../../../core/services/customers.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { SalesInvoicesService } from '../../../../core/services/sales-invoices.service';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type InvoiceFilter = 'all' | 'drafts';
 
@@ -185,6 +186,28 @@ export class SalesInvoicesListComponent implements OnInit {
       default:
         return 'kt-badge-outline';
     }
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      `sales-invoices-${new Date().toISOString().slice(0, 10)}.csv`,
+      [
+        this.language.translate('salesInvoices.invoiceNo'),
+        this.language.translate('salesInvoices.invoiceDate'),
+        this.language.translate('salesInvoices.customer'),
+        this.language.translate('salesInvoices.branch'),
+        this.language.translate('salesInvoices.status'),
+        this.language.translate('salesInvoices.netAmount'),
+      ],
+      this.filteredInvoices().map((invoice) => [
+        invoice.invoiceNo ?? invoice.invoiceId,
+        invoice.invoiceDate,
+        this.customerLabel(invoice.customerId),
+        this.branchLabel(invoice.branchId),
+        this.language.translate(this.statusLabel(invoice.status)),
+        invoice.netAmount,
+      ]),
+    );
   }
 
   isDraft(invoice: SalesInvoiceListItem): boolean {

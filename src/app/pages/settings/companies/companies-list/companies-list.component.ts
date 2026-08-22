@@ -8,6 +8,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { CompaniesService } from '../../../../core/services/companies.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 @Component({
   selector: 'app-companies-list',
@@ -84,6 +86,24 @@ export class CompaniesListComponent implements OnInit {
 
   onSearchChange(value: string): void {
     this.searchTerm.set(value);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('companies'),
+      [
+        this.language.translate('companies.enName'),
+        this.language.translate('companies.code'),
+        this.language.translate('companies.commercialRegister'),
+        this.language.translate('companies.taxNumber'),
+      ],
+      this.filteredCompanies().map((company) => [
+        this.companyName(company),
+        company.companyCode ?? '',
+        company.commercialRegister ?? '',
+        company.taxNumber ?? '',
+      ]),
+    );
   }
 
   openDeleteDialog(company: Company): void {

@@ -10,6 +10,8 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BankAccountsService } from '../../../../core/services/bank-accounts.service';
 import { CheckBooksService } from '../../../../core/services/check-books.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type CheckBookFilter = 'all' | 'lowStock';
 type CheckBookAction = 'delete' | 'toggle';
@@ -171,6 +173,26 @@ export class CheckBooksListComponent implements OnInit {
       default:
         return status != null ? String(status) : '—';
     }
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('check-books'),
+      [
+        this.language.translate('checkBooks.checkBookNumber'),
+        this.language.translate('checkBooks.checkBookName'),
+        this.language.translate('checkBooks.bankAccount'),
+        this.language.translate('checkBooks.remainingChecks'),
+        this.language.translate('checkBooks.status'),
+      ],
+      this.filteredCheckBooks().map((item) => [
+        item.checkBookNumber ?? item.checkBookID,
+        item.checkBookName ?? '',
+        item.bankAccountName ?? item.bankAccountID ?? '',
+        item.remainingChecks ?? 0,
+        this.statusLabel(item.status),
+      ]),
+    );
   }
 
   openActionDialog(item: CheckBook, action: CheckBookAction): void {

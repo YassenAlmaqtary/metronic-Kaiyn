@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 
 import { AuthService } from '../../../core/api/auth.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { GlobalSearchService } from '../../../core/services/global-search.service';
 import { LanguageToggleComponent } from '../../../partials/language-toggle/language-toggle.component';
 import { ThemeToggleComponent } from '../../../partials/theme-toggle/theme-toggle.component';
 import { ThemeToggleService } from '../../../partials/theme-toggle/theme-toggle.service';
@@ -14,6 +15,7 @@ import { ThemeToggleService } from '../../../partials/theme-toggle/theme-toggle.
 export class HeaderComponent {
   protected themeService = inject(ThemeToggleService);
   protected authService = inject(AuthService);
+  protected globalSearch = inject(GlobalSearchService);
 
   onThemeToggle(event: Event): void {
     const input = event.target as HTMLInputElement | null;

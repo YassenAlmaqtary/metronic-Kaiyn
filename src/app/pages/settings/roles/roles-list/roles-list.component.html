@@ -36,6 +36,10 @@
 					[ngModel]="searchTerm()"
 					(ngModelChange)="onSearchChange($event)" />
 			</div>
+			<button type="button" class="kt-btn kt-btn-sm kt-btn-light" [disabled]="!filteredRoles().length" (click)="exportCsv()">
+				<i class="ki-filled ki-file-down"></i>
+				{{ 'common.exportCsv' | translate }}
+			</button>
 			<span class="text-sm text-secondary-foreground">{{ filteredRoles().length }}</span>
 		</div>
 

@@ -24,6 +24,7 @@ import { SalesmanFormComponent } from './pages/sales/salesmen/salesman-form/sale
 import { SalesmenListComponent } from './pages/sales/salesmen/salesmen-list/salesmen-list.component';
 import { SalesInvoiceFormComponent } from './pages/sales/sales-invoices/sales-invoice-form/sales-invoice-form.component';
 import { SalesInvoicesListComponent } from './pages/sales/sales-invoices/sales-invoices-list/sales-invoices-list.component';
+import { SalesQuotesPageComponent } from './pages/sales/quotes/sales-quotes-page.component';
 import { PosComponent } from './pages/sales/pos/pos.component';
 import { PosDevicesListComponent } from './pages/pos/devices/pos-devices-list.component';
 import { PosCashiersListComponent } from './pages/pos/cashiers/pos-cashiers-list.component';
@@ -130,6 +131,7 @@ export const routes: Routes = [
       { path: 'sales/sales-invoices', component: SalesInvoicesListComponent },
       { path: 'sales/sales-invoices/new', component: SalesInvoiceFormComponent },
       { path: 'sales/sales-invoices/:id', component: SalesInvoiceFormComponent },
+      { path: 'sales/quotes', component: SalesQuotesPageComponent },
       { path: 'products/groups', component: ProductGroupsListComponent },
       { path: 'products/groups/new', component: ProductGroupFormComponent },
       { path: 'products/groups/:id/edit', component: ProductGroupFormComponent },

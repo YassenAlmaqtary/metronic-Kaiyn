@@ -8,6 +8,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 @Component({
   selector: 'app-branches-list',
@@ -78,6 +80,28 @@ export class BranchesListComponent implements OnInit {
 
   onSearchChange(value: string): void {
     this.searchTerm.set(value);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('branches'),
+      [
+        this.language.translate('branches.branchName'),
+        this.language.translate('branches.branchCode'),
+        this.language.translate('branches.location'),
+        this.language.translate('branches.phone'),
+        this.language.translate('branches.status'),
+      ],
+      this.filteredBranches().map((branch) => [
+        branch.branchName ?? '',
+        branch.branchCode ?? '',
+        branch.location ?? '',
+        branch.phone ?? '',
+        branch.isActive !== false
+          ? this.language.translate('branches.active')
+          : this.language.translate('branches.inactive'),
+      ]),
+    );
   }
 
   openDeleteDialog(branch: Branch): void {

@@ -7,6 +7,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BanksService } from '../../../../core/services/banks.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type BankFilter = 'all' | 'active';
 type BankAction = 'delete' | 'toggle';
@@ -113,6 +115,30 @@ export class BanksListComponent implements OnInit {
   clearFilters(): void {
     this.searchTerm.set('');
     this.filter.set('all');
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('banks'),
+      [
+        this.language.translate('banks.bankName'),
+        this.language.translate('banks.bankCode'),
+        this.language.translate('banks.swiftCode'),
+        this.language.translate('banks.contactPerson'),
+        this.language.translate('banks.accountsCount'),
+        this.language.translate('banks.status'),
+      ],
+      this.filteredBanks().map((item) => [
+        item.bankName ?? '',
+        item.bankCode ?? '',
+        item.swiftCode ?? '',
+        item.contactPerson ?? '',
+        item.accountsCount ?? 0,
+        item.isActive
+          ? this.language.translate('banks.active')
+          : this.language.translate('banks.inactive'),
+      ]),
+    );
   }
 
   openActionDialog(bank: Bank, action: BankAction): void {

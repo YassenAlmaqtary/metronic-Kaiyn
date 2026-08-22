@@ -8,6 +8,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { CurrenciesService } from '../../../../core/services/currencies.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type CurrencyFilter = 'all' | 'active';
 
@@ -92,6 +94,26 @@ export class CurrenciesListComponent implements OnInit {
 
   setFilter(filter: CurrencyFilter): void {
     this.filter.set(filter);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('currencies'),
+      [
+        this.language.translate('currencies.name'),
+        this.language.translate('currencies.shortcut'),
+        this.language.translate('currencies.valuesCurr'),
+        this.language.translate('currencies.status'),
+      ],
+      this.filteredCurrencies().map((currency) => [
+        currency.currencyName ?? '',
+        currency.currencyShorcut ?? '',
+        currency.valuesCurr ?? '',
+        currency.isActive
+          ? this.language.translate('currencies.active')
+          : this.language.translate('currencies.inactive'),
+      ]),
+    );
   }
 
   openDeleteDialog(currency: Currency): void {

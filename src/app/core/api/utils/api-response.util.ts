@@ -11,6 +11,44 @@ export function unwrapApiResponse<T>(response: ApiResponse<T>): T {
 
 export function extractApiErrorMessage(error: unknown, fallback = 'Request failed'): string {
   if (error instanceof HttpErrorResponse) {
+    if (error.status === 0) {
+      return fallback.includes('فشل') || fallback.includes('تعذر') || fallback.includes('Failed')
+        ? fallback
+        : 'تعذر الاتصال بالخادم — تحقق من الاتصال بالشبكة أو أن الخادم يعمل';
+    }
+
+    if (error.status === 403) {
+      const forbiddenFallback =
+        'ليس لديك صلاحية لتنفيذ هذه العملية — تواصل مع مدير النظام';
+      const body403 = error.error as { message?: string; errors?: string[] | Record<string, string[] | string> } | null;
+      if (body403 && typeof body403 === 'object' && 'message' in body403 && typeof body403.message === 'string') {
+        const msg = body403.message.trim();
+        if (msg && !msg.toLowerCase().includes('an error occurred while processing')) {
+          return msg;
+        }
+      }
+      return forbiddenFallback;
+    }
+
+    if (error.status === 404) {
+      return 'العنصر المطلوب غير موجود أو تم حذفه';
+    }
+
+    if (error.status >= 500) {
+      const body = error.error as
+        | ApiResponse<unknown>
+        | { message?: string; detail?: string; errors?: string[] | Record<string, string[] | string> }
+        | string
+        | null;
+      if (body && typeof body === 'object' && 'message' in body && typeof body.message === 'string') {
+        const msg = body.message.trim();
+        if (msg && !msg.toLowerCase().includes('an error occurred while processing')) {
+          return msg;
+        }
+      }
+      return 'حدث خطأ في الخادم — حاول مرة أخرى أو تواصل مع الدعم الفني';
+    }
+
     const body = error.error as
       | ApiResponse<unknown>
       | {

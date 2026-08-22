@@ -17,4 +17,8 @@ export const commonAr = {
   'dashboard.connected': 'متصل',
   'dashboard.error': 'فشل الاتصال',
   'dashboard.usersCount': 'عدد المستخدمين',
+  'common.comingSoon': 'قريباً',
+  'common.exportCsv': 'تصدير CSV',
+  'common.confirm': 'تأكيد',
+  'common.cancel': 'إلغاء',
 } as const;

@@ -15,6 +15,8 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BankAccountsService } from '../../../../core/services/bank-accounts.service';
 import { IssuedChecksService } from '../../../../core/services/issued-checks.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type StatusFilter = 'all' | IssuedCheckStatusValue;
 type CheckAction =
@@ -257,6 +259,28 @@ export class IssuedChecksListComponent implements OnInit {
       return this.language.translate('issuedChecks.filter.all');
     }
     return this.statusLabel({ status: filter } as IssuedCheck);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('issued-checks'),
+      [
+        this.language.translate('issuedChecks.checkNumber'),
+        this.language.translate('issuedChecks.checkDate'),
+        this.language.translate('issuedChecks.payeeName'),
+        this.language.translate('issuedChecks.amount'),
+        this.language.translate('issuedChecks.bankAccount'),
+        this.language.translate('issuedChecks.status'),
+      ],
+      this.filteredChecks().map((check) => [
+        check.checkNumber ?? check.checkID,
+        check.checkDate ?? '',
+        check.payeeName ?? '',
+        check.amount ?? 0,
+        check.bankAccountName ?? check.bankAccountID ?? '',
+        this.statusLabel(check),
+      ]),
+    );
   }
 
   isDraftOrIssuedNotPosted(check: IssuedCheck): boolean {

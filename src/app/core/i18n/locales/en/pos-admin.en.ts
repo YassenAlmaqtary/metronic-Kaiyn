@@ -22,6 +22,7 @@ export const posAdminEn = {
   'posAdmin.devices.loadError': 'Failed to load devices',
   'posAdmin.devices.saveError': 'Failed to save device',
   'posAdmin.devices.nameRequired': 'Device name is required',
+  'posAdmin.devices.emptyHint': 'Register a POS device and link it to a branch and store',
 
   'posAdmin.cashiers.title': 'Cashier management',
   'posAdmin.cashiers.subtitle': 'Link users as POS cashiers',
@@ -31,6 +32,7 @@ export const posAdminEn = {
   'posAdmin.cashiers.saveSuccess': 'Cashier saved',
   'posAdmin.cashiers.loadError': 'Failed to load cashiers',
   'posAdmin.cashiers.saveError': 'Failed to save cashier',
+  'posAdmin.cashiers.emptyHint': 'Add a user as a POS cashier to get started',
 
   'posAdmin.shifts.title': 'Shift management',
   'posAdmin.shifts.subtitle': 'Monitor open and closed shifts',
@@ -47,6 +49,7 @@ export const posAdminEn = {
   'posAdmin.shifts.loadError': 'Failed to load shifts',
   'posAdmin.shifts.closeError': 'Failed to close shift',
   'posAdmin.shifts.closingBalance': 'Closing balance',
+  'posAdmin.shifts.emptyHint': 'Shifts appear here when cashiers open them from the POS terminal',
 
   'posAdmin.settings.title': 'POS settings',
   'posAdmin.settings.subtitle': 'Configure POS behavior by branch and device',

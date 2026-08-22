@@ -150,6 +150,14 @@ export class PosComponent implements OnInit {
   amountPaid = signal(0);
   success = signal<PosSuccessState | null>(null);
 
+  confirmOpen = signal(false);
+  confirmMessage = signal('');
+  batchPickerOpen = signal(false);
+  batchOptions = signal<ProductBatch[]>([]);
+
+  private confirmHandler: (() => void) | null = null;
+  private batchPickerHandler: ((value: ProductBatch | null | false) => void) | null = null;
+
   private taxCache = new Map<number, number>();
   private sessionGen = 0;
 
@@ -709,11 +717,10 @@ export class PosComponent implements OnInit {
     if (!this.cart().length) {
       return;
     }
-    if (!confirm(this.language.translate('pos.clearConfirm'))) {
-      return;
-    }
-    this.cart.set([]);
-    this.discountAmount.set(0);
+    this.askConfirm(this.language.translate('pos.clearConfirm'), () => {
+      this.cart.set([]);
+      this.discountAmount.set(0);
+    });
   }
 
   resetSale(): void {
@@ -906,53 +913,89 @@ export class PosComponent implements OnInit {
   }
 
   resumeSuspended(order: PosOrderHeader): void {
-    if (this.cart().length && !confirm(this.language.translate('pos.resumeReplaceConfirm'))) {
+    const run = () => {
+      this.saving.set(true);
+      this.errorMessage.set('');
+      this.pos
+        .resumeOrder(order.posOrderId)
+        .pipe(
+          switchMap((header) => this.pos.getOrder(header.posOrderId || order.posOrderId)),
+          takeUntilDestroyed(this.destroyRef),
+        )
+        .subscribe({
+          next: (full) => {
+            this.saving.set(false);
+            this.applyOrderToCart(full);
+            this.showSuspended.set(false);
+            this.toastMessage.set(this.language.translate('pos.resumeSuccess'));
+            this.refreshSuspended();
+            this.focusSearch();
+          },
+          error: (err) => {
+            this.saving.set(false);
+            this.errorMessage.set(
+              extractApiErrorMessage(err, this.language.translate('pos.resumeError')),
+            );
+          },
+        });
+    };
+
+    if (this.cart().length) {
+      this.askConfirm(this.language.translate('pos.resumeReplaceConfirm'), run);
       return;
     }
-    this.saving.set(true);
-    this.errorMessage.set('');
-    this.pos
-      .resumeOrder(order.posOrderId)
-      .pipe(
-        switchMap((header) => this.pos.getOrder(header.posOrderId || order.posOrderId)),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: (full) => {
-          this.saving.set(false);
-          this.applyOrderToCart(full);
-          this.showSuspended.set(false);
-          this.toastMessage.set(this.language.translate('pos.resumeSuccess'));
-          this.refreshSuspended();
-          this.focusSearch();
-        },
-        error: (err) => {
-          this.saving.set(false);
-          this.errorMessage.set(
-            extractApiErrorMessage(err, this.language.translate('pos.resumeError')),
-          );
-        },
-      });
+    run();
   }
 
   deleteSuspended(order: PosOrderHeader): void {
-    if (!confirm(this.language.translate('pos.deleteSuspendedConfirm'))) {
-      return;
-    }
-    this.pos
-      .deleteOrder(order.posOrderId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.toastMessage.set(this.language.translate('pos.deleteSuspendedSuccess'));
-          this.refreshSuspended();
-        },
-        error: (err) => {
-          this.errorMessage.set(
-            extractApiErrorMessage(err, this.language.translate('pos.deleteSuspendedError')),
-          );
-        },
-      });
+    this.askConfirm(this.language.translate('pos.deleteSuspendedConfirm'), () => {
+      this.pos
+        .deleteOrder(order.posOrderId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.toastMessage.set(this.language.translate('pos.deleteSuspendedSuccess'));
+            this.refreshSuspended();
+          },
+          error: (err) => {
+            this.errorMessage.set(
+              extractApiErrorMessage(err, this.language.translate('pos.deleteSuspendedError')),
+            );
+          },
+        });
+    });
+  }
+
+  confirmDialogYes(): void {
+    this.confirmHandler?.();
+    this.closeConfirmDialog();
+  }
+
+  closeConfirmDialog(): void {
+    this.confirmOpen.set(false);
+    this.confirmHandler = null;
+  }
+
+  selectBatchOption(batch: ProductBatch): void {
+    this.batchPickerHandler?.(batch);
+    this.closeBatchPicker();
+  }
+
+  cancelBatchPicker(): void {
+    this.batchPickerHandler?.(false);
+    this.closeBatchPicker();
+  }
+
+  private askConfirm(message: string, onConfirm: () => void): void {
+    this.confirmMessage.set(message);
+    this.confirmHandler = onConfirm;
+    this.confirmOpen.set(true);
+  }
+
+  private closeBatchPicker(): void {
+    this.batchPickerOpen.set(false);
+    this.batchOptions.set([]);
+    this.batchPickerHandler = null;
   }
 
   printReceipt(): void {
@@ -1246,23 +1289,9 @@ export class PosComponent implements OnInit {
             resolve(usable[0]);
             return;
           }
-          const labels = usable
-            .map(
-              (b, i) =>
-                `${i + 1}) ${b.batchNumber || '—'} · ${b.availableQty ?? 0}` +
-                (b.expiryDate ? ` · ${String(b.expiryDate).slice(0, 10)}` : ''),
-            )
-            .join('\n');
-          const pick = prompt(
-            `${this.language.translate('pos.selectBatch')}\n${labels}`,
-            '1',
-          );
-          if (pick == null) {
-            resolve(false);
-            return;
-          }
-          const idx = Math.max(1, Number(pick) || 1) - 1;
-          resolve(usable[idx] || usable[0]);
+          this.batchOptions.set(usable);
+          this.batchPickerHandler = resolve;
+          this.batchPickerOpen.set(true);
         },
         error: () => resolve(null),
       });

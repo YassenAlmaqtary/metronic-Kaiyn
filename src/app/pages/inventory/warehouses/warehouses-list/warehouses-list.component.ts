@@ -10,6 +10,8 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { StoresService } from '../../../../core/services/stores.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type WarehouseFilter = 'all' | 'active';
 
@@ -155,6 +157,26 @@ export class WarehousesListComponent implements OnInit {
     this.searchTerm.set('');
     this.filter.set('all');
     this.branchFilter.set(null);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('warehouses'),
+      [
+        this.language.translate('warehouses.storeName'),
+        this.language.translate('warehouses.locationStore'),
+        this.language.translate('warehouses.branchId'),
+        this.language.translate('warehouses.status'),
+      ],
+      this.filteredStores().map((store) => [
+        store.storeName ?? '',
+        this.branchLabel(store.branchId),
+        store.locationStore ?? '',
+        store.status
+          ? this.language.translate('warehouses.active')
+          : this.language.translate('warehouses.inactive'),
+      ]),
+    );
   }
 
   openDeleteDialog(store: Store): void {

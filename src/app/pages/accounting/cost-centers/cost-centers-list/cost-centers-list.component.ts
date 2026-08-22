@@ -7,6 +7,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { CostCentersService } from '../../../../core/services/cost-centers.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type CostCenterFilter = 'all' | 'active';
 
@@ -81,6 +83,26 @@ export class CostCentersListComponent implements OnInit {
 
   setFilter(filter: CostCenterFilter): void {
     this.filter.set(filter);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('cost-centers'),
+      [
+        this.language.translate('costCenters.costCenterCode'),
+        this.language.translate('costCenters.costCenterName'),
+        this.language.translate('costCenters.fullPath'),
+        this.language.translate('costCenters.status'),
+      ],
+      this.filteredCostCenters().map((item) => [
+        item.costCenterCode ?? '',
+        item.costCenterName ?? '',
+        item.fullPath ?? '',
+        item.isActive
+          ? this.language.translate('costCenters.active')
+          : this.language.translate('costCenters.inactive'),
+      ]),
+    );
   }
 
   openDeleteDialog(item: CostCenter): void {

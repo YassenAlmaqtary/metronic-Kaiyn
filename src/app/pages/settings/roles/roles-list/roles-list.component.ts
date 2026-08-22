@@ -7,6 +7,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
 import { RolesService } from '../../../../core/services/roles.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 @Component({
   selector: 'app-roles-list',
@@ -70,6 +72,24 @@ export class RolesListComponent implements OnInit {
 
   onSearchChange(value: string): void {
     this.searchTerm.set(value);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('roles'),
+      [
+        this.language.translate('roles.name'),
+        this.language.translate('roles.description'),
+        this.language.translate('roles.type'),
+      ],
+      this.filteredRoles().map((role) => [
+        role.roleName ?? '',
+        role.description ?? '',
+        role.isSystem
+          ? this.language.translate('roles.system')
+          : this.language.translate('roles.custom'),
+      ]),
+    );
   }
 
   canDelete(role: Role): boolean {

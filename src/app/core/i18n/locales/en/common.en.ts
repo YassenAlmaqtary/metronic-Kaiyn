@@ -17,4 +17,8 @@ export const commonEn = {
   'dashboard.connected': 'Connected',
   'dashboard.error': 'Connection failed',
   'dashboard.usersCount': 'Users count',
+  'common.comingSoon': 'Coming soon',
+  'common.exportCsv': 'Export CSV',
+  'common.confirm': 'Confirm',
+  'common.cancel': 'Cancel',
 } as const;

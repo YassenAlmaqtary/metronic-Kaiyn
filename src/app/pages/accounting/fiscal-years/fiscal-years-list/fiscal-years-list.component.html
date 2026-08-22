@@ -63,6 +63,10 @@
 						{{ 'fiscalYears.filter.closed' | translate }}
 					</button>
 				</div>
+				<button type="button" class="kt-btn kt-btn-sm kt-btn-light" [disabled]="!filteredFiscalYears().length" (click)="exportCsv()">
+					<i class="ki-filled ki-file-down"></i>
+					{{ 'common.exportCsv' | translate }}
+				</button>
 			</div>
 			<span class="text-sm text-secondary-foreground">{{ filteredFiscalYears().length }}</span>
 		</div>

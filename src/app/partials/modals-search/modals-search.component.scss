@@ -1,0 +1,14 @@
+.global-search-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  text-align: start;
+  transition: background-color 0.15s ease;
+
+  &:hover,
+  &.is-active {
+    background: color-mix(in oklab, var(--color-primary) 10%, transparent);
+  }
+}

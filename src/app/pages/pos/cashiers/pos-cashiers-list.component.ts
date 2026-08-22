@@ -10,6 +10,8 @@ import { BranchesService } from '../../../core/services/branches.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { PosService } from '../../../core/services/pos.service';
 import { UsersService } from '../../../core/services/users.service';
+import { csvExportFilename } from '../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../core/utils/download-csv';
 
 @Component({
   selector: 'app-pos-cashiers-list',
@@ -91,6 +93,26 @@ export class PosCashiersListComponent implements OnInit {
     this.formBranchId.set(this.branches()[0]?.branchId ?? null);
     this.showForm.set(true);
     this.successMessage.set('');
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('pos-cashiers'),
+      [
+        '#',
+        this.language.translate('posAdmin.cashiers.user'),
+        this.language.translate('posAdmin.common.branch'),
+        this.language.translate('posAdmin.common.status'),
+      ],
+      this.filtered().map((cashier) => [
+        cashier.cashierId,
+        cashier.userName ?? cashier.userId,
+        cashier.branchId != null ? this.branchName().get(cashier.branchId) ?? cashier.branchId : '',
+        cashier.isActive !== false
+          ? this.language.translate('posAdmin.common.active')
+          : this.language.translate('posAdmin.common.inactive'),
+      ]),
+    );
   }
 
   create(): void {

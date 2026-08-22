@@ -13,6 +13,8 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BankAccountsService } from '../../../../core/services/bank-accounts.service';
 import { BanksService } from '../../../../core/services/banks.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type AccountAction = 'delete' | 'toggle';
 
@@ -157,6 +159,28 @@ export class BankAccountsListComponent implements OnInit {
       default:
         return String(status);
     }
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('bank-accounts'),
+      [
+        this.language.translate('bankAccounts.accountName'),
+        this.language.translate('bankAccounts.accountNumber'),
+        this.language.translate('bankAccounts.bankName'),
+        this.language.translate('bankAccounts.currency'),
+        this.language.translate('bankAccounts.currentBalance'),
+        this.language.translate('bankAccounts.accountStatus'),
+      ],
+      this.filteredAccounts().map((account) => [
+        account.accountName ?? '',
+        account.accountNumber ?? '',
+        account.bankName ?? '',
+        account.currencyName ?? '',
+        account.currentBalance ?? 0,
+        this.statusLabel(account.accountStatus),
+      ]),
+    );
   }
 
   openActionDialog(account: BankAccount, action: AccountAction): void {

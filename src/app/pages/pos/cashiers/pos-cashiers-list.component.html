@@ -56,13 +56,31 @@
 	}
 
 	<div class="kt-card overflow-hidden">
-		<div class="px-5 pt-5 pb-4 border-b border-border">
+		<div class="px-5 pt-5 pb-4 border-b border-border flex flex-wrap items-center gap-3">
 			<input class="kt-input max-w-sm" [placeholder]="'posAdmin.common.search' | translate" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" />
+			<button type="button" class="kt-btn kt-btn-sm kt-btn-light ms-auto" [disabled]="!filtered().length" (click)="exportCsv()">
+				<i class="ki-filled ki-file-down"></i>
+				{{ 'common.exportCsv' | translate }}
+			</button>
 		</div>
 		@if (loading()) {
 			<div class="p-8 text-sm text-secondary-foreground">{{ 'posAdmin.common.loading' | translate }}</div>
 		} @else if (!filtered().length) {
-			<div class="p-8 text-sm text-secondary-foreground">{{ 'posAdmin.common.empty' | translate }}</div>
+			<div class="flex flex-col items-center justify-center gap-4 py-20 text-center px-6">
+				<div class="relative">
+					<div class="absolute inset-0 rounded-full bg-primary/10 blur-2xl scale-150"></div>
+					<div class="relative flex size-16 items-center justify-center rounded-2xl bg-muted/60 text-muted-foreground">
+						<i class="ki-filled ki-profile-user text-3xl"></i>
+					</div>
+				</div>
+				<div>
+					<p class="font-medium text-mono">{{ 'posAdmin.common.empty' | translate }}</p>
+					<p class="text-sm text-secondary-foreground mt-1 max-w-md">{{ 'posAdmin.cashiers.emptyHint' | translate }}</p>
+				</div>
+				<button type="button" class="kt-btn kt-btn-primary kt-btn-sm" (click)="openForm()">
+					{{ 'posAdmin.cashiers.add' | translate }}
+				</button>
+			</div>
 		} @else {
 			<div class="kt-scrollable-x-auto">
 				<table class="kt-table kt-table-border">

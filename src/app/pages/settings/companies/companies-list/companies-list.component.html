@@ -36,6 +36,10 @@
 					[ngModel]="searchTerm()"
 					(ngModelChange)="onSearchChange($event)" />
 			</div>
+			<button type="button" class="kt-btn kt-btn-sm kt-btn-light" [disabled]="!filteredCompanies().length" (click)="exportCsv()">
+				<i class="ki-filled ki-file-down"></i>
+				{{ 'common.exportCsv' | translate }}
+			</button>
 			<span class="text-sm text-secondary-foreground">{{ filteredCompanies().length }}</span>
 		</div>
 

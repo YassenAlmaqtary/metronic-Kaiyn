@@ -8,6 +8,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
 import { StockReceivingsService } from '../../../../core/services/stock-receivings.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 @Component({
   selector: 'app-stock-receivings-list',
@@ -35,6 +37,29 @@ export class StockReceivingsListComponent implements OnInit {
     });
   }
   setFilter(pending: boolean): void { this.pendingOnly.set(pending); this.load(); }
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('stock-receivings'),
+      [
+        this.language.translate('stockReceivings.number'),
+        this.language.translate('stockReceivings.date'),
+        this.language.translate('stockReceivings.branch'),
+        this.language.translate('stockReceivings.store'),
+        this.language.translate('stockReceivings.total'),
+        this.language.translate('stockReceivings.status'),
+      ],
+      this.filtered().map((item) => [
+        item.receivingNumber ?? item.receivingId,
+        item.receivingDate ?? '',
+        item.branchName ?? '',
+        item.storeName ?? '',
+        item.totalAmount ?? 0,
+        this.isPending(item)
+          ? this.language.translate('stockReceivings.pending')
+          : this.language.translate('stockReceivings.posted'),
+      ]),
+    );
+  }
   post(item: StockReceivingListItem): void { this.run(item.receivingId, () => this.service.post(item.receivingId), 'stockReceivings.postSuccess'); }
   delete(item: StockReceivingListItem): void {
     if (confirm(this.language.translate('stockReceivings.deleteConfirm'))) this.run(item.receivingId, () => this.service.delete(item.receivingId), 'stockReceivings.deleteSuccess');

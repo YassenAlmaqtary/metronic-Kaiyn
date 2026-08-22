@@ -8,6 +8,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
 import { TaxSetupsService } from '../../../../core/services/tax-setups.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type TaxFilter = 'all' | 'active';
 
@@ -82,6 +84,26 @@ export class TaxSetupsListComponent implements OnInit {
 
   setFilter(filter: TaxFilter): void {
     this.filter.set(filter);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('tax-setups'),
+      [
+        this.language.translate('taxSetups.taxCode'),
+        this.language.translate('taxSetups.taxType'),
+        this.language.translate('taxSetups.taxRate'),
+        this.language.translate('taxSetups.status'),
+      ],
+      this.filteredTaxSetups().map((item) => [
+        item.taxCode ?? '',
+        item.taxType ?? '',
+        item.taxRate ?? '',
+        item.isActive
+          ? this.language.translate('taxSetups.active')
+          : this.language.translate('taxSetups.inactive'),
+      ]),
+    );
   }
 
   openDeleteDialog(item: TaxSetup): void {

@@ -11,6 +11,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
 import { StockAdjustmentsService } from '../../../../core/services/stock-adjustments.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 @Component({
   selector: 'app-stock-adjustments-list',
@@ -69,6 +71,28 @@ export class StockAdjustmentsListComponent implements OnInit {
   setFilter(draftsOnly: boolean): void {
     this.draftsOnly.set(draftsOnly);
     this.load();
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('stock-adjustments'),
+      [
+        this.language.translate('stockAdjustments.number'),
+        this.language.translate('stockAdjustments.date'),
+        this.language.translate('stockAdjustments.store'),
+        this.language.translate('stockAdjustments.taking'),
+        this.language.translate('stockAdjustments.totalValue'),
+        this.language.translate('stockAdjustments.status'),
+      ],
+      this.filtered().map((x) => [
+        x.adjNo ?? x.adjId,
+        x.adjDate ?? '',
+        x.storeName ?? '',
+        x.takingNo ?? '',
+        x.totalValue ?? 0,
+        x.statusName ?? this.language.translate('stockAdjustments.draft'),
+      ]),
+    );
   }
 
   post(item: StockAdjustmentListItem): void {

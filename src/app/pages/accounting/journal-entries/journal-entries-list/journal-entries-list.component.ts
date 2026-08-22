@@ -18,6 +18,7 @@ import { BranchesService } from '../../../../core/services/branches.service';
 import { JournalEntriesService } from '../../../../core/services/journal-entries.service';
 import { JournalTypesService } from '../../../../core/services/journal-types.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type JournalFilter = 'all' | 'unposted' | 'posted';
 type JournalAction = 'delete' | 'post' | 'unpost' | 'reverse' | 'bulkPost';
@@ -291,6 +292,34 @@ export class JournalEntriesListComponent implements OnInit {
       return entry.totalCredit;
     }
     return (entry.details ?? []).reduce((sum, line) => sum + (line.credit || 0), 0);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      `journal-entries-${new Date().toISOString().slice(0, 10)}.csv`,
+      [
+        this.language.translate('journalEntries.entryId'),
+        this.language.translate('journalEntries.entryDate'),
+        this.language.translate('journalEntries.journalType'),
+        this.language.translate('journalEntries.branch'),
+        this.language.translate('journalEntries.period'),
+        this.language.translate('journalEntries.totalDebit'),
+        this.language.translate('journalEntries.totalCredit'),
+        this.language.translate('journalEntries.status'),
+      ],
+      this.filteredEntries().map((entry) => [
+        entry.entryId,
+        entry.entryDate,
+        this.typeLabel(entry.journalTypeId),
+        this.branchLabel(entry.branchId),
+        this.periodLabel(entry.periodId),
+        this.totalDebit(entry),
+        this.totalCredit(entry),
+        isJournalEntryPosted(entry)
+          ? this.language.translate('journalEntries.posted')
+          : this.language.translate('journalEntries.unposted'),
+      ]),
+    );
   }
 
   openActionDialog(entry: JournalEntry | null, action: JournalAction): void {

@@ -9,6 +9,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
 import { StockIssuesService } from '../../../../core/services/stock-issues.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type ListFilter = 'all' | 'pending';
 
@@ -86,6 +88,28 @@ export class StockIssuesListComponent implements OnInit {
     return isStockDocPosted(status, datePosted)
       ? 'stockIssues.status.posted'
       : 'stockIssues.status.pending';
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('stock-issues'),
+      [
+        this.language.translate('stockIssues.number'),
+        this.language.translate('stockIssues.date'),
+        this.language.translate('stockIssues.branch'),
+        this.language.translate('stockIssues.store'),
+        this.language.translate('stockIssues.total'),
+        this.language.translate('stockIssues.status'),
+      ],
+      this.filteredIssues().map((issue) => [
+        issue.issueNumber ?? issue.issueId,
+        issue.issueDate ?? '',
+        issue.branchName ?? '',
+        issue.storeName ?? '',
+        issue.totalAmount ?? 0,
+        this.language.translate(this.statusKey(issue.status, issue.datePosted)),
+      ]),
+    );
   }
 
   post(issue: StockIssueListItem): void {

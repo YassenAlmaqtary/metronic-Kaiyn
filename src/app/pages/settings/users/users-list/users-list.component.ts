@@ -8,6 +8,8 @@ import { User } from '../../../../core/api/models/user.models';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
 import { UsersService } from '../../../../core/services/users.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 @Component({
   selector: 'app-users-list',
@@ -71,6 +73,28 @@ export class UsersListComponent implements OnInit {
 
   onSearchChange(value: string): void {
     this.searchTerm.set(value);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('users'),
+      [
+        this.language.translate('users.userName'),
+        this.language.translate('users.fullName'),
+        this.language.translate('users.email'),
+        this.language.translate('users.phone'),
+        this.language.translate('users.status'),
+      ],
+      this.filteredUsers().map((user) => [
+        user.userName ?? '',
+        user.fullName ?? '',
+        user.email ?? '',
+        user.phone ?? '',
+        user.isActive !== false
+          ? this.language.translate('users.active')
+          : this.language.translate('users.inactive'),
+      ]),
+    );
   }
 
   openDeleteDialog(user: User): void {

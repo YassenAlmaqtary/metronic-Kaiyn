@@ -7,6 +7,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { AccountGroupsService } from '../../../../core/services/account-groups.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 @Component({
   selector: 'app-account-groups-list',
@@ -70,6 +72,17 @@ export class AccountGroupsListComponent implements OnInit {
 
   onSearchChange(value: string): void {
     this.searchTerm.set(value);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('account-groups'),
+      [
+        this.language.translate('accountGroups.groupName'),
+        this.language.translate('accountGroups.description'),
+      ],
+      this.filteredAccountGroups().map((group) => [group.groupName ?? '', group.description ?? '']),
+    );
   }
 
   openDeleteDialog(group: AccountGroup): void {

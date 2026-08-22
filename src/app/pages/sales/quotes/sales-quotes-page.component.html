@@ -1,0 +1,33 @@
+<div class="kt-container-fixed flex flex-col gap-6 pb-10 max-w-3xl">
+	<div>
+		<h1 class="text-xl font-semibold text-mono">{{ 'salesQuotes.title' | translate }}</h1>
+		<p class="text-sm text-secondary-foreground mt-1">{{ 'salesQuotes.subtitle' | translate }}</p>
+	</div>
+
+	<div class="kt-card overflow-hidden">
+		<div class="kt-card-content p-10 text-center flex flex-col items-center gap-4">
+			<div class="relative">
+				<div class="absolute inset-0 rounded-full bg-primary/10 blur-2xl scale-150"></div>
+				<div class="relative flex size-20 items-center justify-center rounded-2xl bg-muted/60 text-primary">
+					<i class="ki-filled ki-document text-4xl"></i>
+				</div>
+			</div>
+			<div>
+				<h2 class="text-lg font-semibold text-foreground">{{ 'salesQuotes.comingSoonTitle' | translate }}</h2>
+				<p class="text-sm text-secondary-foreground mt-2 max-w-md mx-auto">
+					{{ 'salesQuotes.comingSoonHint' | translate }}
+				</p>
+			</div>
+			<div class="flex flex-wrap justify-center gap-2 mt-2">
+				<a class="kt-btn kt-btn-primary" routerLink="/demo1/sales/sales-invoices">
+					<i class="ki-filled ki-bill"></i>
+					{{ 'salesQuotes.goInvoices' | translate }}
+				</a>
+				<a class="kt-btn kt-btn-light" routerLink="/demo1/pos/terminal">
+					<i class="ki-filled ki-tablet"></i>
+					{{ 'salesQuotes.goPos' | translate }}
+				</a>
+			</div>
+		</div>
+	</div>
+</div>

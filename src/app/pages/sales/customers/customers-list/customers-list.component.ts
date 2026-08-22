@@ -7,6 +7,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { CustomersService } from '../../../../core/services/customers.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type CustomerFilter = 'all' | 'active';
 
@@ -97,6 +99,28 @@ export class CustomersListComponent implements OnInit {
 
   setFilter(filter: CustomerFilter): void {
     this.filter.set(filter);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('customers'),
+      [
+        this.language.translate('customers.customerName'),
+        this.language.translate('customers.phone'),
+        this.language.translate('customers.group'),
+        this.language.translate('customers.salesman'),
+        this.language.translate('customers.status'),
+      ],
+      this.filteredCustomers().map((customer) => [
+        this.customerLabel(customer),
+        customer.phone ?? '',
+        customer.groupName ?? '',
+        customer.salesmanName ?? '',
+        customer.isActive
+          ? this.language.translate('customers.active')
+          : this.language.translate('customers.inactive'),
+      ]),
+    );
   }
 
   openDeleteDialog(customer: Customer): void {

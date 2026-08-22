@@ -97,6 +97,10 @@
 						{{ 'checkBooks.clearFilters' | translate }}
 					</button>
 				}
+				<button type="button" class="kt-btn kt-btn-sm kt-btn-light ms-auto" [disabled]="!filteredCheckBooks().length" (click)="exportCsv()">
+					<i class="ki-filled ki-file-down"></i>
+					{{ 'common.exportCsv' | translate }}
+				</button>
 			</div>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 				<div class="flex flex-col gap-1">

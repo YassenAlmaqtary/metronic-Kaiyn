@@ -7,6 +7,8 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
 import { SalesmenService } from '../../../../core/services/salesmen.service';
+import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
+import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type SalesmanFilter = 'all' | 'active';
 
@@ -89,6 +91,28 @@ export class SalesmenListComponent implements OnInit {
 
   setFilter(filter: SalesmanFilter): void {
     this.filter.set(filter);
+  }
+
+  exportCsv(): void {
+    downloadCsv(
+      csvExportFilename('salesmen'),
+      [
+        this.language.translate('salesmen.salesmanNameAr'),
+        this.language.translate('salesmen.salesmanNameEn'),
+        this.language.translate('salesmen.phone'),
+        this.language.translate('salesmen.commissionRate'),
+        this.language.translate('salesmen.status'),
+      ],
+      this.filteredSalesmen().map((salesman) => [
+        salesman.salesmanNameAr ?? '',
+        salesman.salesmanNameEn ?? '',
+        salesman.phone ?? '',
+        salesman.commissionRate ?? '',
+        salesman.isActive
+          ? this.language.translate('salesmen.active')
+          : this.language.translate('salesmen.inactive'),
+      ]),
+    );
   }
 
   openDeleteDialog(salesman: Salesman): void {
