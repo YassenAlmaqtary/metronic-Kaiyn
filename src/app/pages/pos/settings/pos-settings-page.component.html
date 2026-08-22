@@ -1,0 +1,64 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex items-start gap-3">
+		<div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+			<i class="ki-filled ki-setting-2 text-xl"></i>
+		</div>
+		<div>
+			<h1 class="text-xl font-semibold text-mono tracking-tight">{{ 'posAdmin.settings.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground mt-1">{{ 'posAdmin.settings.subtitle' | translate }}</p>
+		</div>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-700">{{ successMessage() }}</div>
+	}
+	@if (errorMessage()) {
+		<div class="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">{{ errorMessage() }}</div>
+	}
+
+	<div class="kt-card">
+		<div class="kt-card-content p-5 space-y-4">
+			<div class="grid gap-3 md:grid-cols-3">
+				<label class="block">
+					<span class="text-xs text-secondary-foreground">{{ 'posAdmin.common.branch' | translate }}</span>
+					<select class="kt-select mt-1" [ngModel]="branchId()" (ngModelChange)="branchId.set(+$event)">
+						@for (b of branches(); track b.branchId) {
+							<option [ngValue]="b.branchId">{{ b.branchName }}</option>
+						}
+					</select>
+				</label>
+				<label class="block">
+					<span class="text-xs text-secondary-foreground">{{ 'posAdmin.settings.deviceOptional' | translate }}</span>
+					<select class="kt-select mt-1" [ngModel]="deviceId()" (ngModelChange)="deviceId.set($event === null || $event === 'null' ? null : +$event)">
+						<option [ngValue]="null">—</option>
+						@for (d of devices(); track d.deviceId) {
+							<option [ngValue]="d.deviceId">{{ d.deviceName }} (#{{ d.deviceId }})</option>
+						}
+					</select>
+				</label>
+				<div class="flex items-end">
+					<button type="button" class="kt-btn kt-btn-light" [disabled]="loading()" (click)="load()">{{ 'posAdmin.settings.load' | translate }}</button>
+				</div>
+			</div>
+			<p class="text-xs text-secondary-foreground">{{ 'posAdmin.settings.hint' | translate }}</p>
+
+			@if (loading()) {
+				<div class="text-sm text-secondary-foreground">{{ 'posAdmin.common.loading' | translate }}</div>
+			} @else {
+				<div class="space-y-2">
+					@for (row of rows(); track $index; let i = $index) {
+						<div class="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
+							<input class="kt-input" [placeholder]="'posAdmin.settings.key' | translate" [ngModel]="row.key" (ngModelChange)="updateRow(i, { key: $event })" />
+							<input class="kt-input" [placeholder]="'posAdmin.settings.value' | translate" [ngModel]="row.value" (ngModelChange)="updateRow(i, { value: $event })" />
+							<button type="button" class="kt-btn kt-btn-icon kt-btn-light" (click)="removeRow(i)"><i class="ki-filled ki-trash"></i></button>
+						</div>
+					}
+				</div>
+				<div class="flex flex-wrap gap-2 justify-between pt-2">
+					<button type="button" class="kt-btn kt-btn-light" (click)="addRow()">{{ 'posAdmin.settings.addRow' | translate }}</button>
+					<button type="button" class="kt-btn kt-btn-primary" [disabled]="saving()" (click)="save()">{{ 'posAdmin.common.save' | translate }}</button>
+				</div>
+			}
+		</div>
+	</div>
+</div>

@@ -16,13 +16,54 @@ export function extractApiErrorMessage(error: unknown, fallback = 'Request faile
       | {
           message?: string;
           title?: string;
+          detail?: string;
           errors?: string[] | Record<string, string[] | string>;
         }
+      | string
       | null;
 
+    if (typeof body === 'string' && body.trim()) {
+      const text = body.trim();
+      // ASP.NET HTML/generic 500 pages are useless — prefer fallback.
+      if (!text.includes('<') && text.length < 300) {
+        return text.replace(/^\.+/, '');
+      }
+    }
+
     if (body && typeof body === 'object') {
+      const errorsDetail = (() => {
+        if (!('errors' in body) || !body.errors) {
+          return '';
+        }
+        if (Array.isArray(body.errors) && body.errors.length) {
+          return body.errors.filter(Boolean).join(' · ');
+        }
+        if (typeof body.errors === 'object') {
+          return Object.entries(body.errors)
+            .flatMap(([key, value]) => {
+              const text = Array.isArray(value) ? value.join(', ') : String(value);
+              return text ? `${key}: ${text}` : [];
+            })
+            .join(' | ');
+        }
+        return '';
+      })();
+
       if ('message' in body && typeof body.message === 'string' && body.message.trim()) {
-        return body.message.trim().replace(/^\.+/, '');
+        let msg = body.message.trim().replace(/^\.+/, '');
+        msg = msg.replace(/^an error occurred:\s*/i, '').trim();
+        // Generic ASP.NET message → keep fallback if we have a better one.
+        if (
+          msg.toLowerCase() === 'an error occurred while processing your request' ||
+          msg.toLowerCase() === 'an error occurred while processing your request.'
+        ) {
+          return errorsDetail || fallback;
+        }
+        // Append API detail (e.g. required permission key) when present.
+        if (errorsDetail && !msg.includes(errorsDetail)) {
+          return `${msg} — ${errorsDetail}`;
+        }
+        return msg;
       }
 
       if ('detail' in body && typeof (body as { detail?: unknown }).detail === 'string') {
@@ -32,20 +73,8 @@ export function extractApiErrorMessage(error: unknown, fallback = 'Request faile
         }
       }
 
-      if ('errors' in body && body.errors) {
-        if (Array.isArray(body.errors) && body.errors.length) {
-          return body.errors.filter(Boolean).join(', ');
-        }
-
-        if (typeof body.errors === 'object') {
-          const messages = Object.entries(body.errors).flatMap(([key, value]) => {
-            const text = Array.isArray(value) ? value.join(', ') : String(value);
-            return text ? `${key}: ${text}` : [];
-          });
-          if (messages.length) {
-            return messages.join(' | ');
-          }
-        }
+      if (errorsDetail) {
+        return errorsDetail;
       }
 
       if ('title' in body && body.title) {
@@ -56,7 +85,14 @@ export function extractApiErrorMessage(error: unknown, fallback = 'Request faile
   }
 
   if (error instanceof Error && error.message) {
-    return error.message;
+    const msg = error.message.trim();
+    if (
+      msg.toLowerCase() === 'an error occurred while processing your request' ||
+      msg.toLowerCase() === 'an error occurred while processing your request.'
+    ) {
+      return fallback;
+    }
+    return msg;
   }
 
   return fallback;

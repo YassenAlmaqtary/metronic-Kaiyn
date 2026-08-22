@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 
 import { SIDEBAR_MENU_SECTIONS, SIDEBAR_ROOT_LINKS } from './sidebar-menu.config';
 import {
@@ -40,8 +40,30 @@ export class SidebarMenuService {
       return null;
     }
 
-    const children = section.children.filter((child) => this.canAccess(child.permission));
-    if (children.length === 0) {
+    const filtered = section.children.filter((child) => {
+      if (child.kind === 'group') {
+        return true;
+      }
+      return this.canAccess(child.permission);
+    });
+
+    // Drop group headers that have no following visible links before the next group.
+    const children: SidebarMenuLink[] = [];
+    for (let i = 0; i < filtered.length; i++) {
+      const item = filtered[i];
+      if (item.kind === 'group') {
+        const hasLinkAfter = filtered
+          .slice(i + 1)
+          .some((next) => next.kind !== 'group' && !!next.route);
+        if (hasLinkAfter) {
+          children.push(item);
+        }
+        continue;
+      }
+      children.push(item);
+    }
+
+    if (!children.some((c) => c.kind !== 'group')) {
       return null;
     }
 

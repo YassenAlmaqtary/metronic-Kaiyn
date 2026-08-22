@@ -1,0 +1,104 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div class="flex items-start gap-3">
+			<div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+				<i class="ki-filled ki-tablet text-xl"></i>
+			</div>
+			<div>
+				<h1 class="text-xl font-semibold text-mono tracking-tight">{{ 'posAdmin.devices.title' | translate }}</h1>
+				<p class="text-sm text-secondary-foreground mt-1">{{ 'posAdmin.devices.subtitle' | translate }}</p>
+			</div>
+		</div>
+		<button type="button" class="kt-btn kt-btn-primary" (click)="openForm()">
+			<i class="ki-filled ki-plus"></i>
+			{{ 'posAdmin.devices.add' | translate }}
+		</button>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-700">{{ successMessage() }}</div>
+	}
+	@if (errorMessage()) {
+		<div class="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive flex justify-between gap-3">
+			<span>{{ errorMessage() }}</span>
+			<button type="button" class="kt-btn kt-btn-sm kt-btn-light" (click)="load()">{{ 'posAdmin.common.retry' | translate }}</button>
+		</div>
+	}
+
+	@if (showForm()) {
+		<div class="kt-card">
+			<div class="kt-card-content p-5 grid gap-3 md:grid-cols-3">
+				<label class="block">
+					<span class="text-xs text-secondary-foreground">{{ 'posAdmin.devices.name' | translate }}</span>
+					<input class="kt-input mt-1" [ngModel]="formName()" (ngModelChange)="formName.set($event)" />
+				</label>
+				<label class="block">
+					<span class="text-xs text-secondary-foreground">{{ 'posAdmin.common.branch' | translate }}</span>
+					<select class="kt-select mt-1" [ngModel]="formBranchId()" (ngModelChange)="formBranchId.set(+$event)">
+						@for (b of branches(); track b.branchId) {
+							<option [ngValue]="b.branchId">{{ b.branchName }}</option>
+						}
+					</select>
+				</label>
+				<label class="block">
+					<span class="text-xs text-secondary-foreground">{{ 'posAdmin.common.store' | translate }}</span>
+					<select class="kt-select mt-1" [ngModel]="formStoreId()" (ngModelChange)="formStoreId.set(+$event)">
+						@for (s of stores(); track s.storeId) {
+							<option [ngValue]="s.storeId">{{ s.storeName }}</option>
+						}
+					</select>
+				</label>
+				<div class="md:col-span-3 flex gap-2 justify-end">
+					<button type="button" class="kt-btn kt-btn-light" (click)="showForm.set(false)">{{ 'posAdmin.common.cancel' | translate }}</button>
+					<button type="button" class="kt-btn kt-btn-primary" [disabled]="saving()" (click)="create()">{{ 'posAdmin.common.save' | translate }}</button>
+				</div>
+			</div>
+		</div>
+	}
+
+	<div class="kt-card overflow-hidden">
+		<div class="px-5 pt-5 pb-4 border-b border-border">
+			<input class="kt-input max-w-sm" [placeholder]="'posAdmin.common.search' | translate" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" />
+		</div>
+		@if (loading()) {
+			<div class="p-8 text-sm text-secondary-foreground">{{ 'posAdmin.common.loading' | translate }}</div>
+		} @else if (!filtered().length) {
+			<div class="p-8 text-sm text-secondary-foreground">{{ 'posAdmin.common.empty' | translate }}</div>
+		} @else {
+			<div class="kt-scrollable-x-auto">
+				<table class="kt-table kt-table-border">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>{{ 'posAdmin.devices.name' | translate }}</th>
+							<th>{{ 'posAdmin.common.branch' | translate }}</th>
+							<th>{{ 'posAdmin.common.store' | translate }}</th>
+							<th>{{ 'posAdmin.common.status' | translate }}</th>
+							<th>{{ 'posAdmin.common.actions' | translate }}</th>
+						</tr>
+					</thead>
+					<tbody>
+						@for (d of filtered(); track d.deviceId) {
+							<tr>
+								<td class="font-mono">{{ d.deviceId }}</td>
+								<td class="font-medium">{{ d.deviceName }}</td>
+								<td>{{ branchName().get(d.branchId) || d.branchId }}</td>
+								<td>{{ storeName().get(d.storeId) || d.storeId }}</td>
+								<td>
+									<span class="kt-badge" [class.kt-badge-success]="d.isActive !== false" [class.kt-badge-secondary]="d.isActive === false">
+										{{ (d.isActive === false ? 'posAdmin.common.inactive' : 'posAdmin.common.active') | translate }}
+									</span>
+								</td>
+								<td>
+									<button type="button" class="kt-btn kt-btn-sm kt-btn-light" [disabled]="saving()" (click)="toggle(d)">
+										{{ 'posAdmin.devices.toggle' | translate }}
+									</button>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		}
+	</div>
+</div>

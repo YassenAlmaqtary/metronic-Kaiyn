@@ -25,6 +25,13 @@ import { SalesmenListComponent } from './pages/sales/salesmen/salesmen-list/sale
 import { SalesInvoiceFormComponent } from './pages/sales/sales-invoices/sales-invoice-form/sales-invoice-form.component';
 import { SalesInvoicesListComponent } from './pages/sales/sales-invoices/sales-invoices-list/sales-invoices-list.component';
 import { PosComponent } from './pages/sales/pos/pos.component';
+import { PosDevicesListComponent } from './pages/pos/devices/pos-devices-list.component';
+import { PosCashiersListComponent } from './pages/pos/cashiers/pos-cashiers-list.component';
+import { PosShiftsListComponent } from './pages/pos/shifts/pos-shifts-list.component';
+import { PosSettingsPageComponent } from './pages/pos/settings/pos-settings-page.component';
+import { PosReturnsPageComponent } from './pages/pos/returns/pos-returns-page.component';
+import { PosReportsPageComponent } from './pages/pos/reports/pos-reports-page.component';
+import { PosReturnsReportPageComponent } from './pages/pos/reports/pos-returns-report-page.component';
 import { ProductGroupFormComponent } from './pages/products/product-groups/product-group-form/product-group-form.component';
 import { ProductGroupsListComponent } from './pages/products/product-groups/product-groups-list/product-groups-list.component';
 import { ProductFormComponent } from './pages/products/items/product-form/product-form.component';
@@ -111,7 +118,15 @@ export const routes: Routes = [
       { path: 'sales/salesmen', component: SalesmenListComponent },
       { path: 'sales/salesmen/new', component: SalesmanFormComponent },
       { path: 'sales/salesmen/:id/edit', component: SalesmanFormComponent },
-      { path: 'sales/pos', component: PosComponent },
+      { path: 'sales/pos', redirectTo: 'pos/terminal', pathMatch: 'full' },
+      { path: 'pos/terminal', component: PosComponent },
+      { path: 'pos/returns', component: PosReturnsPageComponent },
+      { path: 'pos/settings', component: PosSettingsPageComponent },
+      { path: 'pos/shifts', component: PosShiftsListComponent },
+      { path: 'pos/devices', component: PosDevicesListComponent },
+      { path: 'pos/cashiers', component: PosCashiersListComponent },
+      { path: 'pos/reports', component: PosReportsPageComponent },
+      { path: 'pos/returns-report', component: PosReturnsReportPageComponent },
       { path: 'sales/sales-invoices', component: SalesInvoicesListComponent },
       { path: 'sales/sales-invoices/new', component: SalesInvoiceFormComponent },
       { path: 'sales/sales-invoices/:id', component: SalesInvoiceFormComponent },

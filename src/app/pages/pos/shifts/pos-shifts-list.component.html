@@ -1,0 +1,102 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex items-start gap-3">
+		<div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+			<i class="ki-filled ki-time text-xl"></i>
+		</div>
+		<div>
+			<h1 class="text-xl font-semibold text-mono tracking-tight">{{ 'posAdmin.shifts.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground mt-1">{{ 'posAdmin.shifts.subtitle' | translate }}</p>
+		</div>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-700">{{ successMessage() }}</div>
+	}
+	@if (errorMessage()) {
+		<div class="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive flex justify-between gap-3">
+			<span>{{ errorMessage() }}</span>
+			<button type="button" class="kt-btn kt-btn-sm kt-btn-light" (click)="load()">{{ 'posAdmin.common.retry' | translate }}</button>
+		</div>
+	}
+
+	<div class="kt-card overflow-hidden">
+		<div class="px-5 pt-5 pb-4 border-b border-border flex flex-wrap gap-3">
+			<div class="inline-flex rounded-lg border border-border bg-muted/40 p-1 gap-1">
+				<button type="button" class="kt-btn kt-btn-sm border-0 shadow-none" [class.kt-btn-primary]="statusFilter() === 'all'" (click)="statusFilter.set('all'); load()">{{ 'posAdmin.common.all' | translate }}</button>
+				<button type="button" class="kt-btn kt-btn-sm border-0 shadow-none" [class.kt-btn-primary]="statusFilter() === 'Open'" (click)="statusFilter.set('Open'); load()">{{ 'posAdmin.shifts.open' | translate }}</button>
+				<button type="button" class="kt-btn kt-btn-sm border-0 shadow-none" [class.kt-btn-primary]="statusFilter() === 'Closed'" (click)="statusFilter.set('Closed'); load()">{{ 'posAdmin.shifts.closed' | translate }}</button>
+			</div>
+			<select class="kt-select max-w-[220px]" [ngModel]="branchFilter()" (ngModelChange)="branchFilter.set($event === null || $event === 'null' ? null : +$event); load()">
+				<option [ngValue]="null">{{ 'posAdmin.common.branch' | translate }}: {{ 'posAdmin.common.all' | translate }}</option>
+				@for (b of branches(); track b.branchId) {
+					<option [ngValue]="b.branchId">{{ b.branchName }}</option>
+				}
+			</select>
+		</div>
+
+		@if (loading()) {
+			<div class="p-8 text-sm text-secondary-foreground">{{ 'posAdmin.common.loading' | translate }}</div>
+		} @else if (!filtered().length) {
+			<div class="p-8 text-sm text-secondary-foreground">{{ 'posAdmin.common.empty' | translate }}</div>
+		} @else {
+			<div class="kt-scrollable-x-auto">
+				<table class="kt-table kt-table-border">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>{{ 'posAdmin.common.branch' | translate }}</th>
+							<th>{{ 'posAdmin.shifts.cashier' | translate }}</th>
+							<th>{{ 'posAdmin.shifts.device' | translate }}</th>
+							<th>{{ 'posAdmin.shifts.openedAt' | translate }}</th>
+							<th>{{ 'posAdmin.shifts.opening' | translate }}</th>
+							<th>{{ 'posAdmin.common.status' | translate }}</th>
+							<th>{{ 'posAdmin.common.actions' | translate }}</th>
+						</tr>
+					</thead>
+					<tbody>
+						@for (s of filtered(); track s.shiftId) {
+							<tr>
+								<td class="font-mono">{{ s.shiftId }}</td>
+								<td>{{ s.branchId != null ? (branchName().get(s.branchId) || s.branchId) : '—' }}</td>
+								<td>{{ s.cashierId }}</td>
+								<td>{{ s.deviceId }}</td>
+								<td>{{ s.openedAt ? (s.openedAt | date: 'short') : '—' }}</td>
+								<td>{{ s.openingBalance ?? 0 | number: '1.2-2' }}</td>
+								<td>
+									<span class="kt-badge" [class.kt-badge-success]="isOpen(s)" [class.kt-badge-secondary]="!isOpen(s)">
+										{{ (isOpen(s) ? 'posAdmin.shifts.open' : 'posAdmin.shifts.closed') | translate }}
+									</span>
+								</td>
+								<td>
+									@if (isOpen(s)) {
+										<button type="button" class="kt-btn kt-btn-sm kt-btn-light" (click)="askClose(s)">{{ 'posAdmin.shifts.close' | translate }}</button>
+									}
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		}
+	</div>
+
+	@if (closeTarget(); as shift) {
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+			<div class="kt-card w-full max-w-md">
+				<div class="kt-card-header">
+					<h3 class="kt-card-title">{{ 'posAdmin.shifts.close' | translate }} #{{ shift.shiftId }}</h3>
+				</div>
+				<div class="kt-card-content p-5 space-y-3">
+					<label class="block">
+						<span class="text-xs text-secondary-foreground">{{ 'posAdmin.shifts.closingBalance' | translate }}</span>
+						<input class="kt-input mt-1" type="number" step="0.01" [ngModel]="closingBalance()" (ngModelChange)="closingBalance.set(+$event || 0)" />
+					</label>
+					<div class="flex justify-end gap-2">
+						<button type="button" class="kt-btn kt-btn-light" (click)="closeTarget.set(null)">{{ 'posAdmin.common.cancel' | translate }}</button>
+						<button type="button" class="kt-btn kt-btn-primary" [disabled]="saving()" (click)="confirmClose()">{{ 'posAdmin.shifts.close' | translate }}</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+</div>

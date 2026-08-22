@@ -1060,6 +1060,115 @@
 	color: var(--color-muted-foreground);
 }
 
+.pos-session-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.35rem 0.7rem;
+	border-radius: 9999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	background: color-mix(in oklab, var(--color-muted) 55%, white);
+	color: var(--color-muted-foreground);
+}
+
+.pos-session-chip.ready {
+	background: color-mix(in oklab, var(--pos-accent) 14%, white);
+	color: var(--pos-accent-deep);
+}
+
+.pos-badge-count {
+	display: inline-grid;
+	place-items: center;
+	min-width: 1.15rem;
+	height: 1.15rem;
+	padding: 0 0.3rem;
+	border-radius: 9999px;
+	font-size: 0.65rem;
+	background: var(--pos-accent);
+	color: #fff;
+}
+
+.pos-gate {
+	display: grid;
+	place-items: center;
+	min-height: 18rem;
+	padding: 1rem;
+}
+
+.pos-gate-card {
+	max-width: 22rem;
+	text-align: center;
+	padding: 1.75rem 1.5rem;
+	border-radius: 1.25rem;
+	background: color-mix(in oklab, var(--pos-panel) 92%, white);
+	border: 1px solid color-mix(in oklab, var(--pos-accent) 12%, var(--color-border));
+	box-shadow: 0 18px 40px -28px color-mix(in oklab, var(--pos-accent) 40%, transparent);
+}
+
+.pos-gate-icon {
+	display: inline-grid;
+	place-items: center;
+	width: 3rem;
+	height: 3rem;
+	margin-bottom: 0.75rem;
+	border-radius: 9999px;
+	background: color-mix(in oklab, var(--pos-accent) 12%, white);
+	color: var(--pos-accent-deep);
+	font-size: 1.35rem;
+}
+
+.pos-gate-icon.warn {
+	background: color-mix(in oklab, #ef4444 12%, white);
+	color: #b91c1c;
+}
+
+.pos-gate-card .kt-btn {
+	min-width: 10rem;
+}
+
+.pos-gate-card h2 {
+	font-size: 1.1rem;
+	font-weight: 700;
+	margin-bottom: 0.35rem;
+}
+
+.pos-gate-card p {
+	font-size: 0.85rem;
+	color: var(--color-muted-foreground);
+}
+
+.pos-product-stock {
+	display: block;
+	font-size: 0.7rem;
+	color: var(--color-muted-foreground);
+	margin-top: 0.15rem;
+}
+
+.pos-modal-wide {
+	width: min(34rem, calc(100vw - 1.5rem));
+}
+
+.pos-suspended-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.55rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pos-suspended-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.75rem 0.85rem;
+	border-radius: 0.85rem;
+	background: color-mix(in oklab, var(--pos-soft) 80%, white);
+	border: 1px solid color-mix(in oklab, var(--color-border) 80%, transparent);
+}
+
 @media (max-width: 640px) {
 	.pos-quick-tenders {
 		grid-template-columns: repeat(2, minmax(0, 1fr));

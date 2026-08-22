@@ -31,7 +31,7 @@
 				</label>
 				<label class="pos-filter">
 					<span>{{ 'pos.store' | translate }}</span>
-					<select class="kt-select h-10" [ngModel]="storeId()" (ngModelChange)="storeId.set($event)">
+					<select class="kt-select h-10" [ngModel]="storeId()" (ngModelChange)="onStoreChange($event)">
 						<option [ngValue]="null">—</option>
 						@for (s of stores(); track s.storeId) {
 							<option [ngValue]="s.storeId">{{ s.storeName }}</option>
@@ -41,7 +41,7 @@
 				<label class="pos-filter pos-filter-wide">
 					<span>{{ 'pos.customer' | translate }}</span>
 					<select class="kt-select h-10" [ngModel]="customerId()" (ngModelChange)="customerId.set($event)">
-						<option [ngValue]="null">—</option>
+						<option [ngValue]="null">{{ 'pos.walkIn' | translate }}</option>
 						@for (c of customers(); track c.customerId) {
 							<option [ngValue]="c.customerId">{{ customerLabel(c) }}</option>
 						}
@@ -50,11 +50,36 @@
 			</div>
 
 			<div class="pos-top-actions">
+				@if (shift(); as sh) {
+					<div class="pos-session-chip" [class.ready]="canOperate()">
+						<i class="ki-filled ki-time"></i>
+						<span>{{ 'pos.shift' | translate }} {{ shiftLabel() }}</span>
+					</div>
+				}
 				<div class="pos-chip-row">
 					<span class="pos-keychip">F2</span>
 					<span class="pos-keychip">F4</span>
+					<span class="pos-keychip">F7</span>
+					<span class="pos-keychip">F8</span>
 					<span class="pos-keychip">F9</span>
 				</div>
+				<button type="button" class="kt-btn kt-btn-light pos-btn-ghost" (click)="openReturns()" [disabled]="!canOperate() || !canReturn()">
+					<i class="ki-filled ki-arrow-circle-left"></i>
+					{{ 'pos.returns' | translate }}
+				</button>
+				<button type="button" class="kt-btn kt-btn-light pos-btn-ghost" (click)="toggleSuspended()" [disabled]="!canOperate() || !canHold()">
+					<i class="ki-filled ki-archive"></i>
+					{{ 'pos.suspended' | translate }}
+					@if (suspended().length) {
+						<span class="pos-badge-count">{{ suspended().length }}</span>
+					}
+				</button>
+				@if (canOperate() && canCloseShift()) {
+					<button type="button" class="kt-btn kt-btn-light pos-btn-ghost" (click)="requestCloseShift()">
+						<i class="ki-filled ki-exit-right"></i>
+						{{ 'pos.closeShift' | translate }}
+					</button>
+				}
 				<button type="button" class="kt-btn kt-btn-light pos-btn-ghost" (click)="resetSale()">
 					<i class="ki-filled ki-plus-square"></i>
 					{{ 'pos.newSale' | translate }}
@@ -62,7 +87,7 @@
 			</div>
 		</header>
 
-		@if (errorMessage()) {
+		@if (errorMessage() && canOperate() && !needShiftOpen() && !needCloseShift()) {
 			<div class="pos-alert pos-alert-error">
 				<i class="ki-filled ki-information-2"></i>
 				<span>{{ errorMessage() }}</span>
@@ -75,165 +100,435 @@
 			</div>
 		}
 
-		<div class="pos-main">
-			<section class="pos-catalog">
-				<div class="pos-search">
-					<span class="pos-search-icon"><i class="ki-filled ki-barcode"></i></span>
-					<input
-						#searchInput
-						class="kt-input"
-						type="text"
-						autocomplete="off"
-						[placeholder]="'pos.searchPlaceholder' | translate"
-						[ngModel]="searchQuery()"
-						(ngModelChange)="searchQuery.set($event)"
-						(keydown)="onSearchKeydown($event)"
-					/>
-					@if (scanning()) {
-						<span class="pos-search-busy"></span>
+		@if (!canOperate() && !needShiftOpen()) {
+			<div class="pos-gate">
+				<div class="pos-gate-card">
+					@if (shiftBusy()) {
+						<div class="pos-loading-orb mx-auto"></div>
+						<h2>{{ 'pos.preparingSession' | translate }}</h2>
+						<p>{{ 'pos.preparingSessionHint' | translate }}</p>
+					} @else if (hasStoreContext() && errorMessage()) {
+						<div class="pos-gate-icon warn"><i class="ki-filled ki-information-2"></i></div>
+						<h2>{{ 'pos.sessionErrorTitle' | translate }}</h2>
+						<p>{{ errorMessage() }}</p>
+						<button type="button" class="kt-btn pos-pay-btn mt-4" (click)="retrySession()">
+							<i class="ki-filled ki-arrows-circle"></i>
+							{{ 'pos.retrySession' | translate }}
+						</button>
+					} @else if (hasStoreContext() && !cashier()) {
+						<div class="pos-gate-icon warn"><i class="ki-filled ki-profile-user"></i></div>
+						<h2>{{ 'pos.cashierRequiredTitle' | translate }}</h2>
+						<p>{{ 'pos.cashierRequired' | translate }}</p>
 					} @else {
-						<span class="pos-search-enter">Enter</span>
+						<div class="pos-gate-icon"><i class="ki-filled ki-shop"></i></div>
+						<h2>{{ 'pos.selectStoreTitle' | translate }}</h2>
+						<p>{{ 'pos.selectStoreHint' | translate }}</p>
 					}
 				</div>
-				<div class="pos-catalog-meta">
-					<span>{{ 'pos.barcodeHint' | translate }}</span>
-					<span class="pos-catalog-count">{{ filteredCatalog().length }}</span>
-				</div>
+			</div>
+		} @else {
+			<div class="pos-main">
+				<section class="pos-catalog">
+					<div class="pos-search">
+						<span class="pos-search-icon"><i class="ki-filled ki-barcode"></i></span>
+						<input
+							#searchInput
+							class="kt-input"
+							type="text"
+							autocomplete="off"
+							[disabled]="!canOperate()"
+							[placeholder]="'pos.searchPlaceholder' | translate"
+							[ngModel]="searchQuery()"
+							(ngModelChange)="searchQuery.set($event)"
+							(keydown)="onSearchKeydown($event)"
+						/>
+						@if (scanning() || catalogLoading()) {
+							<span class="pos-search-busy"></span>
+						} @else {
+							<span class="pos-search-enter">Enter</span>
+						}
+					</div>
+					<div class="pos-catalog-meta">
+						<span>{{ 'pos.barcodeHint' | translate }}</span>
+						<span class="pos-catalog-count">{{ filteredCatalog().length }}</span>
+					</div>
 
-				<div class="pos-grid">
-					@if (!filteredCatalog().length) {
-						<div class="pos-empty-catalog">
-							<div class="pos-empty-orb"><i class="ki-filled ki-magnifier"></i></div>
-							<div>{{ 'pos.noProducts' | translate }}</div>
-						</div>
-					} @else {
-						@for (item of filteredCatalog(); track trackProduct($index, item); let i = $index) {
-							<button
-								type="button"
-								class="pos-product"
-								[style.animation-delay.ms]="i * 28"
-								(click)="addProduct(item.product.productId)"
-							>
-								<span class="pos-product-icon" [attr.data-tone]="productTone(item.product.productId)">
-									@if (item.product.productImage) {
-										<img [src]="item.product.productImage" alt="" />
-									} @else {
-										<span class="pos-product-letter">{{ productInitial(item.product.productName || item.product.proCode) }}</span>
-									}
-								</span>
-								<span class="pos-product-body">
-									<span class="pos-product-name">{{ item.product.productName || item.product.proCode }}</span>
-									@if (item.product.proCode) {
-										<span class="pos-product-code">{{ item.product.proCode }}</span>
-									}
-								</span>
-								<span class="pos-product-foot">
-									<span class="pos-product-price">
-										@if (item.product.defaultSalesPrice != null) {
-											{{ item.product.defaultSalesPrice | number: '1.2-2' }}
-										} @else {
-											{{ 'pos.noPrice' | translate }}
+					<div class="pos-grid">
+						@if (!filteredCatalog().length) {
+							<div class="pos-empty-catalog">
+								<div class="pos-empty-orb"><i class="ki-filled ki-magnifier"></i></div>
+								<div>{{ 'pos.noProducts' | translate }}</div>
+							</div>
+						} @else {
+							@for (item of filteredCatalog(); track trackProduct($index, item); let i = $index) {
+								<button
+									type="button"
+									class="pos-product"
+									[style.animation-delay.ms]="i * 28"
+									[disabled]="!canOperate()"
+									(click)="addProduct(item.tile.productId)"
+								>
+									<span class="pos-product-icon" [attr.data-tone]="productTone(item.tile.productId)">
+										<span class="pos-product-letter">{{ productInitial(item.tile.productName) }}</span>
+									</span>
+									<span class="pos-product-body">
+										<span class="pos-product-name">{{ item.tile.productName }}</span>
+										@if (item.tile.saleUnitName) {
+											<span class="pos-product-code">{{ item.tile.saleUnitName }}</span>
+										}
+										@if (item.tile.stockQty != null) {
+											<span class="pos-product-stock">{{ 'pos.stock' | translate }}: {{ item.tile.stockQty | number: '1.0-2' }}</span>
 										}
 									</span>
-									<span class="pos-product-add"><i class="ki-filled ki-plus"></i></span>
-								</span>
-							</button>
-						}
-					}
-				</div>
-			</section>
-
-			<aside class="pos-cart">
-				<div class="pos-cart-head">
-					<div class="pos-cart-title-wrap">
-						<span class="pos-cart-badge"><i class="ki-filled ki-handcart"></i></span>
-						<div>
-							<h2>{{ 'pos.cart' | translate }}</h2>
-							<span class="pos-cart-count">{{ linesCount() }} {{ 'pos.itemsCount' | translate }}</span>
-						</div>
-					</div>
-					<button type="button" class="kt-btn kt-btn-sm kt-btn-ghost" [disabled]="!cart().length" (click)="clearCart()">
-						{{ 'pos.clearCart' | translate }}
-					</button>
-				</div>
-
-				<div class="pos-cart-body">
-					@if (!cart().length) {
-						<div class="pos-cart-empty">
-							<div class="pos-cart-empty-icon"><i class="ki-filled ki-handcart"></i></div>
-							<div class="font-medium text-foreground">{{ 'pos.cartEmpty' | translate }}</div>
-							<div class="text-xs text-secondary-foreground mt-1 max-w-[14rem]">{{ 'pos.cartEmptyHint' | translate }}</div>
-						</div>
-					} @else {
-						<ul class="pos-lines">
-							@for (line of cart(); track trackLine($index, line)) {
-								<li class="pos-line">
-									<span class="pos-line-avatar" [attr.data-tone]="productTone(line.productId)">
-										{{ productInitial(line.productName) }}
+									<span class="pos-product-foot">
+										<span class="pos-product-price">
+											@if (item.tile.salePrice != null) {
+												{{ item.tile.salePrice | number: '1.2-2' }}
+											} @else {
+												{{ 'pos.noPrice' | translate }}
+											}
+										</span>
+										<span class="pos-product-add"><i class="ki-filled ki-plus"></i></span>
 									</span>
-									<div class="min-w-0 flex-1">
-										<div class="pos-line-name">{{ line.productName }}</div>
+								</button>
+							}
+						}
+					</div>
+				</section>
+
+				<aside class="pos-cart">
+					<div class="pos-cart-head">
+						<div class="pos-cart-title-wrap">
+							<span class="pos-cart-badge"><i class="ki-filled ki-handcart"></i></span>
+							<div>
+								<h2>{{ 'pos.cart' | translate }}</h2>
+								<span class="pos-cart-count">{{ linesCount() }} {{ 'pos.itemsCount' | translate }}</span>
+							</div>
+						</div>
+						<button type="button" class="kt-btn kt-btn-sm kt-btn-ghost" [disabled]="!cart().length" (click)="clearCart()">
+							{{ 'pos.clearCart' | translate }}
+						</button>
+					</div>
+
+					<div class="pos-cart-body">
+						@if (!cart().length) {
+							<div class="pos-cart-empty">
+								<div class="pos-cart-empty-icon"><i class="ki-filled ki-handcart"></i></div>
+								<div class="font-medium text-foreground">{{ 'pos.cartEmpty' | translate }}</div>
+								<div class="text-xs text-secondary-foreground mt-1 max-w-[14rem]">{{ 'pos.cartEmptyHint' | translate }}</div>
+							</div>
+						} @else {
+							<ul class="pos-lines">
+								@for (line of cart(); track trackLine($index, line)) {
+									<li class="pos-line">
+										<span class="pos-line-avatar" [attr.data-tone]="productTone(line.productId)">
+											{{ productInitial(line.productName) }}
+										</span>
+										<div class="min-w-0 flex-1">
+											<div class="pos-line-name">{{ line.productName }}</div>
 										<div class="pos-line-meta">
 											{{ line.unitPrice | number: '1.2-2' }}
 											@if (line.unitName) {
 												· {{ line.unitName }}
 											}
+											@if (line.batchNumber) {
+												· {{ line.batchNumber }}
+											}
 										</div>
-									</div>
-									<div class="pos-qty">
-										<button type="button" (click)="bumpQty(line.key, -1)" aria-label="-">−</button>
-										<input
-											type="number"
-											min="0"
-											step="1"
-											[ngModel]="line.qty"
-											(ngModelChange)="updateQty(line.key, $event)"
-										/>
-										<button type="button" (click)="bumpQty(line.key, 1)" aria-label="+">+</button>
-									</div>
-									<div class="pos-line-total">{{ lineNet(line) | number: '1.2-2' }}</div>
-									<button type="button" class="pos-line-remove" (click)="removeLine(line.key)">
-										<i class="ki-filled ki-trash"></i>
-									</button>
-								</li>
-							}
-						</ul>
-					}
-				</div>
+										</div>
+										<div class="pos-qty">
+											<button type="button" (click)="bumpQty(line.key, -1)" aria-label="-">−</button>
+											<input
+												type="number"
+												min="0"
+												step="1"
+												[ngModel]="line.qty"
+												(ngModelChange)="updateQty(line.key, $event)"
+											/>
+											<button type="button" (click)="bumpQty(line.key, 1)" aria-label="+">+</button>
+										</div>
+										<div class="pos-line-total">{{ lineNet(line) | number: '1.2-2' }}</div>
+										<button type="button" class="pos-line-remove" (click)="removeLine(line.key)">
+											<i class="ki-filled ki-trash"></i>
+										</button>
+									</li>
+								}
+							</ul>
+						}
+					</div>
 
-				<div class="pos-cart-foot">
-					<div class="pos-totals">
-						<div><span>{{ 'pos.subtotal' | translate }}</span><strong>{{ subtotal() | number: '1.2-2' }}</strong></div>
+					<div class="pos-cart-foot">
+						<div class="pos-totals">
+							<div><span>{{ 'pos.subtotal' | translate }}</span><strong>{{ subtotal() | number: '1.2-2' }}</strong></div>
 						<div class="pos-discount-row">
 							<span>{{ 'pos.discount' | translate }}</span>
 							<input
 								class="kt-input h-9 w-28 text-end"
 								type="number"
 								min="0"
+								[disabled]="!canDiscount()"
 								[ngModel]="discountAmount()"
 								(ngModelChange)="discountAmount.set(+$event || 0)"
 							/>
 						</div>
-						<div><span>{{ 'pos.tax' | translate }}</span><strong>{{ taxAmount() | number: '1.2-2' }}</strong></div>
-					</div>
+							<div><span>{{ 'pos.tax' | translate }}</span><strong>{{ taxAmount() | number: '1.2-2' }}</strong></div>
+						</div>
 
-					<div class="pos-net-card">
-						<span>{{ 'pos.net' | translate }}</span>
-						<strong>{{ netAmount() | number: '1.2-2' }}</strong>
-					</div>
+						<div class="pos-net-card">
+							<span>{{ 'pos.net' | translate }}</span>
+							<strong>{{ netAmount() | number: '1.2-2' }}</strong>
+						</div>
 
 					<div class="pos-cart-actions">
-						<button type="button" class="kt-btn kt-btn-light flex-1" [disabled]="!cart().length || saving()" (click)="holdDraft()">
+						<button type="button" class="kt-btn kt-btn-light flex-1" [disabled]="!cart().length || saving() || !canOperate() || !canHold()" (click)="holdDraft()">
 							<i class="ki-filled ki-archive"></i>
 							{{ 'pos.hold' | translate }}
 						</button>
-						<button type="button" class="kt-btn pos-pay-btn flex-[1.5]" [disabled]="!cart().length || saving()" (click)="openPayment()">
+						<button type="button" class="kt-btn pos-pay-btn flex-[1.5]" [disabled]="!cart().length || saving() || !canOperate()" (click)="openPayment()">
 							<i class="ki-filled ki-dollar"></i>
 							{{ 'pos.pay' | translate }}
 						</button>
 					</div>
+					</div>
+				</aside>
+			</div>
+		}
+	}
+
+	@if (needShiftOpen()) {
+		<div class="pos-modal-backdrop">
+			<div class="pos-modal pos-modal-enter" role="dialog" aria-modal="true">
+				<div class="pos-modal-head">
+					<div>
+						<div class="pos-modal-kicker">POS</div>
+						<h3>{{ 'pos.openShiftTitle' | translate }}</h3>
+					</div>
 				</div>
-			</aside>
+				<div class="pos-modal-body">
+					<p class="text-sm text-secondary-foreground mb-4">{{ 'pos.openShiftHint' | translate }}</p>
+					@if (errorMessage()) {
+						<div class="pos-alert pos-alert-error mb-3">
+							<i class="ki-filled ki-information-2"></i>
+							<span>{{ errorMessage() }}</span>
+						</div>
+					}
+					@if (pendingActiveShift(); as pending) {
+						<div class="pos-alert pos-alert-ok mb-3">
+							<i class="ki-filled ki-information-2"></i>
+							<span>{{ 'pos.activeShiftFound' | translate }} #{{ pending.shiftId }}</span>
+						</div>
+					}
+					<label class="block">
+						<span class="text-xs text-secondary-foreground">{{ 'pos.openingBalance' | translate }}</span>
+						<input
+							class="kt-input mt-1"
+							type="number"
+							min="0"
+							step="0.01"
+							[ngModel]="openingBalance()"
+							(ngModelChange)="openingBalance.set(+$event || 0)"
+						/>
+					</label>
+					@if (device(); as d) {
+						<div class="text-xs text-secondary-foreground mt-3">
+							{{ 'pos.device' | translate }}: #{{ d.deviceId }}
+							· {{ 'pos.cashier' | translate }}: #{{ cashier()?.cashierId }}
+						</div>
+					}
+				</div>
+				<div class="pos-modal-foot">
+					@if (pendingActiveShift()) {
+						<button type="button" class="kt-btn kt-btn-light" [disabled]="shiftBusy()" (click)="resumePendingShift()">
+							{{ 'pos.resumeActiveShift' | translate }}
+						</button>
+					}
+					<button type="button" class="kt-btn pos-pay-btn" [disabled]="shiftBusy()" (click)="openShift()">
+						{{ shiftBusy() ? ('pos.openingShift' | translate) : ('pos.openShift' | translate) }}
+					</button>
+				</div>
+			</div>
+		</div>
+	}
+
+	@if (needCloseShift()) {
+		<div class="pos-modal-backdrop" (click)="needCloseShift.set(false)">
+			<div class="pos-modal pos-modal-enter" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+				<div class="pos-modal-head">
+					<div>
+						<div class="pos-modal-kicker">POS</div>
+						<h3>{{ 'pos.closeShiftTitle' | translate }}</h3>
+					</div>
+					<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="needCloseShift.set(false)">
+						<i class="ki-filled ki-cross"></i>
+					</button>
+				</div>
+				<div class="pos-modal-body">
+					<label class="block">
+						<span class="text-xs text-secondary-foreground">{{ 'pos.closingBalance' | translate }}</span>
+						<input
+							class="kt-input mt-1"
+							type="number"
+							min="0"
+							step="0.01"
+							[ngModel]="closingBalance()"
+							(ngModelChange)="closingBalance.set(+$event || 0)"
+						/>
+					</label>
+				</div>
+				<div class="pos-modal-foot">
+					<button type="button" class="kt-btn kt-btn-light" (click)="needCloseShift.set(false)">{{ 'pos.cancel' | translate }}</button>
+					<button type="button" class="kt-btn pos-pay-btn" [disabled]="shiftBusy()" (click)="confirmCloseShift()">
+						{{ shiftBusy() ? ('pos.closingShift' | translate) : ('pos.closeShift' | translate) }}
+					</button>
+				</div>
+			</div>
+		</div>
+	}
+
+	@if (showReturns()) {
+		<div class="pos-modal-backdrop" (click)="closeReturns()">
+			<div class="pos-modal pos-modal-wide pos-modal-enter" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+				<div class="pos-modal-head">
+					<div>
+						<div class="pos-modal-kicker">POS</div>
+						<h3>{{ 'pos.returnsTitle' | translate }}</h3>
+					</div>
+					<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="closeReturns()">
+						<i class="ki-filled ki-cross"></i>
+					</button>
+				</div>
+				<div class="pos-modal-body">
+					@if (errorMessage()) {
+						<div class="pos-alert pos-alert-error mb-3">
+							<i class="ki-filled ki-information-2"></i>
+							<span>{{ errorMessage() }}</span>
+						</div>
+					}
+					@if (!returnOrder()) {
+						<div class="flex gap-2 mb-3">
+							<input
+								class="kt-input flex-1"
+								type="text"
+								[placeholder]="'pos.returnSearchPlaceholder' | translate"
+								[ngModel]="returnSearch()"
+								(ngModelChange)="returnSearch.set($event)"
+								(keydown.enter)="searchPaidOrders()"
+							/>
+							<button type="button" class="kt-btn kt-btn-light" [disabled]="returnBusy()" (click)="searchPaidOrders()">
+								{{ 'pos.search' | translate }}
+							</button>
+						</div>
+						@if (returnBusy()) {
+							<div class="text-sm text-secondary-foreground py-6 text-center">{{ 'pos.loading' | translate }}</div>
+						} @else if (!paidOrders().length) {
+							<div class="pos-cart-empty py-8">{{ 'pos.paidEmpty' | translate }}</div>
+						} @else {
+							<ul class="pos-suspended-list">
+								@for (order of paidOrders(); track order.posOrderId) {
+									<li class="pos-suspended-item">
+										<div>
+											<div class="font-semibold">#{{ order.posOrderId }}</div>
+											<div class="text-xs text-secondary-foreground">
+												{{ order.orderDateTime | date: 'short' }}
+												· {{ order.totalAmount | number: '1.2-2' }}
+											</div>
+										</div>
+										<button type="button" class="kt-btn kt-btn-sm kt-btn-light" (click)="selectReturnOrder(order)">
+											{{ 'pos.select' | translate }}
+										</button>
+									</li>
+								}
+							</ul>
+						}
+					} @else {
+						<div class="flex items-center justify-between mb-3">
+							<div class="font-semibold">#{{ returnOrder()!.posOrderId }}</div>
+							<button type="button" class="kt-btn kt-btn-sm kt-btn-ghost" (click)="returnOrder.set(null)">
+								{{ 'pos.back' | translate }}
+							</button>
+						</div>
+						<ul class="pos-suspended-list mb-3">
+							@for (line of returnLines(); track line.key) {
+								<li class="pos-suspended-item">
+									<div class="min-w-0 flex-1">
+										<div class="font-medium truncate">{{ line.name }}</div>
+										<div class="text-xs text-secondary-foreground">
+											{{ line.price | number: '1.2-2' }} · {{ 'pos.soldQty' | translate }}: {{ line.soldQty }}
+										</div>
+									</div>
+									<input
+										class="kt-input h-9 w-20 text-end"
+										type="number"
+										min="0"
+										[max]="line.soldQty"
+										[ngModel]="returnQtys()[line.key] || 0"
+										(ngModelChange)="setReturnQty(line.key, $event, line.soldQty)"
+									/>
+								</li>
+							}
+						</ul>
+						<label class="block">
+							<span class="text-xs text-secondary-foreground">{{ 'pos.returnReason' | translate }}</span>
+							<input class="kt-input mt-1" type="text" [ngModel]="returnReason()" (ngModelChange)="returnReason.set($event)" />
+						</label>
+					}
+				</div>
+				@if (returnOrder()) {
+					<div class="pos-modal-foot">
+						<button type="button" class="kt-btn kt-btn-light" [disabled]="returnBusy()" (click)="closeReturns()">
+							{{ 'pos.cancel' | translate }}
+						</button>
+						<button type="button" class="kt-btn pos-pay-btn" [disabled]="returnBusy()" (click)="submitReturn()">
+							{{ returnBusy() ? ('pos.saving' | translate) : ('pos.confirmReturn' | translate) }}
+						</button>
+					</div>
+				}
+			</div>
+		</div>
+	}
+
+	@if (showSuspended()) {
+		<div class="pos-modal-backdrop" (click)="showSuspended.set(false)">
+			<div class="pos-modal pos-modal-wide pos-modal-enter" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+				<div class="pos-modal-head">
+					<div>
+						<div class="pos-modal-kicker">POS</div>
+						<h3>{{ 'pos.suspendedTitle' | translate }}</h3>
+					</div>
+					<button type="button" class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" (click)="showSuspended.set(false)">
+						<i class="ki-filled ki-cross"></i>
+					</button>
+				</div>
+				<div class="pos-modal-body">
+					@if (!suspended().length) {
+						<div class="pos-cart-empty py-8">
+							<div>{{ 'pos.suspendedEmpty' | translate }}</div>
+						</div>
+					} @else {
+						<ul class="pos-suspended-list">
+							@for (order of suspended(); track order.posOrderId) {
+								<li class="pos-suspended-item">
+									<div>
+										<div class="font-semibold">#{{ order.posOrderId }}</div>
+										<div class="text-xs text-secondary-foreground">
+											{{ order.orderDateTime | date: 'short' }}
+											· {{ order.totalAmount | number: '1.2-2' }}
+										</div>
+									</div>
+									<div class="flex gap-2">
+										<button type="button" class="kt-btn kt-btn-sm kt-btn-light" (click)="resumeSuspended(order)">
+											{{ 'pos.resume' | translate }}
+										</button>
+										<button type="button" class="kt-btn kt-btn-sm kt-btn-ghost text-danger" (click)="deleteSuspended(order)">
+											<i class="ki-filled ki-trash"></i>
+										</button>
+									</div>
+								</li>
+							}
+						</ul>
+					}
+				</div>
+			</div>
 		</div>
 	}
 
@@ -257,29 +552,7 @@
 					</div>
 
 					<div class="pos-pay-grid">
-						<label>
-							<span>{{ 'pos.invoiceType' | translate }}</span>
-							<div class="pos-seg">
-								<button
-									type="button"
-									class="pos-seg-btn"
-									[class.active]="invoiceType() === SalesInvoiceType.Cash"
-									(click)="invoiceType.set(SalesInvoiceType.Cash); amountPaid.set(netAmount())"
-								>
-									{{ 'pos.cash' | translate }}
-								</button>
-								<button
-									type="button"
-									class="pos-seg-btn"
-									[class.active]="invoiceType() === SalesInvoiceType.Credit"
-									(click)="invoiceType.set(SalesInvoiceType.Credit)"
-								>
-									{{ 'pos.credit' | translate }}
-								</button>
-							</div>
-						</label>
-
-						<label>
+						<label class="pos-pay-span">
 							<span>{{ 'pos.paymentType' | translate }}</span>
 							<select class="kt-select h-11" [ngModel]="paymentTypeId()" (ngModelChange)="paymentTypeId.set($event)">
 								@for (p of paymentTypes(); track p.paymentTypeId) {
@@ -327,14 +600,9 @@
 					<button type="button" class="kt-btn kt-btn-light" [disabled]="saving()" (click)="closePayment()">
 						{{ 'pos.cancel' | translate }}
 					</button>
-					<button type="button" class="kt-btn kt-btn-light" [disabled]="saving()" (click)="confirmPay(false)">
+					<button type="button" class="kt-btn pos-pay-btn" [disabled]="saving() || stillDue() > 0" (click)="confirmPay()">
 						{{ saving() ? ('pos.saving' | translate) : ('pos.confirmPay' | translate) }}
 					</button>
-					@if (openPeriods().length) {
-						<button type="button" class="kt-btn pos-pay-btn" [disabled]="saving()" (click)="confirmPay(true)">
-							{{ saving() ? ('pos.posting' | translate) : ('pos.confirmAndPost' | translate) }}
-						</button>
-					}
 				</div>
 			</div>
 		</div>
@@ -346,11 +614,11 @@
 				<div class="pos-success-rings" aria-hidden="true"></div>
 				<div class="pos-success-badge"><i class="ki-filled ki-check-circle"></i></div>
 				<h3>{{ 'pos.successTitle' | translate }}</h3>
-				<p class="pos-success-inv">{{ 'pos.successInvoice' | translate }}: <strong>{{ s.invoiceNo }}</strong></p>
+				<p class="pos-success-inv">{{ 'pos.successOrder' | translate }}: <strong>{{ s.orderNo }}</strong></p>
 
 				<div id="pos-receipt" class="pos-receipt">
 					<div class="pos-receipt-title">{{ 'pos.receiptTitle' | translate }}</div>
-					<div class="pos-receipt-row"><span>{{ 'pos.successInvoice' | translate }}</span><span>{{ s.invoiceNo }}</span></div>
+					<div class="pos-receipt-row"><span>{{ 'pos.successOrder' | translate }}</span><span>{{ s.orderNo }}</span></div>
 					<div class="pos-receipt-row"><span>{{ 'pos.net' | translate }}</span><span>{{ s.net | number: '1.2-2' }}</span></div>
 					<div class="pos-receipt-row"><span>{{ 'pos.amountPaid' | translate }}</span><span>{{ s.paid | number: '1.2-2' }}</span></div>
 					<div class="pos-receipt-row"><span>{{ 'pos.change' | translate }}</span><span>{{ s.change | number: '1.2-2' }}</span></div>
@@ -362,9 +630,6 @@
 						<i class="ki-filled ki-printer"></i>
 						{{ 'pos.print' | translate }}
 					</button>
-					<a class="kt-btn kt-btn-light" [routerLink]="['/demo1/sales/sales-invoices', s.invoiceId]">
-						{{ 'pos.viewInvoice' | translate }}
-					</a>
 					<button type="button" class="kt-btn pos-pay-btn" (click)="closeSuccess()">
 						{{ 'pos.closeSuccess' | translate }}
 					</button>
