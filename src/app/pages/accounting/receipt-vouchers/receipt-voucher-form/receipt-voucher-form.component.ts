@@ -31,6 +31,7 @@ import { CurrenciesService } from '../../../../core/services/currencies.service'
 import { LanguageService } from '../../../../core/services/language.service';
 import { PaymentTypesService } from '../../../../core/services/payment-types.service';
 import { ReceiptVouchersService } from '../../../../core/services/receipt-vouchers.service';
+import { DocumentPrintService } from '../../../../core/services/document-print.service';
 import { TaxSetupsService } from '../../../../core/services/tax-setups.service';
 
 type ReceiptLineGroup = FormGroup<{
@@ -61,6 +62,7 @@ export class ReceiptVoucherFormComponent implements OnInit {
   private accountsService = inject(AccountsService);
   private taxSetupsService = inject(TaxSetupsService);
   private language = inject(LanguageService);
+  private documentPrint = inject(DocumentPrintService);
 
   isEditMode = signal(false);
   isReadOnly = signal(false);
@@ -229,6 +231,66 @@ export class ReceiptVoucherFormComponent implements OnInit {
 
   accountLabel(account: Account): string {
     return `${account.accCode} — ${account.accName || account.accId}`;
+  }
+
+  printDocument(): void {
+    const raw = this.form.getRawValue();
+    const branch = this.branches().find((item) => item.branchId === raw.branchId);
+    const currency = this.currencies().find((item) => item.id === raw.currencyId);
+    const paymentType = this.paymentTypes().find((item) => item.paymentTypeId === raw.paymentTypeId);
+    const debitAccount = this.accounts().find((item) => item.accId === raw.debitAccountId);
+
+    this.documentPrint.print({
+      title: this.language.translate('receiptVouchers.title'),
+      subtitle: raw.voucherNumber || undefined,
+      fields: [
+        { label: this.language.translate('receiptVouchers.voucherNumber'), value: raw.voucherNumber || '—' },
+        { label: this.language.translate('receiptVouchers.voucherDate'), value: raw.voucherDate || '—' },
+        { label: this.language.translate('receiptVouchers.payerName'), value: raw.payerName || '—' },
+        { label: this.language.translate('receiptVouchers.paymentType'), value: paymentType?.paymentTypeName || '—' },
+        {
+          label: this.language.translate('receiptVouchers.debitAccount'),
+          value: debitAccount ? this.accountLabel(debitAccount) : '—',
+        },
+        { label: this.language.translate('receiptVouchers.branch'), value: branch?.branchName || branch?.branchCode || '—' },
+        {
+          label: this.language.translate('receiptVouchers.currency'),
+          value: currency?.currencyName || currency?.currencyShorcut || '—',
+        },
+        { label: this.language.translate('receiptVouchers.reference'), value: raw.reference || '—' },
+        { label: this.language.translate('receiptVouchers.description'), value: raw.description || '—' },
+      ],
+      columns: [
+        { key: 'account', header: this.language.translate('receiptVouchers.account') },
+        { key: 'description', header: this.language.translate('receiptVouchers.description') },
+        { key: 'amount', header: this.language.translate('receiptVouchers.amount'), align: 'end' },
+      ],
+      rows: this.lines.controls.map((line) => {
+        const account = this.accounts().find((item) => item.accId === line.controls.creditAccountId.value);
+        return {
+          account: account ? this.accountLabel(account) : '—',
+          description: line.controls.description.value || '—',
+          amount: this.formatPrintAmount(line.controls.amount.value),
+        };
+      }),
+      totals: [
+        {
+          label: this.language.translate('receiptVouchers.totalAmount'),
+          value: this.formatPrintAmount(this.totalAmount()),
+        },
+        {
+          label: this.language.translate('receiptVouchers.totalAmountLc'),
+          value: this.formatPrintAmount(this.totalAmountLc()),
+        },
+      ],
+    });
+  }
+
+  private formatPrintAmount(value: number | null | undefined): string {
+    return (value ?? 0).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 
   onPaymentTypeChange(typeId: number | null): void {

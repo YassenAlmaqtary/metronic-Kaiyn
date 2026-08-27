@@ -34,6 +34,7 @@ import { ProductsService } from '../../../../core/services/products.service';
 import { SalesInvoicesService } from '../../../../core/services/sales-invoices.service';
 import { SalesmenService } from '../../../../core/services/salesmen.service';
 import { StoresService } from '../../../../core/services/stores.service';
+import { DocumentPrintService } from '../../../../core/services/document-print.service';
 
 type SalesInvoiceLineGroup = FormGroup<{
   productId: FormControl<number | null>;
@@ -66,6 +67,7 @@ export class SalesInvoiceFormComponent implements OnInit {
   private currenciesService = inject(CurrenciesService);
   private productsService = inject(ProductsService);
   private language = inject(LanguageService);
+  private documentPrint = inject(DocumentPrintService);
 
   readonly SalesInvoiceType = SalesInvoiceType;
   readonly SalesInvoiceStatus = SalesInvoiceStatus;
@@ -465,6 +467,89 @@ export class SalesInvoiceFormComponent implements OnInit {
 
   productLabel(product: ProductLookup): string {
     return product.productName || product.proCode || String(product.productId);
+  }
+
+  printDocument(): void {
+    const raw = this.form.getRawValue();
+    const branch = this.branches().find((item) => item.branchId === raw.branchId);
+    const store = this.stores().find((item) => item.storeId === raw.storeId);
+    const customer = this.customers().find((item) => item.customerId === raw.customerId);
+    const salesman = this.salesmen().find((item) => item.salesmanId === raw.salesmanId);
+    const currency = this.currencies().find((item) => item.id === raw.currencyId);
+
+    const invoiceTypeKey =
+      raw.invoiceType === SalesInvoiceType.Cash
+        ? 'salesInvoices.type.cash'
+        : 'salesInvoices.type.credit';
+
+    this.documentPrint.print({
+      title: this.language.translate('salesInvoices.title'),
+      subtitle: raw.invoiceNo || undefined,
+      fields: [
+        { label: this.language.translate('salesInvoices.invoiceNo'), value: raw.invoiceNo || '—' },
+        { label: this.language.translate('salesInvoices.invoiceDate'), value: raw.invoiceDate || '—' },
+        { label: this.language.translate('salesInvoices.status'), value: this.invoiceStatusLabel() },
+        { label: this.language.translate('salesInvoices.branch'), value: branch ? this.branchLabel(branch) : '—' },
+        { label: this.language.translate('salesInvoices.store'), value: store?.storeName || '—' },
+        { label: this.language.translate('salesInvoices.customer'), value: customer ? this.customerLabel(customer) : '—' },
+        { label: this.language.translate('salesInvoices.salesman'), value: salesman ? this.salesmanLabel(salesman) : '—' },
+        { label: this.language.translate('salesInvoices.invoiceType'), value: this.language.translate(invoiceTypeKey) },
+        { label: this.language.translate('salesInvoices.currency'), value: currency ? this.currencyLabel(currency) : '—' },
+      ],
+      columns: [
+        { key: 'product', header: this.language.translate('salesInvoices.product') },
+        { key: 'qty', header: this.language.translate('salesInvoices.qty'), align: 'end' },
+        { key: 'unitPrice', header: this.language.translate('salesInvoices.unitPrice'), align: 'end' },
+        { key: 'discount', header: this.language.translate('salesInvoices.discountAmount'), align: 'end' },
+        { key: 'tax', header: this.language.translate('salesInvoices.taxAmount'), align: 'end' },
+        { key: 'total', header: this.language.translate('salesInvoices.lineTotal'), align: 'end' },
+      ],
+      rows: this.details.controls.map((line, index) => {
+        const product = this.products().find((item) => item.productId === line.controls.productId.value);
+        return {
+          product: product ? this.productLabel(product) : '—',
+          qty: this.formatPrintAmount(line.controls.qty.value),
+          unitPrice: this.formatPrintAmount(line.controls.unitPrice.value),
+          discount: this.formatPrintAmount(line.controls.discountAmount.value),
+          tax: this.formatPrintAmount(line.controls.taxAmount.value),
+          total: this.formatPrintAmount(line.controls.netAmount.value),
+        };
+      }),
+      totals: [
+        {
+          label: this.language.translate('salesInvoices.totalBeforeDiscount'),
+          value: this.formatPrintAmount(this.headerTotalBeforeDiscount()),
+        },
+        {
+          label: this.language.translate('salesInvoices.taxAmount'),
+          value: this.formatPrintAmount(this.headerTaxAmount()),
+        },
+        {
+          label: this.language.translate('salesInvoices.netAmount'),
+          value: this.formatPrintAmount(this.headerNetAmount()),
+        },
+      ],
+    });
+  }
+
+  private invoiceStatusLabel(): string {
+    switch (this.invoiceStatus()) {
+      case SalesInvoiceStatus.Draft:
+        return this.language.translate('salesInvoices.status.draft');
+      case SalesInvoiceStatus.Posted:
+        return this.language.translate('salesInvoices.status.posted');
+      case SalesInvoiceStatus.Cancelled:
+        return this.language.translate('salesInvoices.status.cancelled');
+      default:
+        return this.language.translate('salesInvoices.status.unknown');
+    }
+  }
+
+  private formatPrintAmount(value: number | null | undefined): string {
+    return (value ?? 0).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 
   unitsForLine(index: number): ProductUnit[] {

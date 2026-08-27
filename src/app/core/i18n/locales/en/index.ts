@@ -14,6 +14,7 @@ import { posAdminEn } from './pos-admin.en';
 import { productGroupsEn } from './product-groups.en';
 import { productsEn } from './products.en';
 import { pricingEn } from './pricing.en';
+import { brandsEn } from './brands.en';
 import { unitsEn } from './units.en';
 import { accountGroupsEn } from './account-groups.en';
 import { accountingPeriodsEn } from './accounting-periods.en';
@@ -23,6 +24,7 @@ import { costCentersEn } from './cost-centers.en';
 import { taxSetupsEn } from './tax-setups.en';
 import { openingBalancesEn } from './opening-balances.en';
 import { journalEntriesEn } from './journal-entries.en';
+import { journalTypesEn } from './journal-types.en';
 import { paymentVouchersEn } from './payment-vouchers.en';
 import { receiptVouchersEn } from './receipt-vouchers.en';
 import { generalLedgerEn } from './general-ledger.en';
@@ -36,6 +38,9 @@ import { stockTransfersEn } from './stock-transfers.en';
 import { stockReceivingsEn } from './stock-receivings.en';
 import { stockTakingsEn } from './stock-takings.en';
 import { stockAdjustmentsEn } from './stock-adjustments.en';
+import { inventoryReportsEn } from './inventory-reports.en';
+import { suppliersEn } from './suppliers.en';
+import { documentPrintEn } from './document-print.en';
 import { menuEn } from './menu.en';
 import { navEn } from './nav.en';
 import { permissionsEn } from './permissions.en';
@@ -47,6 +52,7 @@ import { usersEn } from './users.en';
 
 export const en = mergeLocale(
   commonEn,
+  documentPrintEn,
   navEn,
   menuEn,
   authEn,
@@ -70,6 +76,7 @@ export const en = mergeLocale(
   productsEn,
   pricingEn,
   unitsEn,
+  brandsEn,
   accountGroupsEn,
   accountingPeriodsEn,
   fiscalYearsEn,
@@ -78,6 +85,7 @@ export const en = mergeLocale(
   taxSetupsEn,
   openingBalancesEn,
   journalEntriesEn,
+  journalTypesEn,
   paymentVouchersEn,
   receiptVouchersEn,
   generalLedgerEn,
@@ -91,4 +99,6 @@ export const en = mergeLocale(
   stockReceivingsEn,
   stockTakingsEn,
   stockAdjustmentsEn,
+  inventoryReportsEn,
+  suppliersEn,
 );

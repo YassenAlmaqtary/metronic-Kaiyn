@@ -1,0 +1,162 @@
+<div class="kt-container-fixed flex flex-col gap-6 max-w-5xl pb-10">
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div>
+			<div class="flex items-center gap-2 text-sm text-secondary-foreground mb-2">
+				<a class="hover:text-primary transition-colors" routerLink="/demo1/products/brands">{{
+					'brands.title' | translate
+				}}</a>
+				<i class="ki-filled ki-right text-[10px] rtl:rotate-180 opacity-60"></i>
+				<span class="font-medium text-foreground">
+					@if (isEditMode()) {
+						{{ 'brands.edit' | translate }}
+					} @else {
+						{{ 'brands.create' | translate }}
+					}
+				</span>
+			</div>
+			<div class="flex items-center gap-3">
+				<div
+					class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+					<i class="ki-filled ki-badge text-lg"></i>
+				</div>
+				<div>
+					<h1 class="text-xl font-semibold tracking-tight">
+						@if (isEditMode()) {
+							{{ 'brands.edit' | translate }}
+						} @else {
+							{{ 'brands.create' | translate }}
+						}
+					</h1>
+					<p class="text-sm text-secondary-foreground mt-0.5">{{ 'brands.subtitle' | translate }}</p>
+				</div>
+			</div>
+		</div>
+		<div class="flex items-center gap-2">
+			<a class="kt-btn kt-btn-outline" routerLink="/demo1/products/brands">
+				{{ 'brands.cancel' | translate }}
+			</a>
+			<button
+				class="kt-btn kt-btn-primary min-w-28"
+				type="button"
+				[disabled]="saving() || loading()"
+				(click)="onSubmit()">
+				@if (saving()) {
+					<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+				} @else {
+					<i class="ki-filled ki-check"></i>
+				}
+				{{ 'brands.save' | translate }}
+			</button>
+		</div>
+	</div>
+
+	@if (loading()) {
+		<div class="kt-card overflow-hidden">
+			<div class="kt-card-content flex items-center justify-center gap-3 py-24 text-secondary-foreground">
+				<span class="size-5 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'brands.loading' | translate }}
+			</div>
+		</div>
+	} @else {
+		<form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+			@if (errorMessage()) {
+				<div
+					class="rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3.5 text-sm text-destructive flex items-start gap-2">
+					<i class="ki-filled ki-information-2 mt-0.5"></i>
+					<span>{{ errorMessage() }}</span>
+				</div>
+			}
+
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="px-6 md:px-8 py-4 border-b border-border bg-muted/30">
+					<h2 class="text-sm font-semibold">{{ 'brands.section.basic' | translate }}</h2>
+					<p class="text-xs text-secondary-foreground mt-0.5">{{ 'brands.section.basicHint' | translate }}</p>
+				</div>
+				<div class="p-6 md:p-8">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label required">{{ 'brands.brandArName' | translate }}</label>
+							<input
+								class="kt-input h-11"
+								formControlName="brandArName"
+								type="text"
+								autocomplete="off" />
+							@if (form.controls.brandArName.touched && form.controls.brandArName.hasError('required')) {
+								<span class="text-xs text-destructive">{{
+									'brands.required.brandArName' | translate
+								}}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label required">{{ 'brands.brandEnName' | translate }}</label>
+							<input class="kt-input h-11" formControlName="brandEnName" type="text" autocomplete="off" />
+							@if (form.controls.brandEnName.touched && form.controls.brandEnName.hasError('required')) {
+								<span class="text-xs text-destructive">{{
+									'brands.required.brandEnName' | translate
+								}}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1.5 md:col-span-2">
+							<label class="kt-form-label required">{{ 'brands.details' | translate }}</label>
+							<textarea class="kt-input min-h-24 py-3" formControlName="details" rows="3"></textarea>
+							@if (form.controls.details.touched && form.controls.details.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'brands.required.details' | translate }}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1.5 md:col-span-2">
+							<label class="kt-form-label required">{{ 'brands.companyId' | translate }}</label>
+							<select class="kt-select h-11" formControlName="companyId">
+								<option [ngValue]="null">{{ 'brands.selectCompany' | translate }}</option>
+								@for (company of companies(); track company.companyId) {
+									<option [ngValue]="company.companyId">{{ companyLabel(company) }}</option>
+								}
+							</select>
+							@if (form.controls.companyId.touched && form.controls.companyId.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'brands.required.companyId' | translate }}</span>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="px-6 md:px-8 py-4 border-b border-border bg-muted/30">
+					<h2 class="text-sm font-semibold">{{ 'brands.section.status' | translate }}</h2>
+				</div>
+				<div class="p-6 md:p-8">
+					<label
+						class="flex items-center justify-between gap-4 rounded-xl border border-border bg-background px-4 py-3.5 cursor-pointer hover:border-primary/40 transition-colors">
+						<div class="flex items-center gap-3">
+							<div
+								class="flex size-9 items-center justify-center rounded-lg bg-success/10 text-success">
+								<i class="ki-filled ki-check-circle"></i>
+							</div>
+							<div>
+								<div class="text-sm font-medium">{{ 'brands.isActive' | translate }}</div>
+								<div class="text-xs text-secondary-foreground">{{ 'brands.isActiveHint' | translate }}</div>
+							</div>
+						</div>
+						<input class="kt-switch" formControlName="status" type="checkbox" />
+					</label>
+				</div>
+			</div>
+
+			<div class="flex justify-end gap-2 pt-1">
+				<a class="kt-btn kt-btn-outline" routerLink="/demo1/products/brands">
+					{{ 'brands.cancel' | translate }}
+				</a>
+				<button class="kt-btn kt-btn-primary min-w-28" type="submit" [disabled]="saving()">
+					@if (saving()) {
+						<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+					} @else {
+						<i class="ki-filled ki-check"></i>
+					}
+					{{ 'brands.save' | translate }}
+				</button>
+			</div>
+		</form>
+	}
+</div>

@@ -64,12 +64,18 @@
 					</div>
 				</div>
 
-				@if (!isReadOnly()) {
-					<div class="flex flex-wrap items-center justify-end gap-2">
-						<a class="kt-btn kt-btn-light" routerLink="/demo1/accounting/receipt-vouchers">{{ 'receiptVouchers.cancel' | translate }}</a>
+				<div class="flex flex-wrap items-center justify-end gap-2">
+					<a class="kt-btn kt-btn-light" routerLink="/demo1/accounting/receipt-vouchers">{{ 'receiptVouchers.cancel' | translate }}</a>
+					@if (isEditMode()) {
+						<button class="kt-btn kt-btn-light" type="button" (click)="printDocument()">
+							<i class="ki-filled ki-printer"></i>
+							{{ 'documentPrint.printPdf' | translate }}
+						</button>
+					}
+					@if (!isReadOnly()) {
 						<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">@if (saving()) { <span class="size-4 rounded-full border-2 border-current border-t-transparent animate-spin"></span> }{{ 'receiptVouchers.save' | translate }}</button>
-					</div>
-				}
+					}
+				</div>
 			</form>
 		}
 	</div>

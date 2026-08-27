@@ -1,0 +1,133 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex items-start gap-3">
+		<div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+			<i class="ki-filled ki-package text-xl"></i>
+		</div>
+		<div>
+			<h1 class="text-xl font-semibold text-mono tracking-tight">{{ 'inventoryReports.currentStock.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground mt-1 max-w-xl">{{ 'inventoryReports.currentStock.subtitle' | translate }}</p>
+		</div>
+	</div>
+
+	<div class="kt-card overflow-hidden">
+		<div class="px-5 pt-5 pb-4 border-b border-border">
+			<h2 class="text-sm font-semibold text-mono mb-4">{{ 'inventoryReports.filters' | translate }}</h2>
+			<form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 items-end" [formGroup]="filterForm" (ngSubmit)="runReport()">
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'inventoryReports.branch' | translate }}</label>
+					<select class="kt-input" formControlName="branchId">
+						<option [ngValue]="null">{{ 'inventoryReports.selectBranch' | translate }}</option>
+						@for (branch of branches(); track branch.branchId) {
+							<option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchCode }}</option>
+						}
+					</select>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'inventoryReports.store' | translate }}</label>
+					<select class="kt-input" formControlName="storeId">
+						<option [ngValue]="null">{{ 'inventoryReports.selectStore' | translate }}</option>
+						@for (store of stores(); track store.storeId) {
+							<option [ngValue]="store.storeId">{{ store.storeName || store.storeId }}</option>
+						}
+					</select>
+				</div>
+				<div class="flex flex-col gap-1 xl:col-span-2">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'inventoryReports.item' | translate }}</label>
+					<select class="kt-input" formControlName="itemId">
+						<option [ngValue]="null">{{ 'inventoryReports.selectItem' | translate }}</option>
+						@for (product of products(); track product.productId) {
+							<option [ngValue]="product.productId">{{ productLabel(product) }}</option>
+						}
+					</select>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label class="text-xs font-medium text-secondary-foreground">{{ 'inventoryReports.barcode' | translate }}</label>
+					<input class="kt-input" formControlName="barcode" type="text" />
+				</div>
+				<div class="flex items-center gap-2 pb-2">
+					<input class="kt-checkbox" formControlName="hideZeroes" id="hideZeroes" type="checkbox" />
+					<label class="text-sm text-secondary-foreground cursor-pointer" for="hideZeroes">{{ 'inventoryReports.hideZeroes' | translate }}</label>
+				</div>
+				<div>
+					<button class="kt-btn kt-btn-primary w-full" type="submit" [disabled]="loading()">
+						@if (loading()) { <span class="size-4 rounded-full border-2 border-current border-t-transparent animate-spin"></span> }
+						{{ 'inventoryReports.runReport' | translate }}
+					</button>
+				</div>
+			</form>
+		</div>
+
+		@if (errorMessage()) {
+			<div class="mx-5 mt-4 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
+				<span>{{ errorMessage() }}</span>
+				<button class="kt-btn kt-btn-sm kt-btn-light" type="button" (click)="runReport()">{{ 'inventoryReports.retry' | translate }}</button>
+			</div>
+		}
+
+		<div class="kt-card-content p-0">
+			@if (loading()) {
+				<div class="flex flex-col items-center justify-center gap-3 py-20 text-secondary-foreground">
+					<span class="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+					<span class="text-sm">{{ 'inventoryReports.loading' | translate }}</span>
+				</div>
+			} @else if (hasRun() && report()) {
+				<div class="px-5 py-4 border-b border-border bg-muted/20">
+					<div class="flex flex-wrap items-center justify-between gap-4">
+						<div class="flex flex-wrap gap-6 text-sm">
+							<div><span class="text-secondary-foreground">{{ 'inventoryReports.totalItems' | translate }}:</span> <span class="font-mono font-semibold">{{ report()?.totalItemsCount | number: '1.0-0' }}</span></div>
+							<div><span class="text-secondary-foreground">{{ 'inventoryReports.totalValue' | translate }}:</span> <span class="font-mono font-semibold">{{ report()?.totalStockValue | number: '1.2-2' }}</span></div>
+							<div><span class="text-secondary-foreground">{{ 'inventoryReports.totalAvailable' | translate }}:</span> <span class="font-mono font-semibold">{{ report()?.totalAvailableQuantity | number: '1.2-2' }}</span></div>
+							<div><span class="text-secondary-foreground">{{ 'inventoryReports.totalReserved' | translate }}:</span> <span class="font-mono font-semibold">{{ report()?.totalReservedQuantity | number: '1.2-2' }}</span></div>
+						</div>
+						<button class="kt-btn kt-btn-sm kt-btn-light" type="button" [disabled]="!items().length" (click)="exportCsv()">
+							<i class="ki-filled ki-file-down"></i>
+							{{ 'common.exportCsv' | translate }}
+						</button>
+					</div>
+				</div>
+
+				@if (items().length === 0) {
+					<div class="flex flex-col items-center justify-center gap-4 py-20 text-center px-6">
+						<div class="relative"><div class="absolute inset-0 rounded-full bg-primary/10 blur-2xl scale-150"></div><div class="relative flex size-16 items-center justify-center rounded-2xl bg-muted/60 text-muted-foreground"><i class="ki-filled ki-package text-3xl"></i></div></div>
+						<div><p class="font-medium text-mono">{{ 'inventoryReports.empty' | translate }}</p><p class="text-sm text-secondary-foreground mt-1">{{ 'inventoryReports.emptyHint' | translate }}</p></div>
+					</div>
+				} @else {
+					<div class="kt-scrollable-x-auto">
+						<table class="kt-table kt-table-border w-full">
+							<thead>
+								<tr>
+									<th>{{ 'inventoryReports.col.itemCode' | translate }}</th>
+									<th>{{ 'inventoryReports.col.itemName' | translate }}</th>
+									<th>{{ 'inventoryReports.col.branch' | translate }}</th>
+									<th>{{ 'inventoryReports.col.store' | translate }}</th>
+									<th>{{ 'inventoryReports.col.unit' | translate }}</th>
+									<th>{{ 'inventoryReports.col.available' | translate }}</th>
+									<th>{{ 'inventoryReports.col.reserved' | translate }}</th>
+									<th>{{ 'inventoryReports.col.value' | translate }}</th>
+								</tr>
+							</thead>
+							<tbody>
+								@for (row of items(); track row.itemId + '-' + row.storeId) {
+									<tr>
+										<td class="font-mono">{{ row.itemCode || '—' }}</td>
+										<td>{{ row.itemName || '—' }}</td>
+										<td>{{ row.branchName || '—' }}</td>
+										<td>{{ row.storeName || '—' }}</td>
+										<td>{{ row.baseUnitName || '—' }}</td>
+										<td class="font-mono">{{ row.availableQuantity | number: '1.2-2' }}</td>
+										<td class="font-mono">{{ row.reservedQuantity | number: '1.2-2' }}</td>
+										<td class="font-mono">{{ row.totalStockValueWAC | number: '1.2-2' }}</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				}
+			} @else if (hasRun() && !report()) {
+				<div class="flex flex-col items-center justify-center gap-4 py-20 text-center px-6">
+					<p class="font-medium text-mono">{{ 'inventoryReports.empty' | translate }}</p>
+				</div>
+			}
+		</div>
+	</div>
+</div>

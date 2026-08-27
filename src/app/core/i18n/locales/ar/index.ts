@@ -14,6 +14,7 @@ import { posAdminAr } from './pos-admin.ar';
 import { productGroupsAr } from './product-groups.ar';
 import { productsAr } from './products.ar';
 import { pricingAr } from './pricing.ar';
+import { brandsAr } from './brands.ar';
 import { unitsAr } from './units.ar';
 import { accountGroupsAr } from './account-groups.ar';
 import { accountingPeriodsAr } from './accounting-periods.ar';
@@ -23,6 +24,7 @@ import { costCentersAr } from './cost-centers.ar';
 import { taxSetupsAr } from './tax-setups.ar';
 import { openingBalancesAr } from './opening-balances.ar';
 import { journalEntriesAr } from './journal-entries.ar';
+import { journalTypesAr } from './journal-types.ar';
 import { paymentVouchersAr } from './payment-vouchers.ar';
 import { receiptVouchersAr } from './receipt-vouchers.ar';
 import { generalLedgerAr } from './general-ledger.ar';
@@ -36,6 +38,9 @@ import { stockTransfersAr } from './stock-transfers.ar';
 import { stockReceivingsAr } from './stock-receivings.ar';
 import { stockTakingsAr } from './stock-takings.ar';
 import { stockAdjustmentsAr } from './stock-adjustments.ar';
+import { inventoryReportsAr } from './inventory-reports.ar';
+import { suppliersAr } from './suppliers.ar';
+import { documentPrintAr } from './document-print.ar';
 import { menuAr } from './menu.ar';
 import { navAr } from './nav.ar';
 import { permissionsAr } from './permissions.ar';
@@ -47,6 +52,7 @@ import { usersAr } from './users.ar';
 
 export const ar = mergeLocale(
   commonAr,
+  documentPrintAr,
   navAr,
   menuAr,
   authAr,
@@ -70,6 +76,7 @@ export const ar = mergeLocale(
   productsAr,
   pricingAr,
   unitsAr,
+  brandsAr,
   accountGroupsAr,
   accountingPeriodsAr,
   fiscalYearsAr,
@@ -78,6 +85,7 @@ export const ar = mergeLocale(
   taxSetupsAr,
   openingBalancesAr,
   journalEntriesAr,
+  journalTypesAr,
   paymentVouchersAr,
   receiptVouchersAr,
   generalLedgerAr,
@@ -91,4 +99,6 @@ export const ar = mergeLocale(
   stockReceivingsAr,
   stockTakingsAr,
   stockAdjustmentsAr,
+  inventoryReportsAr,
+  suppliersAr,
 );

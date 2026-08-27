@@ -140,6 +140,12 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         permission: 'units.view',
       },
       {
+        id: 'products-brands',
+        labelKey: 'menu.products.brands',
+        route: '/demo1/products/brands',
+        permission: 'brands.view',
+      },
+      {
         id: 'products-pricing',
         labelKey: 'menu.products.pricing',
         route: '/demo1/products/pricing',
@@ -189,6 +195,43 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         route: '/demo1/inventory/stock-adjustments',
         permission: 'stores.view',
       },
+      {
+        id: 'inventory-reports-group',
+        labelKey: 'menu.inventory.reportsGroup',
+        kind: 'group',
+      },
+      {
+        id: 'inventory-report-current-stock',
+        labelKey: 'menu.inventory.currentStock',
+        route: '/demo1/inventory/reports/current-stock',
+        permission: 'stores.view',
+      },
+      {
+        id: 'inventory-report-item-movement',
+        labelKey: 'menu.inventory.itemMovement',
+        route: '/demo1/inventory/reports/item-movement',
+        permission: 'stores.view',
+      },
+      {
+        id: 'inventory-report-stock-issue',
+        labelKey: 'menu.inventory.stockIssueReport',
+        route: '/demo1/inventory/reports/stock-issue',
+        permission: 'stores.view',
+      },
+    ],
+  },
+  {
+    id: 'purchasing',
+    labelKey: 'menu.purchasing',
+    icon: 'ki-delivery',
+    matchPaths: ['/purchasing'],
+    children: [
+      {
+        id: 'purchasing-suppliers',
+        labelKey: 'menu.purchasing.suppliers',
+        route: '/demo1/purchasing/suppliers',
+        permission: 'suppliers.view',
+      },
     ],
   },
   {
@@ -202,6 +245,12 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         labelKey: 'menu.accounting.journal',
         route: '/demo1/accounting/journal-entries',
         permission: 'journalEntries.view',
+      },
+      {
+        id: 'accounting-journal-types',
+        labelKey: 'menu.accounting.journalTypes',
+        route: '/demo1/accounting/journal-types',
+        permission: 'journalTypes.view',
       },
       {
         id: 'accounting-account-groups',

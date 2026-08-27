@@ -21,7 +21,12 @@ import { LanguageService } from '../../core/services/language.service';
 interface GlobalSearchGroup {
   sectionKey: TranslationKey;
   sectionIcon: string;
-  items: GlobalSearchItem[];
+  items: GlobalSearchDisplayItem[];
+}
+
+interface GlobalSearchDisplayItem extends GlobalSearchItem {
+  displayLabel: string;
+  sectionLabel: string;
 }
 
 @Component({
@@ -38,53 +43,75 @@ export class ModalsSearchComponent {
 
   readonly open = this.globalSearch.open;
   readonly query = this.globalSearch.query;
+  readonly dataLoading = this.globalSearch.dataLoading;
 
   activeIndex = signal(0);
+  private searchDebounce: ReturnType<typeof setTimeout> | undefined;
 
-  private labeledItems = computed(() =>
-    this.globalSearch.allItems().map((item) => ({
-      ...item,
-      label: this.language.translate(item.labelKey),
-      sectionLabel: this.language.translate(item.sectionKey),
-    })),
+  private labeledMenuItems = computed(() =>
+    this.globalSearch.menuItems().map((item) => this.toDisplayItem(item)),
+  );
+
+  private labeledRecordItems = computed(() =>
+    this.globalSearch.recordItems().map((item) => this.toDisplayItem(item)),
   );
 
   filteredGroups = computed((): GlobalSearchGroup[] => {
     const term = this.query().trim().toLowerCase();
-    const items = this.labeledItems();
+    const menuItems = this.labeledMenuItems();
+    const recordItems = this.labeledRecordItems();
 
-    const matched = term
-      ? items.filter(
+    const matchedMenu = term
+      ? menuItems.filter(
           (item) =>
-            item.label.toLowerCase().includes(term) ||
+            item.displayLabel.toLowerCase().includes(term) ||
             item.sectionLabel.toLowerCase().includes(term) ||
             item.route.toLowerCase().includes(term) ||
             item.keywords.toLowerCase().includes(term),
         )
-      : items;
+      : menuItems;
 
-    const map = new Map<string, GlobalSearchGroup>();
-    for (const item of matched) {
+    const groups: GlobalSearchGroup[] = [];
+    const menuMap = new Map<string, GlobalSearchGroup>();
+
+    for (const item of matchedMenu) {
       const key = item.sectionKey;
-      const group = map.get(key) ?? {
+      const group = menuMap.get(key) ?? {
         sectionKey: item.sectionKey,
         sectionIcon: item.sectionIcon,
         items: [],
       };
       group.items.push(item);
-      map.set(key, group);
+      menuMap.set(key, group);
+    }
+    groups.push(...menuMap.values());
+
+    if (term.length >= 2 && recordItems.length) {
+      const recordMap = new Map<string, GlobalSearchGroup>();
+      for (const item of recordItems) {
+        const key = item.sectionKey;
+        const group = recordMap.get(key) ?? {
+          sectionKey: item.sectionKey,
+          sectionIcon: item.sectionIcon,
+          items: [],
+        };
+        group.items.push(item);
+        recordMap.set(key, group);
+      }
+      groups.push(...recordMap.values());
     }
 
-    return [...map.values()];
+    return groups;
   });
 
   recentItems = computed(() => {
     const routes = new Set(this.globalSearch.recentRoutes());
     if (!routes.size) {
-      return [] as GlobalSearchItem[];
+      return [] as GlobalSearchDisplayItem[];
     }
-    return this.globalSearch
-      .allItems()
+
+    const all = [...this.labeledMenuItems(), ...this.labeledRecordItems()];
+    return all
       .filter((item) => routes.has(item.route))
       .sort(
         (a, b) =>
@@ -144,15 +171,20 @@ export class ModalsSearchComponent {
   onQueryChange(value: string): void {
     this.query.set(value);
     this.activeIndex.set(0);
+
+    clearTimeout(this.searchDebounce);
+    this.searchDebounce = setTimeout(() => {
+      this.globalSearch.searchRecords(value);
+    }, 280);
   }
 
-  navigate(item: GlobalSearchItem): void {
+  navigate(item: GlobalSearchDisplayItem): void {
     this.globalSearch.remember(item.route);
     this.globalSearch.hide();
     void this.router.navigateByUrl(item.route);
   }
 
-  isActive(item: GlobalSearchItem): boolean {
+  isActive(item: GlobalSearchDisplayItem): boolean {
     const results = this.flatResults();
     const idx = results.findIndex((x) => x.id === item.id);
     return idx === this.activeIndex();
@@ -168,5 +200,17 @@ export class ModalsSearchComponent {
 
   onBackdropClick(): void {
     this.globalSearch.hide();
+  }
+
+  private toDisplayItem(item: GlobalSearchItem): GlobalSearchDisplayItem {
+    const displayLabel =
+      item.label ?? (item.labelKey ? this.language.translate(item.labelKey) : item.route);
+    const sectionLabel = this.language.translate(item.sectionKey);
+
+    return {
+      ...item,
+      displayLabel,
+      sectionLabel,
+    };
   }
 }

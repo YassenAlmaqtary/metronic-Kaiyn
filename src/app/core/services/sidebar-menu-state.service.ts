@@ -6,6 +6,7 @@ import { SidebarMenuSectionId } from '../navigation/sidebar-menu.models';
 export type MenuSection = SidebarMenuSectionId;
 
 const STORAGE_KEY = 'kayian-erp-sidebar-sections';
+const GROUPS_STORAGE_KEY = 'kayian-erp-sidebar-groups';
 
 const MENU_SECTIONS: readonly MenuSection[] = SIDEBAR_MENU_SECTIONS.map((section) => section.id);
 
@@ -35,5 +36,27 @@ export class SidebarMenuStateService {
 
   save(sections: ReadonlySet<MenuSection>): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...sections]));
+  }
+
+  loadGroups(): Set<string> {
+    const raw = localStorage.getItem(GROUPS_STORAGE_KEY);
+    if (!raw) {
+      return new Set();
+    }
+
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        return new Set();
+      }
+
+      return new Set(parsed.filter((value): value is string => typeof value === 'string'));
+    } catch {
+      return new Set();
+    }
+  }
+
+  saveGroups(groups: ReadonlySet<string>): void {
+    localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify([...groups]));
   }
 }

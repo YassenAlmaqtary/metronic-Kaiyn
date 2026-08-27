@@ -105,8 +105,4 @@ export interface PartnerTypeLookup {
   tableReference?: string | null;
 }
 
-export interface SupplierLookup {
-  supplierId: number;
-  supplierName?: string | null;
-  isActive?: boolean;
-}
+export type { SupplierLookup } from './supplier.models';

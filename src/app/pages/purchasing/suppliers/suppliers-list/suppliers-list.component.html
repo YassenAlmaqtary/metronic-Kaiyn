@@ -1,0 +1,161 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex flex-wrap items-center justify-between gap-3">
+		<div>
+			<h1 class="text-xl font-semibold text-mono">{{ 'suppliers.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground mt-1">{{ 'suppliers.subtitle' | translate }}</p>
+		</div>
+		<a class="kt-btn kt-btn-primary" routerLink="/demo1/purchasing/suppliers/new">
+			<i class="ki-filled ki-plus"></i>
+			{{ 'suppliers.add' | translate }}
+		</a>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded border border-success/30 bg-success/10 p-3 text-sm text-success">
+			{{ successMessage() }}
+		</div>
+	}
+
+	@if (errorMessage()) {
+		<div
+			class="rounded border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive flex items-center justify-between gap-3">
+			<span>{{ errorMessage() }}</span>
+			<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="loadSuppliers()">
+				{{ 'suppliers.retry' | translate }}
+			</button>
+		</div>
+	}
+
+	<div class="kt-card">
+		<div class="kt-card-content p-5">
+			<div class="flex flex-wrap items-center gap-3 mb-4">
+				<button
+					type="button"
+					class="kt-btn kt-btn-sm"
+					[class.kt-btn-primary]="filter() === 'all'"
+					[class.kt-btn-outline]="filter() !== 'all'"
+					(click)="setFilter('all')">
+					{{ 'suppliers.filter.all' | translate }}
+				</button>
+				<button
+					type="button"
+					class="kt-btn kt-btn-sm"
+					[class.kt-btn-primary]="filter() === 'active'"
+					[class.kt-btn-outline]="filter() !== 'active'"
+					(click)="setFilter('active')">
+					{{ 'suppliers.filter.active' | translate }}
+				</button>
+				<input
+					class="kt-input ms-auto max-w-xs"
+					type="search"
+					[placeholder]="'suppliers.search' | translate"
+					[ngModel]="searchTerm()"
+					(ngModelChange)="onSearchChange($event)" />
+				<button
+					type="button"
+					class="kt-btn kt-btn-sm kt-btn-light"
+					[disabled]="!filteredSuppliers().length"
+					(click)="exportCsv()">
+					<i class="ki-filled ki-file-down"></i>
+					{{ 'common.exportCsv' | translate }}
+				</button>
+			</div>
+
+			@if (loading()) {
+				<div class="py-12 text-center text-secondary-foreground">{{ 'suppliers.loading' | translate }}</div>
+			} @else if (filteredSuppliers().length === 0) {
+				<div class="flex flex-col items-center justify-center gap-3 py-12 text-center">
+					<i class="ki-filled ki-delivery text-3xl text-muted-foreground"></i>
+					<div>
+						<p class="font-medium text-mono">{{ 'suppliers.empty' | translate }}</p>
+						<p class="text-sm text-secondary-foreground mt-1">{{ 'suppliers.emptyHint' | translate }}</p>
+					</div>
+					<a class="kt-btn kt-btn-primary kt-btn-sm" routerLink="/demo1/purchasing/suppliers/new">
+						{{ 'suppliers.add' | translate }}
+					</a>
+				</div>
+			} @else {
+				<div class="kt-scrollable-x-auto">
+					<table class="kt-table w-full">
+						<thead>
+							<tr>
+								<th>{{ 'suppliers.supplierName' | translate }}</th>
+								<th>{{ 'suppliers.phone' | translate }}</th>
+								<th>{{ 'suppliers.email' | translate }}</th>
+								<th>{{ 'suppliers.taxNumber' | translate }}</th>
+								<th>{{ 'suppliers.status' | translate }}</th>
+								<th class="w-[100px]"></th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (supplier of filteredSuppliers(); track supplier.supplierId) {
+								<tr>
+									<td>
+										<a
+											class="font-medium text-primary"
+											[routerLink]="['/demo1/purchasing/suppliers', supplier.supplierId, 'edit']">
+											{{ supplier.supplierName || '—' }}
+										</a>
+									</td>
+									<td>{{ supplier.phone || '—' }}</td>
+									<td>{{ supplier.email || '—' }}</td>
+									<td>{{ supplier.taxNumber || '—' }}</td>
+									<td>
+										@if (supplier.isActive) {
+											<span class="kt-badge kt-badge-success">{{ 'suppliers.active' | translate }}</span>
+										} @else {
+											<span class="kt-badge kt-badge-warning">{{ 'suppliers.inactive' | translate }}</span>
+										}
+									</td>
+									<td>
+										<div class="flex items-center gap-1">
+											<a
+												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
+												[routerLink]="['/demo1/purchasing/suppliers', supplier.supplierId, 'edit']"
+												[attr.aria-label]="'suppliers.edit' | translate">
+												<i class="ki-filled ki-notepad-edit"></i>
+											</a>
+											<button
+												class="kt-btn kt-btn-sm kt-btn-destructive"
+												type="button"
+												(click)="openDeleteDialog(supplier)"
+												[attr.aria-label]="'suppliers.delete' | translate">
+												<i class="ki-filled ki-trash"></i>
+											</button>
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+		</div>
+	</div>
+</div>
+
+@if (deleteTarget(); as supplier) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<button class="absolute inset-0 bg-black/40" type="button" (click)="closeDeleteDialog()" aria-label="close"></button>
+		<div class="relative kt-card w-full max-w-md shadow-xl">
+			<div class="kt-card-content flex flex-col gap-4 p-6">
+				<div>
+					<h3 class="text-lg font-semibold text-mono">{{ 'suppliers.delete' | translate }}</h3>
+					<p class="text-sm text-secondary-foreground mt-2">{{ 'suppliers.deleteConfirm' | translate }}</p>
+					<p class="text-sm font-medium text-mono mt-3">{{ supplierLabel(supplier) }}</p>
+				</div>
+				<div class="flex justify-end gap-2">
+					<button class="kt-btn kt-btn-outline" type="button" [disabled]="deleting()" (click)="closeDeleteDialog()">
+						{{ 'suppliers.cancel' | translate }}
+					</button>
+					<button class="kt-btn kt-btn-destructive" type="button" [disabled]="deleting()" (click)="confirmDelete()">
+						@if (deleting()) {
+							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+						}
+						{{ 'suppliers.delete' | translate }}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}

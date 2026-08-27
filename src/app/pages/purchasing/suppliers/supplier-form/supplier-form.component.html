@@ -1,0 +1,205 @@
+<div class="kt-container-fixed flex flex-col gap-6 max-w-5xl pb-10">
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div>
+			<div class="flex items-center gap-2 text-sm text-secondary-foreground mb-2">
+				<a class="hover:text-primary transition-colors" routerLink="/demo1/purchasing/suppliers">{{
+					'suppliers.title' | translate
+				}}</a>
+				<i class="ki-filled ki-right text-[10px] rtl:rotate-180 opacity-60"></i>
+				<span class="font-medium text-foreground">
+					@if (isEditMode()) {
+						{{ 'suppliers.edit' | translate }}
+					} @else {
+						{{ 'suppliers.create' | translate }}
+					}
+				</span>
+			</div>
+			<div class="flex items-center gap-3">
+				<div
+					class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+					<i class="ki-filled ki-delivery text-lg"></i>
+				</div>
+				<div>
+					<h1 class="text-xl font-semibold tracking-tight">
+						@if (isEditMode()) {
+							{{ 'suppliers.edit' | translate }}
+						} @else {
+							{{ 'suppliers.create' | translate }}
+						}
+					</h1>
+					<p class="text-sm text-secondary-foreground mt-0.5">{{ 'suppliers.subtitle' | translate }}</p>
+				</div>
+			</div>
+		</div>
+		<div class="flex items-center gap-2">
+			<a class="kt-btn kt-btn-outline" routerLink="/demo1/purchasing/suppliers">
+				{{ 'suppliers.cancel' | translate }}
+			</a>
+			<button
+				class="kt-btn kt-btn-primary min-w-28"
+				type="button"
+				[disabled]="saving() || loading()"
+				(click)="onSubmit()">
+				@if (saving()) {
+					<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+				} @else {
+					<i class="ki-filled ki-check"></i>
+				}
+				{{ 'suppliers.save' | translate }}
+			</button>
+		</div>
+	</div>
+
+	@if (loading()) {
+		<div class="kt-card overflow-hidden">
+			<div class="kt-card-content flex items-center justify-center gap-3 py-24 text-secondary-foreground">
+				<span class="size-5 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'suppliers.loading' | translate }}
+			</div>
+		</div>
+	} @else {
+		<form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+			@if (errorMessage()) {
+				<div
+					class="rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3.5 text-sm text-destructive flex items-start gap-2">
+					<i class="ki-filled ki-information-2 mt-0.5"></i>
+					<span>{{ errorMessage() }}</span>
+				</div>
+			}
+
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="px-6 md:px-8 py-4 border-b border-border bg-muted/30">
+					<h2 class="text-sm font-semibold">{{ 'suppliers.section.basic' | translate }}</h2>
+				</div>
+				<div class="p-6 md:p-8">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+						<div class="flex flex-col gap-1.5 md:col-span-2">
+							<label class="kt-form-label required">{{ 'suppliers.supplierName' | translate }}</label>
+							<input
+								class="kt-input h-11"
+								formControlName="supplierName"
+								type="text"
+								autocomplete="organization" />
+							@if (form.controls.supplierName.touched && form.controls.supplierName.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'suppliers.required.name' | translate }}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label">{{ 'suppliers.taxNumber' | translate }}</label>
+							<input class="kt-input h-11" formControlName="taxNumber" type="text" />
+						</div>
+
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label">{{ 'suppliers.type' | translate }}</label>
+							<input class="kt-input h-11" formControlName="type" type="number" step="1" />
+						</div>
+
+						<div class="flex flex-col gap-1.5 md:col-span-2">
+							<label class="kt-form-label">{{ 'suppliers.notes' | translate }}</label>
+							<textarea class="kt-input min-h-24 py-2.5" formControlName="notes" rows="3"></textarea>
+						</div>
+
+						<div class="md:col-span-2">
+							<label
+								class="flex items-center justify-between gap-4 rounded-xl border border-border bg-background px-4 py-3.5 cursor-pointer hover:border-primary/40 transition-colors">
+								<div class="flex items-center gap-3">
+									<div
+										class="flex size-9 items-center justify-center rounded-lg bg-success/10 text-success">
+										<i class="ki-filled ki-check-circle"></i>
+									</div>
+									<div>
+										<div class="text-sm font-medium">{{ 'suppliers.active' | translate }}</div>
+									</div>
+								</div>
+								<input class="kt-switch" formControlName="isActive" type="checkbox" />
+							</label>
+						</div>
+
+						@if (!form.controls.isActive.value) {
+							<div class="flex flex-col gap-1.5 md:col-span-2">
+								<label class="kt-form-label">{{ 'suppliers.inactiveReason' | translate }}</label>
+								<input class="kt-input h-11" formControlName="inactiveReason" type="text" />
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="px-6 md:px-8 py-4 border-b border-border bg-muted/30">
+					<h2 class="text-sm font-semibold">{{ 'suppliers.section.contact' | translate }}</h2>
+				</div>
+				<div class="p-6 md:p-8">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label">{{ 'suppliers.phone' | translate }}</label>
+							<input class="kt-input h-11" formControlName="phone" type="tel" />
+						</div>
+
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label">{{ 'suppliers.email' | translate }}</label>
+							<input class="kt-input h-11" formControlName="email" type="email" />
+						</div>
+
+						<div class="flex flex-col gap-1.5 md:col-span-2">
+							<label class="kt-form-label">{{ 'suppliers.address' | translate }}</label>
+							<input class="kt-input h-11" formControlName="address" type="text" />
+						</div>
+
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label">{{ 'suppliers.city' | translate }}</label>
+							<input class="kt-input h-11" formControlName="city" type="text" />
+						</div>
+
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label">{{ 'suppliers.country' | translate }}</label>
+							<input class="kt-input h-11" formControlName="country" type="text" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="px-6 md:px-8 py-4 border-b border-border bg-muted/30">
+					<h2 class="text-sm font-semibold">{{ 'suppliers.section.accounting' | translate }}</h2>
+				</div>
+				<div class="p-6 md:p-8 flex flex-col gap-5">
+					<label
+						class="flex items-center justify-between gap-4 rounded-xl border border-border bg-background px-4 py-3.5 cursor-pointer hover:border-primary/40 transition-colors">
+						<div class="flex items-center gap-3">
+							<div class="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+								<i class="ki-filled ki-book"></i>
+							</div>
+							<div>
+								<div class="text-sm font-medium">{{ 'suppliers.isLinkedToGL' | translate }}</div>
+							</div>
+						</div>
+						<input class="kt-switch" formControlName="isLinkedToGL" type="checkbox" />
+					</label>
+
+					@if (form.controls.isLinkedToGL.value) {
+						<div class="flex flex-col gap-1.5 max-w-sm">
+							<label class="kt-form-label">{{ 'suppliers.glAccountCode' | translate }}</label>
+							<input class="kt-input h-11" formControlName="glAccountCode" type="number" step="1" />
+						</div>
+					}
+				</div>
+			</div>
+
+			<div class="flex justify-end gap-2 pt-1">
+				<a class="kt-btn kt-btn-outline" routerLink="/demo1/purchasing/suppliers">
+					{{ 'suppliers.cancel' | translate }}
+				</a>
+				<button class="kt-btn kt-btn-primary min-w-28" type="submit" [disabled]="saving()">
+					@if (saving()) {
+						<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+					} @else {
+						<i class="ki-filled ki-check"></i>
+					}
+					{{ 'suppliers.save' | translate }}
+				</button>
+			</div>
+		</form>
+	}
+</div>

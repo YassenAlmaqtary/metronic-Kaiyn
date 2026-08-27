@@ -43,8 +43,14 @@
 								>
 									<i [class]="'ki-filled ' + item.sectionIcon"></i>
 									<span class="min-w-0 flex-1 text-start">
-										<span class="block text-sm font-medium truncate">{{ item.labelKey | translate }}</span>
-										<span class="block text-xs text-secondary-foreground truncate">{{ item.sectionKey | translate }}</span>
+										<span class="block text-sm font-medium truncate">{{ item.displayLabel }}</span>
+										<span class="block text-xs text-secondary-foreground truncate">
+											@if (item.subtitle) {
+												{{ item.subtitle }}
+											} @else {
+												{{ item.sectionLabel }}
+											}
+										</span>
 									</span>
 								</button>
 							</li>
@@ -52,11 +58,20 @@
 					</ul>
 				}
 
-				@if (!flatResults().length) {
+				@if (dataLoading()) {
+					<div class="py-6 text-center text-sm text-secondary-foreground flex items-center justify-center gap-2">
+						<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+						{{ 'globalSearch.searchingData' | translate }}
+					</div>
+				}
+
+				@if (!flatResults().length && !dataLoading()) {
 					<div class="py-14 text-center text-sm text-secondary-foreground">
 						{{ (query().trim() ? 'globalSearch.noResults' : 'globalSearch.empty') | translate }}
 					</div>
-				} @else {
+				}
+
+				@if (flatResults().length) {
 					@for (group of filteredGroups(); track group.sectionKey) {
 						<div class="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-secondary-foreground">
 							{{ group.sectionKey | translate }}
@@ -72,8 +87,16 @@
 									>
 										<i [class]="'ki-filled ' + item.sectionIcon"></i>
 										<span class="min-w-0 flex-1 text-start">
-											<span class="block text-sm font-medium truncate">{{ item.labelKey | translate }}</span>
-											<span class="block text-xs text-secondary-foreground truncate">{{ item.route }}</span>
+											<span class="block text-sm font-medium truncate">{{ item.displayLabel }}</span>
+											<span class="block text-xs text-secondary-foreground truncate">
+												@if (item.subtitle) {
+													{{ item.subtitle }}
+												} @else if (item.kind === 'menu') {
+													{{ item.route }}
+												} @else {
+													{{ item.sectionLabel }}
+												}
+											</span>
 										</span>
 										<i class="ki-filled ki-arrow-up-right text-xs text-muted-foreground"></i>
 									</button>

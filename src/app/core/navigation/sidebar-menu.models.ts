@@ -5,6 +5,7 @@ export type SidebarMenuSectionId =
   | 'pos'
   | 'products'
   | 'inventory'
+  | 'purchasing'
   | 'accounting'
   | 'banks'
   | 'settings';
