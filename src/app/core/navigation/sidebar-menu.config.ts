@@ -139,12 +139,13 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         route: '/demo1/products/units',
         permission: 'units.view',
       },
-      {
-        id: 'products-brands',
-        labelKey: 'menu.products.brands',
-        route: '/demo1/products/brands',
-        permission: 'brands.view',
-      },
+      // TEMP: العلامات التجارية مخفية مؤقتاً — أزل التعليق لإظهارها
+      // {
+      //   id: 'products-brands',
+      //   labelKey: 'menu.products.brands',
+      //   route: '/demo1/products/brands',
+      //   permission: 'brands.view',
+      // },
       {
         id: 'products-pricing',
         labelKey: 'menu.products.pricing',

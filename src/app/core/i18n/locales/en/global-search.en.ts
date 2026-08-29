@@ -7,7 +7,7 @@ export const globalSearchEn = {
   'globalSearch.navigate': 'Navigate',
   'globalSearch.open': 'Open',
   'globalSearch.section.customers': 'Customers',
-  'globalSearch.section.products': 'Products',
+  'globalSearch.section.products': 'Items',
   'globalSearch.section.invoices': 'Sales invoices',
   'globalSearch.section.suppliers': 'Suppliers',
 } as const;

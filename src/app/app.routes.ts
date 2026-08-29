@@ -37,8 +37,9 @@ import { ProductGroupFormComponent } from './pages/products/product-groups/produ
 import { ProductGroupsListComponent } from './pages/products/product-groups/product-groups-list/product-groups-list.component';
 import { ProductFormComponent } from './pages/products/items/product-form/product-form.component';
 import { ProductsListComponent } from './pages/products/items/products-list/products-list.component';
-import { BrandFormComponent } from './pages/products/brands/brand-form/brand-form.component';
-import { BrandsListComponent } from './pages/products/brands/brands-list/brands-list.component';
+// TEMP: العلامات التجارية مخفية مؤقتاً
+// import { BrandFormComponent } from './pages/products/brands/brand-form/brand-form.component';
+// import { BrandsListComponent } from './pages/products/brands/brands-list/brands-list.component';
 import { UnitFormComponent } from './pages/products/units/unit-form/unit-form.component';
 import { UnitsListComponent } from './pages/products/units/units-list/units-list.component';
 import { ItemPricingPageComponent } from './pages/products/pricing/item-pricing-page/item-pricing-page.component';
@@ -150,9 +151,10 @@ export const routes: Routes = [
       { path: 'products/units', component: UnitsListComponent },
       { path: 'products/units/new', component: UnitFormComponent },
       { path: 'products/units/:id/edit', component: UnitFormComponent },
-      { path: 'products/brands', component: BrandsListComponent },
-      { path: 'products/brands/new', component: BrandFormComponent },
-      { path: 'products/brands/:id/edit', component: BrandFormComponent },
+      // TEMP: العلامات التجارية مخفية مؤقتاً
+      // { path: 'products/brands', component: BrandsListComponent },
+      // { path: 'products/brands/new', component: BrandFormComponent },
+      // { path: 'products/brands/:id/edit', component: BrandFormComponent },
       { path: 'products/pricing', component: ItemPricingPageComponent },
       { path: 'accounting/account-groups', component: AccountGroupsListComponent },
       { path: 'accounting/account-groups/new', component: AccountGroupFormComponent },
