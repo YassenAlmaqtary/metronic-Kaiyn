@@ -36,10 +36,14 @@ import { warehousesAr } from './warehouses.ar';
 import { stockIssuesAr } from './stock-issues.ar';
 import { stockTransfersAr } from './stock-transfers.ar';
 import { stockReceivingsAr } from './stock-receivings.ar';
+import { stockReceivingTypesAr } from './stock-receiving-types.ar';
+import { stockIssueTypesAr } from './stock-issue-types.ar';
 import { stockTakingsAr } from './stock-takings.ar';
 import { stockAdjustmentsAr } from './stock-adjustments.ar';
 import { inventoryReportsAr } from './inventory-reports.ar';
 import { suppliersAr } from './suppliers.ar';
+import { itemAccountingPoliciesAr } from './item-accounting-policies.ar';
+import { userBranchesAr } from './user-branches.ar';
 import { documentPrintAr } from './document-print.ar';
 import { menuAr } from './menu.ar';
 import { navAr } from './nav.ar';
@@ -97,8 +101,12 @@ export const ar = mergeLocale(
   stockIssuesAr,
   stockTransfersAr,
   stockReceivingsAr,
+  stockReceivingTypesAr,
+  stockIssueTypesAr,
   stockTakingsAr,
   stockAdjustmentsAr,
   inventoryReportsAr,
   suppliersAr,
+  itemAccountingPoliciesAr,
+  userBranchesAr,
 );

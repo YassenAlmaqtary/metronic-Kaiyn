@@ -2,15 +2,7 @@ import { StockLineDetail, StockDocStatus, isStockDocPending, isStockDocPosted } 
 
 export { StockDocStatus, type StockDocStatusValue, isStockDocPending, isStockDocPosted } from './stock-shared.models';
 export type { StockLineDetail };
-
-export interface StockReceivingType {
-  receivingTypeId: number;
-  receivingTypeName?: string | null;
-  description?: string | null;
-  debitAccountId?: number;
-  creditAccountId?: number;
-  isActive?: boolean;
-}
+export type { StockReceivingType } from './stock-receiving-type.models';
 
 export interface StockReceivingHeader {
   receivingId: number;

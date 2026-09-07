@@ -173,9 +173,21 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         permission: 'stores.view',
       },
       {
+        id: 'inventory-stock-receiving-types',
+        labelKey: 'menu.inventory.stockReceivingTypes',
+        route: '/demo1/inventory/stock-receiving-types',
+        permission: 'stores.view',
+      },
+      {
         id: 'inventory-stock-issues',
         labelKey: 'menu.inventory.stockIssues',
         route: '/demo1/inventory/stock-issues',
+        permission: 'stores.view',
+      },
+      {
+        id: 'inventory-stock-issue-types',
+        labelKey: 'menu.inventory.stockIssueTypes',
+        route: '/demo1/inventory/stock-issue-types',
         permission: 'stores.view',
       },
       {
@@ -252,6 +264,12 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         labelKey: 'menu.accounting.journalTypes',
         route: '/demo1/accounting/journal-types',
         permission: 'journalTypes.view',
+      },
+      {
+        id: 'accounting-item-policies',
+        labelKey: 'menu.accounting.itemAccountingPolicies',
+        route: '/demo1/accounting/item-accounting-policies',
+        permission: 'accounts.view',
       },
       {
         id: 'accounting-account-groups',
@@ -369,6 +387,12 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         id: 'settings-users',
         labelKey: 'menu.settings.users',
         route: '/demo1/settings/users',
+        permission: 'users.view',
+      },
+      {
+        id: 'settings-user-branches',
+        labelKey: 'menu.settings.userBranches',
+        route: '/demo1/settings/user-branches',
         permission: 'users.view',
       },
       {

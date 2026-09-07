@@ -15,13 +15,14 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { CurrenciesService } from '../../../../core/services/currencies.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { DocumentPrintService } from '../../../../core/services/document-print.service';
 import { ProductsService } from '../../../../core/services/products.service';
 import { StockTransfersService } from '../../../../core/services/stock-transfers.service';
 import { StoresService } from '../../../../core/services/stores.service';
 type Line = FormGroup<{ itemId: FormControl<number | null>; unitId: FormControl<number | null>; quantity: FormControl<number>; price: FormControl<number>; total: FormControl<number>; barcode: FormControl<string>; batchNumber: FormControl<string>; expiryDate: FormControl<string>; availableQty: FormControl<number | null> }>;
 @Component({ selector: 'app-stock-transfer-form', imports: [RouterLink, ReactiveFormsModule, TranslatePipe, DecimalPipe], templateUrl: './stock-transfer-form.component.html', styleUrl: './stock-transfer-form.component.scss' })
 export class StockTransferFormComponent implements OnInit {
-  private route=inject(ActivatedRoute); private router=inject(Router); private destroyRef=inject(DestroyRef); private service=inject(StockTransfersService); private branchesService=inject(BranchesService); private storesService=inject(StoresService); private productsService=inject(ProductsService); private currenciesService=inject(CurrenciesService); private language=inject(LanguageService);
+  private route=inject(ActivatedRoute); private router=inject(Router); private destroyRef=inject(DestroyRef); private service=inject(StockTransfersService); private branchesService=inject(BranchesService); private storesService=inject(StoresService); private productsService=inject(ProductsService); private currenciesService=inject(CurrenciesService); private language=inject(LanguageService); private documentPrint=inject(DocumentPrintService);
   loading=signal(false); saving=signal(false); isEditMode=signal(false); isReadOnly=signal(false); transferId=signal<number|null>(null); errorMessage=signal(''); totalAmount=signal(0); branches=signal<Branch[]>([]); fromStores=signal<Store[]>([]); toStores=signal<Store[]>([]); products=signal<ProductLookup[]>([]); currencies=signal<Currency[]>([]); lineUnits=signal<ItemUnitLookup[][]>([]);
   form=new FormGroup({transferNumber:new FormControl({value:'',disabled:true},{nonNullable:true}),transferDate:new FormControl(this.today(),{nonNullable:true,validators:Validators.required}),fromBranchId:new FormControl<number|null>(null,Validators.required),fromStoreId:new FormControl<number|null>(null,Validators.required),toBranchId:new FormControl<number|null>(null,Validators.required),toStoreId:new FormControl<number|null>(null,Validators.required),currencyId:new FormControl<number|null>(null),exchangeRate:new FormControl(1,{nonNullable:true}),reference:new FormControl('',{nonNullable:true}),responsibleName:new FormControl('',{nonNullable:true}),notes:new FormControl('',{nonNullable:true}),details:new FormArray<Line>([])});
   get details(){return this.form.controls.details;} today(){return new Date().toISOString().slice(0,10);}
@@ -35,6 +36,39 @@ export class StockTransferFormComponent implements OnInit {
   units(i:number,id:number,selected?:number){this.service.getItemUnits(id).subscribe({next:us=>{this.lineUnits.update(a=>{const n=[...a];n[i]=us;return n;});const l=this.details.at(i);if(l)l.controls.unitId.setValue(us.some(x=>x.unitId===selected)?selected!:(us.find(x=>x.isBaseUnit)??us[0])?.unitId??null);}});} unitsFor(i:number){return this.lineUnits()[i]??[];}   calc(l:Line){const qty=Number(l.controls.quantity.value)||0;const price=Number(l.controls.price.value)||0;l.controls.total.setValue(Number((qty*price).toFixed(4)),{emitEvent:false});this.retotal();} retotal(){this.totalAmount.set(Number(this.details.controls.reduce((s,l)=>s+(Number(l.controls.total.value)||0),0).toFixed(4)));}
   lookup(l:Line,e:Event){e.preventDefault();const b=l.controls.barcode.value.trim();if(b)this.service.lookupBarcode(b).subscribe({next:x=>{l.patchValue({itemId:x.itemId,unitId:x.unitId,price:x.currentCost??0});this.calc(l);}});} available(l:Line){const itemId=l.controls.itemId.value,unitId=l.controls.unitId.value,branchId=this.form.controls.fromBranchId.value,storeId=this.form.controls.fromStoreId.value;if(itemId&&unitId&&branchId&&storeId)this.service.getAvailableQty({itemId,unitId,branchId,storeId,batchNo:l.controls.batchNumber.value||undefined,expiryDate:l.controls.expiryDate.value||undefined}).subscribe({next:x=>l.controls.availableQty.setValue(x.qtyInUnit??x.baseQty??null)});}
   removeLine(i:number){this.details.removeAt(i);this.lineUnits.update(x=>x.filter((_,j)=>j!==i));this.retotal();} productLabel(p:ProductLookup){return[p.productName,p.proCode].filter(Boolean).join(' - ')||String(p.productId);} branchLabel(b:Branch){return b.branchName||String(b.branchId);} currencyLabel(c:Currency){return c.currencyName||c.currencyShorcut||String(c.id);}
+  printDocument(){
+    const r=this.form.getRawValue();
+    const fromBranch=this.branches().find(b=>b.branchId===r.fromBranchId);
+    const toBranch=this.branches().find(b=>b.branchId===r.toBranchId);
+    const fromStore=this.fromStores().find(s=>s.storeId===r.fromStoreId);
+    const toStore=this.toStores().find(s=>s.storeId===r.toStoreId);
+    const fmt=(v:number|null|undefined)=> (v??0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4});
+    this.documentPrint.print({
+      title:this.language.translate('stockTransfers.title'),
+      subtitle:r.transferNumber||undefined,
+      fields:[
+        {label:this.language.translate('stockTransfers.number'),value:r.transferNumber||'—'},
+        {label:this.language.translate('stockTransfers.date'),value:r.transferDate||'—'},
+        {label:this.language.translate('stockTransfers.fromBranch'),value:fromBranch?this.branchLabel(fromBranch):'—'},
+        {label:this.language.translate('stockTransfers.fromStore'),value:fromStore?.storeName||'—'},
+        {label:this.language.translate('stockTransfers.toBranch'),value:toBranch?this.branchLabel(toBranch):'—'},
+        {label:this.language.translate('stockTransfers.toStore'),value:toStore?.storeName||'—'},
+        {label:this.language.translate('stockTransfers.reference'),value:r.reference||'—'},
+        {label:this.language.translate('stockTransfers.notes'),value:r.notes||'—'},
+      ],
+      columns:[
+        {key:'item',header:this.language.translate('stockTransfers.product')},
+        {key:'qty',header:this.language.translate('stockTransfers.qty'),align:'end'},
+        {key:'price',header:this.language.translate('stockTransfers.price'),align:'end'},
+        {key:'total',header:this.language.translate('stockTransfers.total'),align:'end'},
+      ],
+      rows:this.details.controls.map(l=>{
+        const p=this.products().find(x=>x.productId===l.controls.itemId.value);
+        return {item:p?this.productLabel(p):'—',qty:fmt(l.controls.quantity.value),price:fmt(l.controls.price.value),total:fmt(l.controls.total.value)};
+      }),
+      totals:[{label:this.language.translate('stockTransfers.total'),value:fmt(this.totalAmount())}],
+    });
+  }
   save(){
     if(this.isReadOnly())return;
     this.details.controls.forEach(l=>this.calc(l));

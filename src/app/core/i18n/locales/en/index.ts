@@ -36,10 +36,14 @@ import { warehousesEn } from './warehouses.en';
 import { stockIssuesEn } from './stock-issues.en';
 import { stockTransfersEn } from './stock-transfers.en';
 import { stockReceivingsEn } from './stock-receivings.en';
+import { stockReceivingTypesEn } from './stock-receiving-types.en';
+import { stockIssueTypesEn } from './stock-issue-types.en';
 import { stockTakingsEn } from './stock-takings.en';
 import { stockAdjustmentsEn } from './stock-adjustments.en';
 import { inventoryReportsEn } from './inventory-reports.en';
 import { suppliersEn } from './suppliers.en';
+import { itemAccountingPoliciesEn } from './item-accounting-policies.en';
+import { userBranchesEn } from './user-branches.en';
 import { documentPrintEn } from './document-print.en';
 import { menuEn } from './menu.en';
 import { navEn } from './nav.en';
@@ -97,8 +101,12 @@ export const en = mergeLocale(
   stockIssuesEn,
   stockTransfersEn,
   stockReceivingsEn,
+  stockReceivingTypesEn,
+  stockIssueTypesEn,
   stockTakingsEn,
   stockAdjustmentsEn,
   inventoryReportsEn,
   suppliersEn,
+  itemAccountingPoliciesEn,
+  userBranchesEn,
 );

@@ -1,0 +1,343 @@
+<div class="kt-container-fixed flex flex-col gap-6 max-w-6xl pb-10">
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div>
+			<div class="flex items-center gap-2 text-sm text-secondary-foreground mb-2">
+				<a
+					class="hover:text-primary transition-colors"
+					routerLink="/demo1/accounting/item-accounting-policies"
+					>{{ 'itemAccountingPolicies.title' | translate }}</a
+				>
+				<i class="ki-filled ki-right text-[10px] rtl:rotate-180 opacity-60"></i>
+				<span class="font-medium text-foreground">
+					@if (isEditMode()) {
+						{{ 'itemAccountingPolicies.edit' | translate }}
+					} @else {
+						{{ 'itemAccountingPolicies.create' | translate }}
+					}
+				</span>
+			</div>
+			<div class="flex items-center gap-3">
+				<div
+					class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+					<i class="ki-filled ki-book text-lg"></i>
+				</div>
+				<div>
+					<h1 class="text-xl font-semibold tracking-tight">
+						@if (isEditMode()) {
+							{{ 'itemAccountingPolicies.edit' | translate }}
+						} @else {
+							{{ 'itemAccountingPolicies.create' | translate }}
+						}
+					</h1>
+					<p class="text-sm text-secondary-foreground mt-0.5">
+						{{ 'itemAccountingPolicies.subtitle' | translate }}
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="flex items-center gap-2">
+			<a class="kt-btn kt-btn-outline" routerLink="/demo1/accounting/item-accounting-policies">
+				{{ 'itemAccountingPolicies.cancel' | translate }}
+			</a>
+			<button
+				class="kt-btn kt-btn-primary min-w-28"
+				type="button"
+				[disabled]="saving() || loading()"
+				(click)="onSubmit()">
+				@if (saving()) {
+					<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+				} @else {
+					<i class="ki-filled ki-check"></i>
+				}
+				{{ 'itemAccountingPolicies.save' | translate }}
+			</button>
+		</div>
+	</div>
+
+	@if (loading()) {
+		<div class="kt-card overflow-hidden">
+			<div class="kt-card-content flex items-center justify-center gap-3 py-24 text-secondary-foreground">
+				<span class="size-5 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'itemAccountingPolicies.loading' | translate }}
+			</div>
+		</div>
+	} @else {
+		<div class="flex flex-col gap-5">
+			@if (successMessage()) {
+				<div class="rounded-xl border border-success/25 bg-success/10 px-4 py-3.5 text-sm text-success">
+					{{ successMessage() }}
+				</div>
+			}
+
+			@if (errorMessage()) {
+				<div
+					class="rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3.5 text-sm text-destructive flex items-start gap-2">
+					<i class="ki-filled ki-information-2 mt-0.5"></i>
+					<span>{{ errorMessage() }}</span>
+				</div>
+			}
+
+			<form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="px-6 md:px-8 py-4 border-b border-border bg-muted/30">
+					<h2 class="text-sm font-semibold">{{ 'itemAccountingPolicies.section.basic' | translate }}</h2>
+					<p class="text-xs text-secondary-foreground mt-0.5">
+						{{ 'itemAccountingPolicies.section.basicHint' | translate }}
+					</p>
+				</div>
+				<div class="p-6 md:p-8">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label required">{{
+								'itemAccountingPolicies.policyCode' | translate
+							}}</label>
+							<input
+								class="kt-input h-11"
+								formControlName="policyCode"
+								type="text"
+								autocomplete="off" />
+							@if (form.controls.policyCode.touched && form.controls.policyCode.hasError('required')) {
+								<span class="text-xs text-destructive">{{
+									'itemAccountingPolicies.required.policyCode' | translate
+								}}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label required">{{
+								'itemAccountingPolicies.policyName' | translate
+							}}</label>
+							<input
+								class="kt-input h-11"
+								formControlName="policyName"
+								type="text"
+								autocomplete="off" />
+							@if (form.controls.policyName.touched && form.controls.policyName.hasError('required')) {
+								<span class="text-xs text-destructive">{{
+									'itemAccountingPolicies.required.policyName' | translate
+								}}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label required">{{
+								'itemAccountingPolicies.itemType' | translate
+							}}</label>
+							<select class="kt-select h-11" formControlName="itemType">
+								<option [ngValue]="null">{{
+									'itemAccountingPolicies.selectItemType' | translate
+								}}</option>
+								@for (option of itemTypeOptions; track option.value) {
+									<option [ngValue]="option.value">{{ option.labelKey | translate }}</option>
+								}
+							</select>
+							@if (form.controls.itemType.touched && form.controls.itemType.hasError('required')) {
+								<span class="text-xs text-destructive">{{
+									'itemAccountingPolicies.required.itemType' | translate
+								}}</span>
+							}
+						</div>
+
+						<div class="flex flex-col gap-1.5 md:col-span-2">
+							<label class="kt-form-label">{{ 'itemAccountingPolicies.notes' | translate }}</label>
+							<textarea class="kt-textarea" formControlName="notes" rows="3"></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="px-6 md:px-8 py-4 border-b border-border bg-muted/30">
+					<h2 class="text-sm font-semibold">{{ 'itemAccountingPolicies.section.status' | translate }}</h2>
+				</div>
+				<div class="p-6 md:p-8">
+					<label
+						class="flex items-center justify-between gap-4 rounded-xl border border-border bg-background px-4 py-3.5 cursor-pointer hover:border-primary/40 transition-colors">
+						<div class="flex items-center gap-3">
+							<div
+								class="flex size-9 items-center justify-center rounded-lg bg-success/10 text-success">
+								<i class="ki-filled ki-check-circle"></i>
+							</div>
+							<div>
+								<div class="text-sm font-medium">{{ 'itemAccountingPolicies.isActive' | translate }}</div>
+								<div class="text-xs text-secondary-foreground">
+									{{ 'itemAccountingPolicies.isActiveHint' | translate }}
+								</div>
+							</div>
+						</div>
+						<input class="kt-switch" formControlName="isActive" type="checkbox" />
+					</label>
+				</div>
+			</div>
+
+			<div class="flex justify-end gap-2 pt-1">
+				<a class="kt-btn kt-btn-outline" routerLink="/demo1/accounting/item-accounting-policies">
+					{{ 'itemAccountingPolicies.cancel' | translate }}
+				</a>
+				<button class="kt-btn kt-btn-primary min-w-28" type="submit" [disabled]="saving()">
+					@if (saving()) {
+						<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+					} @else {
+						<i class="ki-filled ki-check"></i>
+					}
+					{{ 'itemAccountingPolicies.save' | translate }}
+				</button>
+			</div>
+		</form>
+
+		@if (isEditMode()) {
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="px-6 md:px-8 py-4 border-b border-border bg-muted/30">
+					<h2 class="text-sm font-semibold">{{ 'itemAccountingPolicies.section.rules' | translate }}</h2>
+					<p class="text-xs text-secondary-foreground mt-0.5">
+						{{ 'itemAccountingPolicies.section.rulesHint' | translate }}
+					</p>
+				</div>
+				<div class="p-6 md:p-8 flex flex-col gap-6">
+					@if (rules().length === 0) {
+						<div class="py-8 text-center text-secondary-foreground">
+							<p class="font-medium text-mono">{{ 'itemAccountingPolicies.rules.empty' | translate }}</p>
+							<p class="text-sm mt-1">{{ 'itemAccountingPolicies.rules.emptyHint' | translate }}</p>
+						</div>
+					} @else {
+						<div class="kt-scrollable-x-auto">
+							<table class="kt-table w-full">
+								<thead>
+									<tr>
+										<th>{{ 'itemAccountingPolicies.operationType' | translate }}</th>
+										<th>{{ 'itemAccountingPolicies.debitAccount' | translate }}</th>
+										<th>{{ 'itemAccountingPolicies.creditAccount' | translate }}</th>
+										<th>{{ 'itemAccountingPolicies.notes' | translate }}</th>
+										<th>{{ 'itemAccountingPolicies.status' | translate }}</th>
+										<th class="w-[80px]"></th>
+									</tr>
+								</thead>
+								<tbody>
+									@for (rule of rules(); track rule.ruleId) {
+										<tr>
+											<td>{{ operationTypeLabel(rule.operationType) }}</td>
+											<td>{{ ruleAccountLabel(rule.debitAccountName, rule.debitAccountId) }}</td>
+											<td>{{ ruleAccountLabel(rule.creditAccountName, rule.creditAccountId) }}</td>
+											<td>{{ rule.notes || '—' }}</td>
+											<td>
+												@if (rule.isActive !== false) {
+													<span class="kt-badge kt-badge-success">{{
+														'itemAccountingPolicies.active' | translate
+													}}</span>
+												} @else {
+													<span class="kt-badge kt-badge-warning">{{
+														'itemAccountingPolicies.inactive' | translate
+													}}</span>
+												}
+											</td>
+											<td>
+												<button
+													class="kt-btn kt-btn-sm kt-btn-destructive"
+													type="button"
+													[disabled]="deletingRuleId() === rule.ruleId"
+													(click)="deleteRule(rule)"
+													[attr.aria-label]="'itemAccountingPolicies.rules.delete' | translate">
+													@if (deletingRuleId() === rule.ruleId) {
+														<span
+															class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+													} @else {
+														<i class="ki-filled ki-trash"></i>
+													}
+												</button>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					}
+
+					<div class="rounded-xl border border-border p-4 md:p-5" [formGroup]="ruleForm">
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+							<div class="flex flex-col gap-1.5">
+								<label class="kt-form-label required">{{
+									'itemAccountingPolicies.operationType' | translate
+								}}</label>
+								<select class="kt-select h-11" formControlName="operationType">
+									<option [ngValue]="null">{{
+										'itemAccountingPolicies.selectOperation' | translate
+									}}</option>
+									@for (option of operationTypeOptions; track option.value) {
+										<option [ngValue]="option.value">{{ option.labelKey | translate }}</option>
+									}
+								</select>
+								@if (
+									ruleForm.controls.operationType.touched &&
+									ruleForm.controls.operationType.hasError('required')
+								) {
+									<span class="text-xs text-destructive">{{
+										'itemAccountingPolicies.required.operationType' | translate
+									}}</span>
+								}
+							</div>
+
+							<div class="flex flex-col gap-1.5">
+								<label class="kt-form-label">{{ 'itemAccountingPolicies.notes' | translate }}</label>
+								<input class="kt-input h-11" formControlName="notes" type="text" />
+							</div>
+
+							<div class="flex flex-col gap-1.5">
+								<label class="kt-form-label">{{
+									'itemAccountingPolicies.debitAccount' | translate
+								}}</label>
+								<select class="kt-select h-11" formControlName="debitAccountId">
+									<option [ngValue]="null">{{
+										'itemAccountingPolicies.selectAccount' | translate
+									}}</option>
+									@for (account of leafAccounts(); track account.accId) {
+										<option [ngValue]="account.accId">{{ accountLabel(account) }}</option>
+									}
+								</select>
+							</div>
+
+							<div class="flex flex-col gap-1.5">
+								<label class="kt-form-label">{{
+									'itemAccountingPolicies.creditAccount' | translate
+								}}</label>
+								<select class="kt-select h-11" formControlName="creditAccountId">
+									<option [ngValue]="null">{{
+										'itemAccountingPolicies.selectAccount' | translate
+									}}</option>
+									@for (account of leafAccounts(); track account.accId) {
+										<option [ngValue]="account.accId">{{ accountLabel(account) }}</option>
+									}
+								</select>
+							</div>
+
+							<div class="md:col-span-2">
+								<label
+									class="flex items-center justify-between gap-4 rounded-xl border border-border bg-background px-4 py-3.5 cursor-pointer hover:border-primary/40 transition-colors">
+									<div class="text-sm font-medium">{{ 'itemAccountingPolicies.isActive' | translate }}</div>
+									<input class="kt-switch" formControlName="isActive" type="checkbox" />
+								</label>
+							</div>
+						</div>
+
+						<div class="flex justify-end mt-4">
+							<button
+								class="kt-btn kt-btn-primary"
+								type="button"
+								[disabled]="addingRule()"
+								(click)="addRule()">
+								@if (addingRule()) {
+									<span
+										class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+									{{ 'itemAccountingPolicies.rules.adding' | translate }}
+								} @else {
+									<i class="ki-filled ki-plus"></i>
+									{{ 'itemAccountingPolicies.rules.add' | translate }}
+								}
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+		</div>
+	}
+</div>

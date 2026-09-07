@@ -23,6 +23,7 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { CurrenciesService } from '../../../../core/services/currencies.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { DocumentPrintService } from '../../../../core/services/document-print.service';
 import { ProductsService } from '../../../../core/services/products.service';
 import { StockReceivingsService } from '../../../../core/services/stock-receivings.service';
 import { StoresService } from '../../../../core/services/stores.service';
@@ -54,6 +55,7 @@ export class StockReceivingFormComponent implements OnInit {
   private productsService = inject(ProductsService);
   private currenciesService = inject(CurrenciesService);
   private language = inject(LanguageService);
+  private documentPrint = inject(DocumentPrintService);
 
   loading = signal(false);
   saving = signal(false);
@@ -397,6 +399,57 @@ export class StockReceivingFormComponent implements OnInit {
 
   currencyLabel(c: Currency): string {
     return c.currencyName || c.currencyShorcut || String(c.id);
+  }
+
+  printDocument(): void {
+    const raw = this.form.getRawValue();
+    const branch = this.branches().find((item) => item.branchId === raw.branchId);
+    const store = this.stores().find((item) => item.storeId === raw.storeId);
+    const type = this.types().find((item) => item.receivingTypeId === raw.receivingTypeId);
+    const currency = this.currencies().find((item) => item.id === raw.currencyId);
+
+    this.documentPrint.print({
+      title: this.language.translate('stockReceivings.title'),
+      subtitle: raw.receivingNumber || undefined,
+      fields: [
+        { label: this.language.translate('stockReceivings.number'), value: raw.receivingNumber || '—' },
+        { label: this.language.translate('stockReceivings.date'), value: raw.receivingDate || '—' },
+        { label: this.language.translate('stockReceivings.branch'), value: branch ? this.branchLabel(branch) : '—' },
+        { label: this.language.translate('stockReceivings.store'), value: store?.storeName || '—' },
+        { label: this.language.translate('stockReceivings.type'), value: type?.receivingTypeName || '—' },
+        { label: this.language.translate('stockReceivings.currency'), value: currency ? this.currencyLabel(currency) : '—' },
+        { label: this.language.translate('stockReceivings.reference'), value: raw.reference || '—' },
+        { label: this.language.translate('stockReceivings.notes'), value: raw.notes || '—' },
+      ],
+      columns: [
+        { key: 'item', header: this.language.translate('stockReceivings.product') },
+        { key: 'qty', header: this.language.translate('stockReceivings.qty'), align: 'end' },
+        { key: 'price', header: this.language.translate('stockReceivings.price'), align: 'end' },
+        { key: 'total', header: this.language.translate('stockReceivings.total'), align: 'end' },
+      ],
+      rows: this.details.controls.map((line) => {
+        const product = this.products().find((item) => item.productId === line.controls.itemId.value);
+        return {
+          item: product ? this.productLabel(product) : '—',
+          qty: this.formatPrintAmount(line.controls.quantity.value),
+          price: this.formatPrintAmount(line.controls.price.value),
+          total: this.formatPrintAmount(line.controls.total.value),
+        };
+      }),
+      totals: [
+        {
+          label: this.language.translate('stockReceivings.total'),
+          value: this.formatPrintAmount(this.totalAmount()),
+        },
+      ],
+    });
+  }
+
+  private formatPrintAmount(value: number | null | undefined): string {
+    return (value ?? 0).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 4,
+    });
   }
 
   removeLine(i: number): void {

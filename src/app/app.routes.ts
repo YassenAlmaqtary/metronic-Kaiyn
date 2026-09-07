@@ -61,6 +61,9 @@ import { JournalEntryFormComponent } from './pages/accounting/journal-entries/jo
 import { JournalEntriesListComponent } from './pages/accounting/journal-entries/journal-entries-list/journal-entries-list.component';
 import { JournalTypeFormComponent } from './pages/accounting/journal-types/journal-type-form/journal-type-form.component';
 import { JournalTypesListComponent } from './pages/accounting/journal-types/journal-types-list/journal-types-list.component';
+import { ItemAccountingPoliciesListComponent } from './pages/accounting/item-accounting-policies/item-accounting-policies-list/item-accounting-policies-list.component';
+import { ItemAccountingPolicyFormComponent } from './pages/accounting/item-accounting-policies/item-accounting-policy-form/item-accounting-policy-form.component';
+import { UserBranchesPageComponent } from './pages/settings/user-branches/user-branches-page/user-branches-page.component';
 import { PaymentVoucherFormComponent } from './pages/accounting/payment-vouchers/payment-voucher-form/payment-voucher-form.component';
 import { PaymentVouchersListComponent } from './pages/accounting/payment-vouchers/payment-vouchers-list/payment-vouchers-list.component';
 import { ReceiptVoucherFormComponent } from './pages/accounting/receipt-vouchers/receipt-voucher-form/receipt-voucher-form.component';
@@ -90,6 +93,10 @@ import { StockAdjustmentFormComponent } from './pages/inventory/stock-adjustment
 import { CurrentStockReportComponent } from './pages/inventory/reports/current-stock-report/current-stock-report.component';
 import { ItemMovementReportComponent } from './pages/inventory/reports/item-movement-report/item-movement-report.component';
 import { StockIssueReportComponent } from './pages/inventory/reports/stock-issue-report/stock-issue-report.component';
+import { StockReceivingTypesListComponent } from './pages/inventory/stock-receiving-types/stock-receiving-types-list/stock-receiving-types-list.component';
+import { StockReceivingTypeFormComponent } from './pages/inventory/stock-receiving-types/stock-receiving-type-form/stock-receiving-type-form.component';
+import { StockIssueTypesListComponent } from './pages/inventory/stock-issue-types/stock-issue-types-list/stock-issue-types-list.component';
+import { StockIssueTypeFormComponent } from './pages/inventory/stock-issue-types/stock-issue-type-form/stock-issue-type-form.component';
 import { SuppliersListComponent } from './pages/purchasing/suppliers/suppliers-list/suppliers-list.component';
 import { SupplierFormComponent } from './pages/purchasing/suppliers/supplier-form/supplier-form.component';
 
@@ -105,6 +112,7 @@ export const routes: Routes = [
       { path: 'settings/users', component: UsersListComponent },
       { path: 'settings/users/new', component: UserFormComponent },
       { path: 'settings/users/:id/edit', component: UserFormComponent },
+      { path: 'settings/user-branches', component: UserBranchesPageComponent },
       { path: 'settings/roles', component: RolesListComponent },
       { path: 'settings/roles/new', component: RoleFormComponent },
       { path: 'settings/roles/:id/edit', component: RoleFormComponent },
@@ -183,6 +191,9 @@ export const routes: Routes = [
       { path: 'accounting/journal-types', component: JournalTypesListComponent },
       { path: 'accounting/journal-types/new', component: JournalTypeFormComponent },
       { path: 'accounting/journal-types/:id/edit', component: JournalTypeFormComponent },
+      { path: 'accounting/item-accounting-policies', component: ItemAccountingPoliciesListComponent },
+      { path: 'accounting/item-accounting-policies/new', component: ItemAccountingPolicyFormComponent },
+      { path: 'accounting/item-accounting-policies/:id/edit', component: ItemAccountingPolicyFormComponent },
       { path: 'accounting/payment-vouchers', component: PaymentVouchersListComponent },
       { path: 'accounting/payment-vouchers/new', component: PaymentVoucherFormComponent },
       { path: 'accounting/payment-vouchers/:id/edit', component: PaymentVoucherFormComponent },
@@ -218,6 +229,12 @@ export const routes: Routes = [
       { path: 'inventory/stock-receivings', component: StockReceivingsListComponent },
       { path: 'inventory/stock-receivings/new', component: StockReceivingFormComponent },
       { path: 'inventory/stock-receivings/:id', component: StockReceivingFormComponent },
+      { path: 'inventory/stock-receiving-types', component: StockReceivingTypesListComponent },
+      { path: 'inventory/stock-receiving-types/new', component: StockReceivingTypeFormComponent },
+      { path: 'inventory/stock-receiving-types/:id/edit', component: StockReceivingTypeFormComponent },
+      { path: 'inventory/stock-issue-types', component: StockIssueTypesListComponent },
+      { path: 'inventory/stock-issue-types/new', component: StockIssueTypeFormComponent },
+      { path: 'inventory/stock-issue-types/:id/edit', component: StockIssueTypeFormComponent },
       { path: 'inventory/stock-takings', component: StockTakingsListComponent },
       { path: 'inventory/stock-takings/new', component: StockTakingFormComponent },
       { path: 'inventory/stock-takings/:id', component: StockTakingFormComponent },

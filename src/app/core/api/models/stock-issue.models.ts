@@ -21,8 +21,14 @@ export interface StockIssueType {
   issueTypeName?: string | null;
   description?: string | null;
   debitAccountId?: number;
+  debitAccountName?: string | null;
+  debitAccountCode?: string | null;
   creditAccountId?: number;
+  creditAccountName?: string | null;
+  creditAccountCode?: string | null;
   isActive?: boolean;
+  createdDate?: string | null;
+  modifiedDate?: string | null;
 }
 
 export interface StockIssueHeader {

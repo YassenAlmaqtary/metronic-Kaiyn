@@ -30,6 +30,12 @@
 		</div>
 		<div class="flex items-center gap-2">
 			<a class="kt-btn kt-btn-outline" routerLink="/demo1/inventory/stock-issues">{{ 'stockIssues.back' | translate }}</a>
+			@if (isEditMode()) {
+				<button class="kt-btn kt-btn-light" type="button" (click)="printDocument()">
+					<i class="ki-filled ki-printer"></i>
+					{{ 'documentPrint.printPdf' | translate }}
+				</button>
+			}
 			@if (!isReadOnly()) {
 				<button
 					class="kt-btn kt-btn-primary"

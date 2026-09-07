@@ -251,6 +251,12 @@
 
 				<div class="flex flex-wrap items-center justify-end gap-2 pt-1">
 					<a class="kt-btn kt-btn-light" routerLink="/demo1/accounting/journal-entries">{{ 'journalEntries.cancel' | translate }}</a>
+					@if (isEditMode()) {
+						<button class="kt-btn kt-btn-light" type="button" (click)="printDocument()">
+							<i class="ki-filled ki-printer"></i>
+							{{ 'documentPrint.printPdf' | translate }}
+						</button>
+					}
 					@if (!isReadOnly()) {
 						<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
 							@if (saving()) {

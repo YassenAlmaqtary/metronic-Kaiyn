@@ -35,6 +35,7 @@ import { CurrenciesService } from '../../../../core/services/currencies.service'
 import { JournalEntriesService } from '../../../../core/services/journal-entries.service';
 import { JournalTypesService } from '../../../../core/services/journal-types.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { DocumentPrintService } from '../../../../core/services/document-print.service';
 import { TaxSetupsService } from '../../../../core/services/tax-setups.service';
 
 type DetailLineGroup = FormGroup<{
@@ -73,6 +74,7 @@ export class JournalEntryFormComponent implements OnInit {
   private taxSetupsService = inject(TaxSetupsService);
   private auth = inject(AuthService);
   private language = inject(LanguageService);
+  private documentPrint = inject(DocumentPrintService);
 
   isEditMode = signal(false);
   isReadOnly = signal(false);
@@ -291,6 +293,70 @@ export class JournalEntryFormComponent implements OnInit {
 
   accountLabel(account: Account): string {
     return `${account.accCode} — ${account.accName || account.accId}`;
+  }
+
+  printDocument(): void {
+    const raw = this.form.getRawValue();
+    const branch = this.branches().find((item) => item.branchId === raw.branchId);
+    const journalType = this.journalTypes().find((item) => item.journalTypeId === raw.journalTypeId);
+    const period = this.periods().find((item) => item.periodId === raw.periodId);
+
+    this.documentPrint.print({
+      title: this.language.translate('journalEntries.title'),
+      subtitle: this.entryId() != null ? `#${this.entryId()}` : undefined,
+      fields: [
+        {
+          label: this.language.translate('journalEntries.entryDate'),
+          value: raw.entryDate || '—',
+        },
+        {
+          label: this.language.translate('journalEntries.journalType'),
+          value: journalType?.name || journalType?.code || '—',
+        },
+        {
+          label: this.language.translate('journalEntries.branch'),
+          value: branch?.branchName || branch?.branchCode || '—',
+        },
+        {
+          label: this.language.translate('journalEntries.period'),
+          value: period?.periodName || String(raw.periodId ?? '—'),
+        },
+      ],
+      columns: [
+        { key: 'account', header: this.language.translate('journalEntries.account') },
+        { key: 'description', header: this.language.translate('journalEntries.description') },
+        { key: 'debit', header: this.language.translate('journalEntries.debit'), align: 'end' },
+        { key: 'credit', header: this.language.translate('journalEntries.credit'), align: 'end' },
+      ],
+      rows: this.details.controls.map((line) => {
+        const account = this.accounts().find(
+          (item) => item.accCode === line.controls.accCode.value || item.accId === line.controls.accId.value,
+        );
+        return {
+          account: account ? this.accountLabel(account) : String(line.controls.accCode.value ?? '—'),
+          description: line.controls.description.value || '—',
+          debit: this.formatPrintAmount(line.controls.debit.value),
+          credit: this.formatPrintAmount(line.controls.credit.value),
+        };
+      }),
+      totals: [
+        {
+          label: this.language.translate('journalEntries.totalDebit'),
+          value: this.formatPrintAmount(this.totalDebit()),
+        },
+        {
+          label: this.language.translate('journalEntries.totalCredit'),
+          value: this.formatPrintAmount(this.totalCredit()),
+        },
+      ],
+    });
+  }
+
+  private formatPrintAmount(value: number | null | undefined): string {
+    return (value ?? 0).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 
   onSubmit(): void {
