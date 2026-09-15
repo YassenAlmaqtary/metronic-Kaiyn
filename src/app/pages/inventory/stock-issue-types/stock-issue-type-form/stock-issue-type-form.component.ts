@@ -25,6 +25,7 @@ export class StockIssueTypeFormComponent implements OnInit {
   private language = inject(LanguageService);
 
   loading = signal(false);
+  loadingAccounts = signal(false);
   saving = signal(false);
   errorMessage = signal('');
   isEditMode = signal(false);
@@ -32,7 +33,7 @@ export class StockIssueTypeFormComponent implements OnInit {
   accounts = signal<Account[]>([]);
 
   postingAccounts = computed(() => {
-    const active = this.accounts().filter((account) => !account.accStopped);
+    const active = this.accounts().filter((account) => account.accStopped !== true);
     const leaves = active.filter((account) => account.accType === AccountStructureType.Sub);
     return leaves.length > 0 ? leaves : active;
   });
@@ -56,10 +57,7 @@ export class StockIssueTypeFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.accountsService.getAll().subscribe({
-      next: (accounts) =>
-        this.accounts.set([...accounts].sort((a, b) => a.accCode - b.accCode)),
-    });
+    this.loadAccounts();
 
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam) {
@@ -70,6 +68,34 @@ export class StockIssueTypeFormComponent implements OnInit {
     this.isEditMode.set(true);
     this.issueTypeId.set(id);
     this.loadIssueType(id);
+  }
+
+  loadAccounts(): void {
+    this.loadingAccounts.set(true);
+    this.accountsService.getAll().subscribe({
+      next: (accounts) => {
+        this.accounts.set(
+          [...accounts].sort((a, b) => Number(a.accCode) - Number(b.accCode)),
+        );
+        this.loadingAccounts.set(false);
+      },
+      error: (error) => {
+        this.accounts.set([]);
+        this.loadingAccounts.set(false);
+        this.errorMessage.set(
+          extractApiErrorMessage(error, this.t('stockIssueTypes.accountsLoadError')),
+        );
+      },
+      complete: () => {
+        // 401 interceptor may complete with EMPTY (no next/error).
+        if (this.loadingAccounts()) {
+          this.loadingAccounts.set(false);
+          if (!this.accounts().length && !this.errorMessage()) {
+            this.errorMessage.set(this.t('stockIssueTypes.accountsLoadError'));
+          }
+        }
+      },
+    });
   }
 
   loadIssueType(id: number): void {

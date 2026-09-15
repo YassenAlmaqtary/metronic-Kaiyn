@@ -22,7 +22,12 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status !== 401 || req.url.includes('/api/Auth/login')) {
+      if (
+        error.status !== 401 ||
+        req.url.includes('/api/Auth/login') ||
+        req.url.includes('/sql-agent') ||
+        req.url.includes(':8050')
+      ) {
         return throwError(() => error);
       }
 

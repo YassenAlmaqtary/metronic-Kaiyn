@@ -1,3 +1,4 @@
+import { aiAssistantEn } from './ai-assistant.en';
 import { dashboardEn } from './dashboard.en';
 import { mergeLocale } from '../../utils/merge-locale';
 import { authEn } from './auth.en';
@@ -57,6 +58,7 @@ import { usersEn } from './users.en';
 export const en = mergeLocale(
   commonEn,
   documentPrintEn,
+  aiAssistantEn,
   navEn,
   menuEn,
   authEn,

@@ -1,3 +1,4 @@
+import { aiAssistantAr } from './ai-assistant.ar';
 import { dashboardAr } from './dashboard.ar';
 import { mergeLocale } from '../../utils/merge-locale';
 import { authAr } from './auth.ar';
@@ -57,6 +58,7 @@ import { usersAr } from './users.ar';
 export const ar = mergeLocale(
   commonAr,
   documentPrintAr,
+  aiAssistantAr,
   navAr,
   menuAr,
   authAr,

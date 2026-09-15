@@ -1,0 +1,139 @@
+@if (assistant.open()) {
+	<div class="ai-assistant-root fixed inset-0 z-[110] pointer-events-none">
+		<button
+			type="button"
+			class="ai-assistant-backdrop pointer-events-auto absolute inset-0 bg-black/35"
+			(click)="assistant.hide()"
+			[attr.aria-label]="'aiAssistant.title' | translate"
+		></button>
+
+		<section
+			class="ai-assistant-panel pointer-events-auto absolute end-3 bottom-3 sm:end-5 sm:bottom-5 flex flex-col w-[min(100%-1.5rem,26rem)] h-[min(40rem,calc(100vh-2.5rem))] rounded-2xl border border-border bg-background shadow-2xl overflow-hidden"
+			role="dialog"
+			aria-modal="true"
+			[attr.aria-label]="'aiAssistant.title' | translate"
+			(click)="$event.stopPropagation()"
+		>
+			<header class="flex items-start justify-between gap-3 px-4 py-3 border-b border-border bg-muted/30">
+				<div class="min-w-0">
+					<div class="flex items-center gap-2">
+						<span class="inline-flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+							<i class="ki-filled ki-technology-4 text-base"></i>
+						</span>
+						<div class="min-w-0">
+							<h2 class="text-sm font-semibold truncate">{{ 'aiAssistant.title' | translate }}</h2>
+							<p class="text-xs text-secondary-foreground truncate">
+								{{ 'aiAssistant.subtitle' | translate }}
+							</p>
+						</div>
+					</div>
+				</div>
+				<div class="flex items-center gap-1 shrink-0">
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm kt-btn-ghost kt-btn-icon"
+						(click)="assistant.clear()"
+						[attr.title]="'aiAssistant.clear' | translate"
+					>
+						<i class="ki-filled ki-trash"></i>
+					</button>
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm kt-btn-ghost kt-btn-icon"
+						(click)="assistant.hide()"
+					>
+						<i class="ki-filled ki-cross"></i>
+					</button>
+				</div>
+			</header>
+
+			<div class="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+				@for (message of assistant.messages(); track message.id) {
+					@if (message.role === 'system') {
+						<div class="rounded-xl border border-border bg-muted/40 px-3 py-2 text-xs text-secondary-foreground whitespace-pre-wrap">
+							{{ message.content }}
+						</div>
+					} @else {
+						<div
+							class="flex flex-col gap-1"
+							[class.items-end]="message.role === 'user'"
+							[class.items-start]="message.role === 'assistant'"
+						>
+							<span class="text-[10px] uppercase tracking-wide text-secondary-foreground px-1">
+								@if (message.role === 'user') {
+									{{ 'aiAssistant.you' | translate }}
+								} @else {
+									{{ 'aiAssistant.assistant' | translate }}
+								}
+							</span>
+							<div
+								class="max-w-[92%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap break-words"
+								[class.bg-primary]="message.role === 'user'"
+								[class.text-primary-foreground]="message.role === 'user'"
+								[class.bg-muted]="message.role === 'assistant' && !message.error"
+								[class.bg-destructive/10]="!!message.error"
+								[class.text-destructive]="!!message.error"
+								[class.border]="message.role === 'assistant'"
+								[class.border-border]="message.role === 'assistant' && !message.error"
+								[class.border-destructive/30]="!!message.error"
+							>
+								@if (message.streaming && !message.content) {
+									<span class="inline-flex items-center gap-2 text-secondary-foreground">
+										<span class="ai-assistant-dot"></span>
+										{{ 'aiAssistant.thinking' | translate }}
+									</span>
+								} @else {
+									{{ message.content }}
+									@if (message.streaming) {
+										<span class="ai-assistant-cursor">▍</span>
+									}
+								}
+							</div>
+						</div>
+					}
+				}
+				<div #messagesEnd></div>
+			</div>
+
+			@if (!assistant.sending() && assistant.messages().length <= 2) {
+				<div class="px-4 pb-2 flex flex-wrap gap-2">
+					@for (key of suggestions; track key) {
+						<button
+							type="button"
+							class="rounded-full border border-border bg-muted/40 px-3 py-1 text-xs hover:bg-primary/10 hover:border-primary/30 transition"
+							(click)="useSuggestion(key)"
+						>
+							{{ key | translate }}
+						</button>
+					}
+				</div>
+			}
+
+			<p class="px-4 pb-1 text-[10px] text-secondary-foreground">
+				{{ 'aiAssistant.disclaimer' | translate }}
+			</p>
+
+			<form class="border-t border-border p-3 flex items-end gap-2" (ngSubmit)="onSubmit()">
+				<textarea
+					class="kt-textarea min-h-11 max-h-28 flex-1 resize-none text-sm"
+					rows="2"
+					[placeholder]="'aiAssistant.placeholder' | translate"
+					[ngModel]="draft()"
+					(ngModelChange)="draft.set($event)"
+					[disabled]="assistant.sending()"
+					(keydown)="onComposerKeydown($event)"
+					name="aiAssistantDraft"
+				></textarea>
+				@if (assistant.sending()) {
+					<button type="button" class="kt-btn kt-btn-light shrink-0" (click)="assistant.cancel()">
+						{{ 'aiAssistant.cancel' | translate }}
+					</button>
+				} @else {
+					<button type="submit" class="kt-btn kt-btn-primary shrink-0" [disabled]="!draft().trim()">
+						{{ 'aiAssistant.send' | translate }}
+					</button>
+				}
+			</form>
+		</section>
+	</div>
+}

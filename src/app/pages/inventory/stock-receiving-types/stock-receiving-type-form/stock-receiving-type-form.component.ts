@@ -25,6 +25,7 @@ export class StockReceivingTypeFormComponent implements OnInit {
   private language = inject(LanguageService);
 
   loading = signal(false);
+  loadingAccounts = signal(false);
   saving = signal(false);
   errorMessage = signal('');
   isEditMode = signal(false);
@@ -32,7 +33,7 @@ export class StockReceivingTypeFormComponent implements OnInit {
   accounts = signal<Account[]>([]);
 
   postingAccounts = computed(() => {
-    const active = this.accounts().filter((account) => !account.accStopped);
+    const active = this.accounts().filter((account) => account.accStopped !== true);
     const leaves = active.filter((account) => account.accType === AccountStructureType.Sub);
     return leaves.length > 0 ? leaves : active;
   });
@@ -53,10 +54,7 @@ export class StockReceivingTypeFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.accountsService.getAll().subscribe({
-      next: (accounts) =>
-        this.accounts.set([...accounts].sort((a, b) => a.accCode - b.accCode)),
-    });
+    this.loadAccounts();
 
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam) {
@@ -67,6 +65,33 @@ export class StockReceivingTypeFormComponent implements OnInit {
     this.isEditMode.set(true);
     this.receivingTypeId.set(id);
     this.loadReceivingType(id);
+  }
+
+  loadAccounts(): void {
+    this.loadingAccounts.set(true);
+    this.accountsService.getAll().subscribe({
+      next: (accounts) => {
+        this.accounts.set(
+          [...accounts].sort((a, b) => Number(a.accCode) - Number(b.accCode)),
+        );
+        this.loadingAccounts.set(false);
+      },
+      error: (error) => {
+        this.accounts.set([]);
+        this.loadingAccounts.set(false);
+        this.errorMessage.set(
+          extractApiErrorMessage(error, this.t('stockReceivingTypes.accountsLoadError')),
+        );
+      },
+      complete: () => {
+        if (this.loadingAccounts()) {
+          this.loadingAccounts.set(false);
+          if (!this.accounts().length && !this.errorMessage()) {
+            this.errorMessage.set(this.t('stockReceivingTypes.accountsLoadError'));
+          }
+        }
+      },
+    });
   }
 
   loadReceivingType(id: number): void {

@@ -72,16 +72,29 @@ export class AccountsService {
       .pipe(map(() => undefined));
   }
 
-  private normalizeList(response: Account[] | ApiResponse<Account[]>): Account[] {
+  private normalizeList(response: Account[] | ApiResponse<Account[] | { $values?: Account[] }> | { $values?: Account[] }): Account[] {
     if (Array.isArray(response)) {
       return response;
     }
 
-    if (response.success && Array.isArray(response.data)) {
-      return response.data;
+    if (response && typeof response === 'object' && '$values' in response && Array.isArray(response.$values)) {
+      return response.$values;
     }
 
-    throw new Error(response.message || response.errors?.join(', ') || 'Request failed');
+    const wrapped = response as ApiResponse<Account[] | { $values?: Account[] }>;
+    if (wrapped.success === false) {
+      throw new Error(wrapped.message || wrapped.errors?.join(', ') || 'Request failed');
+    }
+
+    const data = wrapped.data;
+    if (Array.isArray(data)) {
+      return data;
+    }
+    if (data && typeof data === 'object' && Array.isArray(data.$values)) {
+      return data.$values;
+    }
+
+    throw new Error(wrapped.message || wrapped.errors?.join(', ') || 'Request failed');
   }
 
   private normalizeItem(response: Account | ApiResponse<Account>): Account {

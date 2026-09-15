@@ -1,0 +1,31 @@
+.ai-assistant-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: ai-assistant-pulse 1s ease-in-out infinite;
+}
+
+.ai-assistant-cursor {
+  display: inline-block;
+  margin-inline-start: 1px;
+  animation: ai-assistant-blink 1s step-end infinite;
+}
+
+@keyframes ai-assistant-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ai-assistant-blink {
+  50% {
+    opacity: 0;
+  }
+}

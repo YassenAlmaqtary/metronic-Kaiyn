@@ -2,6 +2,7 @@ import { Component, HostBinding, AfterViewInit, inject, Renderer2, DOCUMENT } fr
 import { RouterOutlet } from '@angular/router';
 
 import { MetronicInitService } from '../../core/services/metronic-init.service';
+import { AiAssistantPanelComponent } from '../../partials/ai-assistant/ai-assistant-panel.component';
 import { ModalsSearchComponent } from '../../partials/modals-search/modals-search.component';
 import { ThemeToggleService } from '../../partials/theme-toggle/theme-toggle.service';
 import { FooterComponent } from './footer/footer.component';
@@ -10,7 +11,14 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 
 @Component({
 	selector: 'app-demo1',
-	imports: [RouterOutlet, SidebarComponent, HeaderComponent, FooterComponent, ModalsSearchComponent],
+	imports: [
+		RouterOutlet,
+		SidebarComponent,
+		HeaderComponent,
+		FooterComponent,
+		ModalsSearchComponent,
+		AiAssistantPanelComponent,
+	],
 	templateUrl: './demo1.component.html',
 	styleUrl: './demo1.component.scss'
 })
