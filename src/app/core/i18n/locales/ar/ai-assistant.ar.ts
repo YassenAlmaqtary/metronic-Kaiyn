@@ -9,14 +9,15 @@ export const aiAssistantAr = {
   'aiAssistant.cancel': 'إيقاف',
   'aiAssistant.clear': 'مسح المحادثة',
   'aiAssistant.thinking': 'جارٍ التحليل... قد يستغرق ذلك دقيقة',
-  'aiAssistant.error': 'تعذر الحصول على إجابة من المساعد',
-  'aiAssistant.corsOrNetwork':
-    'تعذر الاتصال بوكيل SQL — تأكد أن الخدمة تعمل على المنفذ 8050 وأنك أعدت تشغيل ng serve بعد تحديث الـ proxy',
-  'aiAssistant.unauthorized':
-    'رفض الوكيل التوكن — تأكد أن وكيل SQL يقبل نفس JWT الخاص بنظام Kayian',
-  'aiAssistant.proxyMissing':
-    'مسار الوكيل غير مفعّل في ng serve — أوقف السيرفر على 4200 وأعد التشغيل، أو افتح http://localhost:4201',
-  'aiAssistant.emptyResponse': 'لم يُرجع المساعد محتوى.',
+  'aiAssistant.error': 'تعذر الحصول على إجابة حالياً. حاول مرة أخرى لاحقاً.',
+  'aiAssistant.unavailable': 'المساعد غير متاح مؤقتاً. حاول مرة أخرى بعد قليل.',
+  'aiAssistant.unauthorized': 'ليس لديك صلاحية لاستخدام المساعد حالياً.',
+  'aiAssistant.rateLimited':
+    'وصلت إلى الحد المسموح من الاستخدام حالياً. انتظر قليلاً ثم حاول مرة أخرى.',
+  'aiAssistant.timeout': 'استغرق الرد وقتاً أطول من المتوقع. حاول مرة أخرى.',
+  'aiAssistant.maxIterations':
+    'لم أتمكن من إكمال التحليل لهذه المسألة. حاول صياغة السؤال بشكل أوضح أو قسّمه إلى سؤال أصغر.',
+  'aiAssistant.emptyResponse': 'لم يتم العثور على إجابة مناسبة.',
   'aiAssistant.disclaimer': 'الإجابات مساعدة فقط — راجع البيانات قبل اتخاذ قرار.',
   'aiAssistant.suggestion.stock': 'ما أكثر 5 أصناف حركة هذا الشهر؟',
   'aiAssistant.suggestion.accounts': 'اعرض ملخصاً عن مجموعات الحسابات',

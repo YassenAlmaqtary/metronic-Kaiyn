@@ -3,7 +3,6 @@ import { finalize } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { AiAssistantMessage } from '../api/models/sql-agent.models';
-import { extractApiErrorMessage } from '../api/utils/api-response.util';
 import { TranslationKey } from '../i18n';
 import { LanguageService } from './language.service';
 import { SqlAgentService } from './sql-agent.service';
@@ -86,8 +85,6 @@ export class AiAssistantService {
   }
 
   private describeAgentError(error: unknown): string {
-    const askUrl = `${environment.sqlAgent.baseUrl}${environment.sqlAgent.askPath}`;
-
     const status =
       error && typeof error === 'object' && 'status' in error
         ? Number((error as { status?: number }).status)
@@ -98,20 +95,32 @@ export class AiAssistantService {
       (typeof TypeError !== 'undefined' && error instanceof TypeError) ||
       (error instanceof Error && /failed to fetch|networkerror|load failed/i.test(error.message));
 
-    if (isNetwork) {
-      return `${this.t('aiAssistant.corsOrNetwork')}\n(${askUrl})`;
+    // Never expose URLs, ports, tokens, or infra details to end users.
+    if (!environment.production) {
+      console.error('[AiAssistant]', {
+        status,
+        askUrl: `${environment.sqlAgent.baseUrl}${environment.sqlAgent.askPath}`,
+        error,
+      });
     }
 
-    if (status === 401) {
-      return `${this.t('aiAssistant.unauthorized')}\n(${askUrl})`;
+    if (isNetwork || status === 404 || status === 502 || status === 503) {
+      return this.t('aiAssistant.unavailable');
     }
 
-    if (status === 404) {
-      return `${this.t('aiAssistant.proxyMissing')}\n(${askUrl})`;
+    if (status === 401 || status === 403) {
+      return this.t('aiAssistant.unauthorized');
     }
 
-    const base = extractApiErrorMessage(error, this.t('aiAssistant.error'));
-    return `${base}\n(${askUrl})`;
+    if (status === 429) {
+      return this.t('aiAssistant.rateLimited');
+    }
+
+    if (status === 408 || (error instanceof Error && /timeout/i.test(error.message))) {
+      return this.t('aiAssistant.timeout');
+    }
+
+    return this.t('aiAssistant.error');
   }
 
   private sendViaStream(query: string, assistantId: string): void {
@@ -157,11 +166,56 @@ export class AiAssistantService {
   }
 
   private finishAssistant(id: string, content: string): void {
-    this.patchAssistant(id, content, false, false);
+    const sanitized = this.sanitizeAgentOutput(content);
+    if (sanitized.isError) {
+      this.failAssistant(id, sanitized.text);
+      return;
+    }
+    this.patchAssistant(id, sanitized.text, false, false);
   }
 
   private failAssistant(id: string, content: string): void {
     this.patchAssistant(id, content, false, true);
+  }
+
+  /**
+   * Maps known LangChain/agent technical strings to safe user-facing copy.
+   * Never pass raw infra/agent internals to the chat UI.
+   */
+  private sanitizeAgentOutput(raw: string): { text: string; isError: boolean } {
+    const text = raw.trim();
+    if (!text) {
+      return { text: this.t('aiAssistant.emptyResponse'), isError: true };
+    }
+
+    const lower = text.toLowerCase();
+
+    if (
+      lower.includes('max iterations') ||
+      lower.includes('agent stopped due to iteration limit') ||
+      lower.includes('stopped due to max iterations')
+    ) {
+      return { text: this.t('aiAssistant.maxIterations'), isError: true };
+    }
+
+    if (lower.includes('early_stopping_method') || lower.includes('unsupported early_stopping')) {
+      return { text: this.t('aiAssistant.error'), isError: true };
+    }
+
+    if (
+      lower.includes('agent execution error') ||
+      lower.startsWith('error:') ||
+      /^traceback \(most recent call last\)/i.test(text)
+    ) {
+      return { text: this.t('aiAssistant.error'), isError: true };
+    }
+
+    // Short English-only infra phrases (no Arabic) → hide from end users.
+    if (/^[a-z0-9 _.'"\-:/()]+$/i.test(text) && /\b(agent|langchain|sql|token|stack|exception)\b/i.test(text)) {
+      return { text: this.t('aiAssistant.error'), isError: true };
+    }
+
+    return { text, isError: false };
   }
 
   private patchAssistant(

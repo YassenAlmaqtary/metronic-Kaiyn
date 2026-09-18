@@ -9,14 +9,15 @@ export const aiAssistantEn = {
   'aiAssistant.cancel': 'Stop',
   'aiAssistant.clear': 'Clear chat',
   'aiAssistant.thinking': 'Analyzing... this may take up to a minute',
-  'aiAssistant.error': 'Could not get a response from the assistant',
-  'aiAssistant.corsOrNetwork':
-    'Could not reach the SQL agent — ensure it is running on port 8050 and restart ng serve after proxy changes',
-  'aiAssistant.unauthorized':
-    'The agent rejected the token — ensure the SQL agent accepts the same Kayian ERP JWT',
-  'aiAssistant.proxyMissing':
-    'SQL agent proxy is not loaded — stop the server on 4200 and restart, or open http://localhost:4201',
-  'aiAssistant.emptyResponse': 'The assistant returned no content.',
+  'aiAssistant.error': 'Could not get an answer right now. Please try again later.',
+  'aiAssistant.unavailable': 'The assistant is temporarily unavailable. Please try again shortly.',
+  'aiAssistant.unauthorized': 'You do not have permission to use the assistant right now.',
+  'aiAssistant.rateLimited':
+    'You have reached the current usage limit. Please wait a moment and try again.',
+  'aiAssistant.timeout': 'The response took too long. Please try again.',
+  'aiAssistant.maxIterations':
+    'I could not finish analyzing this request. Try rephrasing the question or splitting it into a smaller one.',
+  'aiAssistant.emptyResponse': 'No suitable answer was found.',
   'aiAssistant.disclaimer': 'Answers are assistive only — verify data before decisions.',
   'aiAssistant.suggestion.stock': 'What are the top 5 moving items this month?',
   'aiAssistant.suggestion.accounts': 'Summarize the account groups',
