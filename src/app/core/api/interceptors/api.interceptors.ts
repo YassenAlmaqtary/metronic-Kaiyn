@@ -26,7 +26,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         error.status !== 401 ||
         req.url.includes('/api/Auth/login') ||
         req.url.includes('/sql-agent') ||
-        req.url.includes(':8050')
+        req.url.includes(':8050') ||
+        req.url.includes('kayianagent.')
       ) {
         return throwError(() => error);
       }

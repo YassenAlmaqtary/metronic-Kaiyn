@@ -18,9 +18,11 @@ export class AiAssistantPanelComponent {
 
   draft = signal('');
   readonly suggestions: TranslationKey[] = [
-    'aiAssistant.suggestion.stock',
-    'aiAssistant.suggestion.accounts',
-    'aiAssistant.suggestion.invoices',
+    'aiAssistant.suggestion.unpaidInvoices',
+    'aiAssistant.suggestion.accountGroupsCount',
+    'aiAssistant.suggestion.accountGroupsList',
+    'aiAssistant.suggestion.productsCount',
+    'aiAssistant.suggestion.customersCount',
   ];
 
   @ViewChild('messagesEnd') private messagesEnd?: ElementRef<HTMLElement>;
