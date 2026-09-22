@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of, tap } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../api/auth.service';
 import { buildApiUrl, toApiPath } from '../api/api-url';
 import { ApiResponse } from '../api/models/api-response.model';
@@ -12,6 +13,9 @@ import {
 import { unwrapApiResponse } from '../api/utils/api-response.util';
 import { SIDEBAR_MENU_SECTIONS } from '../navigation/sidebar-menu.config';
 import { SidebarMenuService } from '../navigation/sidebar-menu.service';
+
+/** Permission key for the smart assistant (must exist in backend catalog to grant). */
+export const AI_ASSISTANT_PERMISSION = 'aiAssistant.use';
 
 /**
  * Loads the current user's effective permissions and exposes can(permissionKey).
@@ -24,7 +28,7 @@ export class AccessControlService {
   /**
    * Keep false until permission keys from the API are confirmed to match
    * sidebar keys like `salesInvoices.view` / `stores.view`.
-   * When false: load still runs, but UI is not restricted.
+   * When false: menu/dashboard stay unrestricted; assistant can still be gated.
    */
   private static readonly ENFORCE = false;
 
@@ -33,6 +37,8 @@ export class AccessControlService {
   private menu = inject(SidebarMenuService);
 
   private readonly granted = signal<ReadonlySet<string> | null>(null);
+  /** Raw keys from API — used by assistant even when menu ENFORCE is off. */
+  private readonly rawGranted = signal<ReadonlySet<string> | null>(null);
   private readonly loaded = signal(false);
 
   readonly isReady = computed(() => this.loaded());
@@ -53,8 +59,36 @@ export class AccessControlService {
     return this.matches(set, permission);
   }
 
+  /**
+   * Smart assistant access (independent of sidebar ENFORCE).
+   * - Super users: always allowed
+   * - requirePermission=false: any signed-in user
+   * - requirePermission=true: needs `aiAssistant.use` (or fail-open if catalog unreadable)
+   */
+  canUseAiAssistant(): boolean {
+    if (!this.auth.user()) {
+      return false;
+    }
+    if (this.isSuperUser()) {
+      return true;
+    }
+    if (!environment.sqlAgent.requirePermission) {
+      return true;
+    }
+    if (!this.loaded()) {
+      return false;
+    }
+    const set = this.rawGranted();
+    if (!set) {
+      // Permissions payload unknown/unusable — fail-open so ERP stays usable.
+      return true;
+    }
+    return this.matches(set, AI_ASSISTANT_PERMISSION);
+  }
+
   clear(): void {
     this.apply(null);
+    this.rawGranted.set(null);
     this.loaded.set(false);
   }
 
@@ -62,12 +96,14 @@ export class AccessControlService {
     const user = this.auth.user();
     if (!user?.userId) {
       this.apply(null);
+      this.rawGranted.set(null);
       return of(undefined);
     }
 
-    if (user.isSuperUser || !AccessControlService.ENFORCE) {
-      // Super user, or enforcement disabled: never hide menu/dashboard.
+    if (user.isSuperUser) {
       this.apply(null);
+      this.rawGranted.set(null);
+      this.loaded.set(true);
       return of(undefined);
     }
 
@@ -79,10 +115,10 @@ export class AccessControlService {
 
     if (effectiveBranch != null) {
       return this.getByUserAndBranch(user.userId, effectiveBranch).pipe(
-        tap((data) => this.applySafe(this.flatten(data.permissions))),
+        tap((data) => this.ingestPermissions(this.flatten(data.permissions))),
         map(() => undefined),
         catchError(() => {
-          this.apply(null);
+          this.ingestPermissions(null);
           return of(undefined);
         }),
       );
@@ -91,14 +127,30 @@ export class AccessControlService {
     return this.getCurrentUser(user.userId).pipe(
       tap((data) => {
         const branch = data.branches?.find((b) => b.isDefault) ?? data.branches?.[0] ?? null;
-        this.applySafe(this.flatten(branch?.permissions ?? null));
+        this.ingestPermissions(this.flatten(branch?.permissions ?? null));
       }),
       map(() => undefined),
       catchError(() => {
-        this.apply(null);
+        this.ingestPermissions(null);
         return of(undefined);
       }),
     );
+  }
+
+  private ingestPermissions(keys: string[] | null): void {
+    if (!keys) {
+      this.rawGranted.set(null);
+      this.apply(null);
+      return;
+    }
+    this.rawGranted.set(new Set(keys));
+    if (AccessControlService.ENFORCE) {
+      this.applySafe(keys);
+    } else {
+      // Menu unrestricted, but keep rawGranted for assistant checks.
+      this.apply(null);
+      this.loaded.set(true);
+    }
   }
 
   private getByUserAndBranch(userId: number, branchId: number): Observable<UserPermissionsByBranch> {

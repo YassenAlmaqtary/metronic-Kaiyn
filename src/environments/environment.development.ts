@@ -12,5 +12,7 @@ export const environment = {
     streamRequiresAuth: true,
     streamCumulative: true,
     askTimeoutMs: 180_000,
+    /** Local: keep open unless you seed `aiAssistant.use` in the API. */
+    requirePermission: false,
   },
 };

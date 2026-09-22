@@ -4,6 +4,7 @@ import { finalize } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AiAssistantMessage } from '../api/models/sql-agent.models';
 import { TranslationKey } from '../i18n';
+import { AccessControlService } from './access-control.service';
 import { LanguageService } from './language.service';
 import { SqlAgentService } from './sql-agent.service';
 
@@ -11,6 +12,7 @@ import { SqlAgentService } from './sql-agent.service';
 export class AiAssistantService {
   private sqlAgent = inject(SqlAgentService);
   private language = inject(LanguageService);
+  private access = inject(AccessControlService);
 
   readonly open = signal(false);
   readonly sending = signal(false);
@@ -19,6 +21,9 @@ export class AiAssistantService {
   private abortController: AbortController | null = null;
 
   show(): void {
+    if (!this.access.canUseAiAssistant()) {
+      return;
+    }
     this.open.set(true);
     if (!this.messages().length) {
       this.messages.set([this.systemWelcome()]);
@@ -30,6 +35,10 @@ export class AiAssistantService {
   }
 
   toggle(): void {
+    if (!this.access.canUseAiAssistant()) {
+      this.hide();
+      return;
+    }
     if (this.open()) {
       this.hide();
     } else {

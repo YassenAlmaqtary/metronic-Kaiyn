@@ -1847,14 +1847,16 @@
 			</button>
 			<!-- End of Search -->
 			<!-- AI Assistant -->
-			<button
-				type="button"
-				class="group kt-btn kt-btn-ghost kt-btn-icon size-9 rounded-full hover:bg-primary/10 hover:[&_i]:text-primary"
-				(click)="aiAssistant.toggle()"
-				[attr.aria-label]="'aiAssistant.open' | translate"
-				[attr.title]="'aiAssistant.open' | translate">
-				<i class="ki-filled ki-technology-4 text-lg group-hover:text-primary"></i>
-			</button>
+			@if (access.canUseAiAssistant()) {
+				<button
+					type="button"
+					class="group kt-btn kt-btn-ghost kt-btn-icon size-9 rounded-full hover:bg-primary/10 hover:[&_i]:text-primary"
+					(click)="openAiAssistant()"
+					[attr.aria-label]="'aiAssistant.open' | translate"
+					[attr.title]="'aiAssistant.open' | translate">
+					<i class="ki-filled ki-technology-4 text-lg group-hover:text-primary"></i>
+				</button>
+			}
 			<!-- End of AI Assistant -->
 			<!-- Notifications -->
 			<button

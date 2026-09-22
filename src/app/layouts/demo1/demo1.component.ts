@@ -2,6 +2,7 @@ import { Component, HostBinding, AfterViewInit, inject, Renderer2, DOCUMENT } fr
 import { RouterOutlet } from '@angular/router';
 
 import { MetronicInitService } from '../../core/services/metronic-init.service';
+import { AccessControlService } from '../../core/services/access-control.service';
 import { AiAssistantPanelComponent } from '../../partials/ai-assistant/ai-assistant-panel.component';
 import { ModalsSearchComponent } from '../../partials/modals-search/modals-search.component';
 import { ThemeToggleService } from '../../partials/theme-toggle/theme-toggle.service';
@@ -24,13 +25,14 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 })
 export class Demo1Component implements AfterViewInit {
 	@HostBinding('class') class = 'flex grow';
-	protected themeService = inject(ThemeToggleService);//وظيفتى التى تعمل على التبديل بين الوضع الداكن والفاتح
-	private metronicInitService = inject(MetronicInitService);//وظيفتى التى تعمل على التحميل المرة الاولى للموقع
-	private renderer = inject(Renderer2);//وظيفتى التى تعمل على حذف الكلاس kt-sidebar-collapse	
-	private document = inject(DOCUMENT);//وظيفتى التى تعمل على التحميل المرة الاولى للموقع
+	protected themeService = inject(ThemeToggleService);
+	protected access = inject(AccessControlService);
+	private metronicInitService = inject(MetronicInitService);
+	private renderer = inject(Renderer2);
+	private document = inject(DOCUMENT);
 
 	ngAfterViewInit(): void {
-		this.renderer.removeClass(this.document.body, 'kt-sidebar-collapse');//حذف الكلاس kt-sidebar-collapse
-		this.metronicInitService.init();//تحميل الموقع
+		this.renderer.removeClass(this.document.body, 'kt-sidebar-collapse');
+		this.metronicInitService.init();
 	}
 }
