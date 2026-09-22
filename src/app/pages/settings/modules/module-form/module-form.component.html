@@ -1,0 +1,87 @@
+<div class="kt-container-fixed flex flex-col gap-6 max-w-5xl pb-10">
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div class="flex items-start gap-3 min-w-0">
+			<a
+				class="kt-btn kt-btn-icon kt-btn-ghost mt-1"
+				routerLink="/demo1/settings/modules"
+				[attr.aria-label]="'modules.cancel' | translate"
+			>
+				<i class="ki-filled ki-left"></i>
+			</a>
+			<div class="flex items-start gap-3 min-w-0">
+				<div class="size-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+					<i class="ki-filled ki-element-11 text-lg"></i>
+				</div>
+				<div class="min-w-0">
+					<p class="text-xs text-secondary-foreground">
+						<a class="hover:text-primary" routerLink="/demo1/settings/modules">{{ 'modules.title' | translate }}</a>
+						<span class="mx-1">/</span>
+						{{ (isEditMode() ? 'modules.edit' : 'modules.create') | translate }}
+					</p>
+					<h1 class="text-xl font-semibold text-mono mt-1">
+						{{ (isEditMode() ? 'modules.edit' : 'modules.create') | translate }}
+					</h1>
+					<p class="text-sm text-secondary-foreground mt-0.5">{{ 'modules.formHint' | translate }}</p>
+				</div>
+			</div>
+		</div>
+		<div class="flex items-center gap-2">
+			<a class="kt-btn kt-btn-outline" routerLink="/demo1/settings/modules">{{ 'modules.cancel' | translate }}</a>
+			<button class="kt-btn kt-btn-primary" type="button" [disabled]="saving() || loading()" (click)="onSubmit()">
+				@if (saving()) {
+					<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+				}
+				{{ 'modules.save' | translate }}
+			</button>
+		</div>
+	</div>
+
+	@if (errorMessage()) {
+		<div class="rounded border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+			{{ errorMessage() }}
+		</div>
+	}
+
+	@if (loading()) {
+		<div class="py-12 text-center text-secondary-foreground">{{ 'modules.loading' | translate }}</div>
+	} @else {
+		<form class="flex flex-col gap-6" [formGroup]="form" (ngSubmit)="onSubmit()">
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="px-6 md:px-8 py-4 border-b border-border bg-muted/30">
+					<h2 class="text-sm font-semibold">{{ 'modules.section.basic' | translate }}</h2>
+				</div>
+				<div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+					<div class="flex flex-col gap-1.5">
+						<label class="kt-form-label required">{{ 'modules.moduleKey' | translate }}</label>
+						<input class="kt-input h-11" type="text" formControlName="moduleKey" placeholder="aiAssistant" />
+						@if (form.controls.moduleKey.touched && form.controls.moduleKey.hasError('required')) {
+							<span class="text-xs text-destructive">{{ 'modules.required.moduleKey' | translate }}</span>
+						}
+					</div>
+					<div class="flex flex-col gap-1.5">
+						<label class="kt-form-label required">{{ 'modules.moduleName' | translate }}</label>
+						<input class="kt-input h-11" type="text" formControlName="moduleName" />
+						@if (form.controls.moduleName.touched && form.controls.moduleName.hasError('required')) {
+							<span class="text-xs text-destructive">{{ 'modules.required.moduleName' | translate }}</span>
+						}
+					</div>
+					<div class="flex flex-col gap-1.5">
+						<label class="kt-form-label">{{ 'modules.parentModuleId' | translate }}</label>
+						<input class="kt-input h-11" type="number" formControlName="parentModuleId" />
+					</div>
+					<div class="flex flex-col gap-1.5">
+						<label class="kt-form-label">{{ 'modules.sortOrder' | translate }}</label>
+						<input class="kt-input h-11" type="number" formControlName="sortOrder" />
+					</div>
+				</div>
+			</div>
+
+			<div class="flex justify-end gap-2">
+				<a class="kt-btn kt-btn-outline" routerLink="/demo1/settings/modules">{{ 'modules.cancel' | translate }}</a>
+				<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving()">
+					{{ 'modules.save' | translate }}
+				</button>
+			</div>
+		</form>
+	}
+</div>

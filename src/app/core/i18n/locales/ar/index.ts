@@ -49,6 +49,7 @@ import { documentPrintAr } from './document-print.ar';
 import { menuAr } from './menu.ar';
 import { navAr } from './nav.ar';
 import { permissionsAr } from './permissions.ar';
+import { modulesAr } from './modules.ar';
 import { rolesAr } from './roles.ar';
 import { branchesAr } from './branches.ar';
 import { companiesAr } from './companies.ar';
@@ -67,6 +68,7 @@ export const ar = mergeLocale(
   branchesAr,
   rolesAr,
   permissionsAr,
+  modulesAr,
   dashboardAr,
   systemLogsAr,
   currenciesAr,

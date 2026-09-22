@@ -4,6 +4,8 @@ import { Demo1Component } from './layouts/demo1/demo1.component';
 import { SignInComponent } from './pages/auth/sign-in/sign-in.component';
 import { IndexComponent as Demo1IndexComponent } from './pages/demo1/index/index.component';
 import { PermissionsPageComponent } from './pages/settings/permissions/permissions-page/permissions-page.component';
+import { ModulesListComponent } from './pages/settings/modules/modules-list/modules-list.component';
+import { ModuleFormComponent } from './pages/settings/modules/module-form/module-form.component';
 import { RolesListComponent } from './pages/settings/roles/roles-list/roles-list.component';
 import { RoleFormComponent } from './pages/settings/roles/role-form/role-form.component';
 import { BranchesListComponent } from './pages/settings/branches/branches-list/branches-list.component';
@@ -117,6 +119,9 @@ export const routes: Routes = [
       { path: 'settings/roles/new', component: RoleFormComponent },
       { path: 'settings/roles/:id/edit', component: RoleFormComponent },
       { path: 'settings/permissions', component: PermissionsPageComponent },
+      { path: 'settings/modules', component: ModulesListComponent },
+      { path: 'settings/modules/new', component: ModuleFormComponent },
+      { path: 'settings/modules/:id/edit', component: ModuleFormComponent },
       { path: 'settings/companies', component: CompaniesListComponent },
       { path: 'settings/companies/new', component: CompanyFormComponent },
       { path: 'settings/companies/:id/edit', component: CompanyFormComponent },

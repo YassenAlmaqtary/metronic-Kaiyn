@@ -408,6 +408,12 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         permission: 'permissions.view',
       },
       {
+        id: 'settings-modules',
+        labelKey: 'menu.settings.modules',
+        route: '/demo1/settings/modules',
+        permission: 'permissions.view',
+      },
+      {
         id: 'settings-companies',
         labelKey: 'menu.settings.company',
         route: '/demo1/settings/companies',

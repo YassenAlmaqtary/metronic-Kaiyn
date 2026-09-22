@@ -1,7 +1,13 @@
 <div class="kt-container-fixed flex flex-col gap-5">
-	<div>
-		<h1 class="text-xl font-semibold text-mono">{{ 'permissions.title' | translate }}</h1>
-		<p class="text-sm text-secondary-foreground mt-1">{{ 'permissions.subtitle' | translate }}</p>
+	<div class="flex flex-wrap items-start justify-between gap-3">
+		<div>
+			<h1 class="text-xl font-semibold text-mono">{{ 'permissions.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground mt-1">{{ 'permissions.subtitle' | translate }}</p>
+		</div>
+		<a class="kt-btn kt-btn-outline" routerLink="/demo1/settings/modules">
+			<i class="ki-filled ki-element-11"></i>
+			{{ 'permissions.manageModules' | translate }}
+		</a>
 	</div>
 
 	@if (successMessage()) {
@@ -106,10 +112,11 @@
 		<div class="kt-card-header flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border">
 			<div>
 				<h2 class="text-base font-semibold text-mono">{{ 'permissions.catalogTitle' | translate }}</h2>
-				<p class="text-sm text-secondary-foreground mt-1">{{ 'permissions.catalogHint' | translate }}</p>
 			</div>
 			<div class="relative w-full max-w-sm">
-				<i class="ki-filled ki-magnifier absolute top-1/2 -translate-y-1/2 start-3 text-muted-foreground text-sm"></i>
+				<span class="pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center ps-3">
+					<i class="ki-filled ki-magnifier text-muted-foreground text-sm"></i>
+				</span>
 				<input
 					class="kt-input ps-9"
 					type="search"

@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import {
   BulkSetRolePermissionsRequest,
@@ -16,7 +16,7 @@ import { RolesService } from '../../../../core/services/roles.service';
 
 @Component({
   selector: 'app-permissions-page',
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   templateUrl: './permissions-page.component.html',
   styleUrl: './permissions-page.component.scss',
 })

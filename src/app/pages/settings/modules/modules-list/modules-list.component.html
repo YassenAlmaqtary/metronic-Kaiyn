@@ -1,0 +1,144 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex flex-wrap items-center justify-between gap-3">
+		<div>
+			<h1 class="text-xl font-semibold text-mono">{{ 'modules.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground mt-1">{{ 'modules.subtitle' | translate }}</p>
+		</div>
+		<div class="flex flex-wrap items-center gap-2">
+			@if (!hasAiAssistantModule()) {
+				<a
+					class="kt-btn kt-btn-outline"
+					routerLink="/demo1/settings/modules/new"
+					[queryParams]="{ preset: 'aiAssistant' }"
+				>
+					{{ 'modules.addAiAssistant' | translate }}
+				</a>
+			}
+			<a class="kt-btn kt-btn-primary" routerLink="/demo1/settings/modules/new">
+				<i class="ki-filled ki-plus"></i>
+				{{ 'modules.add' | translate }}
+			</a>
+		</div>
+	</div>
+
+	@if (successMessage()) {
+		<div class="rounded border border-success/30 bg-success/10 p-3 text-sm">{{ successMessage() }}</div>
+	}
+
+	@if (errorMessage()) {
+		<div class="rounded border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive flex items-center justify-between gap-3">
+			<span>{{ errorMessage() }}</span>
+			<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="loadModules()">
+				{{ 'modules.retry' | translate }}
+			</button>
+		</div>
+	}
+
+	<div class="kt-card">
+		<div class="kt-card-content p-5">
+			<div class="flex flex-wrap items-center gap-3 mb-5">
+				<input
+					class="kt-input ms-auto max-w-xs"
+					type="search"
+					[placeholder]="'modules.search' | translate"
+					[ngModel]="searchTerm()"
+					(ngModelChange)="onSearchChange($event)"
+				/>
+				<button
+					type="button"
+					class="kt-btn kt-btn-sm kt-btn-light"
+					[disabled]="!filteredModules().length"
+					(click)="exportCsv()"
+				>
+					<i class="ki-filled ki-file-down"></i>
+					{{ 'common.exportCsv' | translate }}
+				</button>
+			</div>
+
+			@if (loading()) {
+				<div class="py-12 text-center text-secondary-foreground">{{ 'modules.loading' | translate }}</div>
+			} @else if (filteredModules().length === 0) {
+				<div class="py-12 text-center">
+					<p class="font-medium">{{ 'modules.empty' | translate }}</p>
+					<p class="text-sm text-secondary-foreground mt-1">{{ 'modules.emptyHint' | translate }}</p>
+					<a class="kt-btn kt-btn-primary kt-btn-sm mt-4" routerLink="/demo1/settings/modules/new">
+						{{ 'modules.add' | translate }}
+					</a>
+				</div>
+			} @else {
+				<div class="kt-scrollable-x-auto">
+					<table class="kt-table w-full">
+						<thead>
+							<tr>
+								<th>{{ 'modules.moduleKey' | translate }}</th>
+								<th>{{ 'modules.moduleName' | translate }}</th>
+								<th>{{ 'modules.parentModuleId' | translate }}</th>
+								<th>{{ 'modules.sortOrder' | translate }}</th>
+								<th class="w-[120px]">{{ 'modules.actions' | translate }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (module of filteredModules(); track module.moduleId) {
+								<tr>
+									<td>
+										<a
+											class="font-medium text-primary"
+											[routerLink]="['/demo1/settings/modules', module.moduleId, 'edit']"
+										>
+											{{ module.moduleKey || '—' }}
+										</a>
+										@if ((module.moduleKey || '').toLowerCase() === aiAssistantModuleKey.toLowerCase()) {
+											<span class="kt-badge kt-badge-success ms-2">{{ 'modules.aiAssistantBadge' | translate }}</span>
+										}
+									</td>
+									<td>{{ module.moduleName || '—' }}</td>
+									<td>{{ module.parentModuleId ?? '—' }}</td>
+									<td>{{ module.sortOrder ?? '—' }}</td>
+									<td>
+										<div class="flex items-center gap-1">
+											<a
+												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
+												[routerLink]="['/demo1/settings/modules', module.moduleId, 'edit']"
+											>
+												<i class="ki-filled ki-pencil"></i>
+											</a>
+											<button
+												type="button"
+												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive"
+												(click)="askDelete(module)"
+											>
+												<i class="ki-filled ki-trash"></i>
+											</button>
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+		</div>
+	</div>
+</div>
+
+@if (deleteTarget(); as target) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+		<div class="kt-card w-full max-w-md">
+			<div class="kt-card-header px-5 py-4 border-b border-border">
+				<h2 class="text-base font-semibold">{{ 'modules.deleteTitle' | translate }}</h2>
+			</div>
+			<div class="kt-card-content p-5 text-sm text-secondary-foreground">
+				{{ 'modules.deleteConfirm' | translate }}
+				<p class="mt-2 font-medium text-foreground">{{ target.moduleKey }} — {{ target.moduleName }}</p>
+			</div>
+			<div class="px-5 pb-5 flex justify-end gap-2">
+				<button type="button" class="kt-btn kt-btn-outline" (click)="cancelDelete()" [disabled]="deleting()">
+					{{ 'common.cancel' | translate }}
+				</button>
+				<button type="button" class="kt-btn kt-btn-destructive" (click)="confirmDelete()" [disabled]="deleting()">
+					{{ 'modules.delete' | translate }}
+				</button>
+			</div>
+		</div>
+	</div>
+}

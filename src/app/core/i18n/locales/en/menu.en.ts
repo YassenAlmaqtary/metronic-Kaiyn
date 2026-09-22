@@ -68,6 +68,7 @@ export const menuEn = {
   'menu.settings.userBranches': 'User branches',
   'menu.settings.roles': 'Roles',
   'menu.settings.permissions': 'Permissions',
+  'menu.settings.modules': 'Modules',
   'menu.settings.company': 'Company Profile',
   'menu.settings.branches': 'Branches',
   'menu.settings.currencies': 'Currencies',

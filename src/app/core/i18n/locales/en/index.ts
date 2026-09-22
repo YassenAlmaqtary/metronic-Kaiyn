@@ -49,6 +49,7 @@ import { documentPrintEn } from './document-print.en';
 import { menuEn } from './menu.en';
 import { navEn } from './nav.en';
 import { permissionsEn } from './permissions.en';
+import { modulesEn } from './modules.en';
 import { rolesEn } from './roles.en';
 import { branchesEn } from './branches.en';
 import { companiesEn } from './companies.en';
@@ -67,6 +68,7 @@ export const en = mergeLocale(
   branchesEn,
   rolesEn,
   permissionsEn,
+  modulesEn,
   dashboardEn,
   systemLogsEn,
   currenciesEn,

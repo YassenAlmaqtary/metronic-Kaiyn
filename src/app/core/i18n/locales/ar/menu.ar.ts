@@ -67,6 +67,7 @@ export const menuAr = {
   'menu.settings.userBranches': 'فروع المستخدمين',
   'menu.settings.roles': 'الأدوار',
   'menu.settings.permissions': 'الصلاحيات',
+  'menu.settings.modules': 'الوحدات',
   'menu.settings.company': 'بيانات الشركة',
   'menu.settings.branches': 'الفروع',
   'menu.settings.currencies': 'العملات',

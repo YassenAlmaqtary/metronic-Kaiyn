@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from '../api/auth.service';
 import { buildApiUrl, toApiPath } from '../api/api-url';
 import { ApiResponse } from '../api/models/api-response.model';
+import { AppModule } from '../api/models/module.models';
 import { Permission } from '../api/models/permission.models';
 import {
   CurrentUserPermissions,
@@ -15,8 +16,9 @@ import { unwrapApiResponse } from '../api/utils/api-response.util';
 import { SIDEBAR_MENU_SECTIONS } from '../navigation/sidebar-menu.config';
 import { SidebarMenuService } from '../navigation/sidebar-menu.service';
 
-/** Permission key for the smart assistant (must exist in backend catalog to grant). */
-export const AI_ASSISTANT_PERMISSION = 'aiAssistant.use';
+/** Flattened permission: module `aiAssistant` + catalog action `view`. */
+export const AI_ASSISTANT_PERMISSION = 'aiAssistant.view';
+export const AI_ASSISTANT_MODULE_KEY = 'aiAssistant';
 
 /**
  * Loads the current user's effective permissions and exposes can(permissionKey).
@@ -42,6 +44,8 @@ export class AccessControlService {
   private readonly rawGranted = signal<ReadonlySet<string> | null>(null);
   /** All permission keys known in the system catalog. */
   private readonly catalogKeys = signal<ReadonlySet<string> | null>(null);
+  /** True when Modules catalog contains `aiAssistant`. */
+  private readonly aiAssistantModuleReady = signal(false);
   private readonly loaded = signal(false);
 
   readonly isReady = computed(() => this.loaded());
@@ -64,10 +68,7 @@ export class AccessControlService {
 
   /**
    * Smart assistant access (independent of sidebar ENFORCE).
-   * - Super users: always allowed
-   * - requirePermission=false: any signed-in user
-   * - If `aiAssistant.use` is not in the catalog yet: allow (cannot control from UI)
-   * - If catalog has the key: user must be granted it
+   * Create module `aiAssistant` via Permissions page, then grant `view` on the role matrix.
    */
   canUseAiAssistant(): boolean {
     if (!this.auth.user()) {
@@ -82,13 +83,10 @@ export class AccessControlService {
     if (!this.loaded()) {
       return false;
     }
-
-    const catalog = this.catalogKeys();
-    if (catalog && !this.matches(catalog, AI_ASSISTANT_PERMISSION)) {
-      // Key not seeded in backend yet — keep assistant available until catalog is updated.
+    // Module not created yet → keep assistant available until admin configures it.
+    if (!this.aiAssistantModuleReady()) {
       return true;
     }
-
     const set = this.rawGranted();
     if (!set) {
       return true;
@@ -100,6 +98,7 @@ export class AccessControlService {
     this.apply(null);
     this.rawGranted.set(null);
     this.catalogKeys.set(null);
+    this.aiAssistantModuleReady.set(false);
     this.loaded.set(false);
   }
 
@@ -109,6 +108,7 @@ export class AccessControlService {
       this.apply(null);
       this.rawGranted.set(null);
       this.catalogKeys.set(null);
+      this.aiAssistantModuleReady.set(false);
       return of(undefined);
     }
 
@@ -120,8 +120,21 @@ export class AccessControlService {
       }),
     );
 
+    const modules$ = this.getModules().pipe(
+      tap((modules) => {
+        const ready = modules.some(
+          (module) => (module.moduleKey ?? '').toLowerCase() === AI_ASSISTANT_MODULE_KEY.toLowerCase(),
+        );
+        this.aiAssistantModuleReady.set(ready);
+      }),
+      catchError(() => {
+        this.aiAssistantModuleReady.set(false);
+        return of([]);
+      }),
+    );
+
     if (user.isSuperUser) {
-      return catalog$.pipe(
+      return forkJoin({ catalog: catalog$, modules: modules$ }).pipe(
         tap(() => {
           this.apply(null);
           this.rawGranted.set(null);
@@ -152,10 +165,16 @@ export class AccessControlService {
             catchError(() => of(null)),
           );
 
-    return forkJoin({ catalog: catalog$, userPerms: userPerms$ }).pipe(
+    return forkJoin({ catalog: catalog$, modules: modules$, userPerms: userPerms$ }).pipe(
       tap(({ userPerms }) => this.ingestPermissions(userPerms)),
       map(() => undefined),
     );
+  }
+
+  private getModules(): Observable<AppModule[]> {
+    return this.http
+      .get<ApiResponse<AppModule[]>>(buildApiUrl('/api/Modules'))
+      .pipe(map((response) => unwrapApiResponse(response)));
   }
 
   private getPermissionCatalog(): Observable<ReadonlySet<string>> {
