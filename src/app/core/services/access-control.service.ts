@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../api/auth.service';
 import { buildApiUrl, toApiPath } from '../api/api-url';
 import { ApiResponse } from '../api/models/api-response.model';
+import { Permission } from '../api/models/permission.models';
 import {
   CurrentUserPermissions,
   UserPermissionsByBranch,
@@ -39,6 +40,8 @@ export class AccessControlService {
   private readonly granted = signal<ReadonlySet<string> | null>(null);
   /** Raw keys from API — used by assistant even when menu ENFORCE is off. */
   private readonly rawGranted = signal<ReadonlySet<string> | null>(null);
+  /** All permission keys known in the system catalog. */
+  private readonly catalogKeys = signal<ReadonlySet<string> | null>(null);
   private readonly loaded = signal(false);
 
   readonly isReady = computed(() => this.loaded());
@@ -63,7 +66,8 @@ export class AccessControlService {
    * Smart assistant access (independent of sidebar ENFORCE).
    * - Super users: always allowed
    * - requirePermission=false: any signed-in user
-   * - requirePermission=true: needs `aiAssistant.use` (or fail-open if catalog unreadable)
+   * - If `aiAssistant.use` is not in the catalog yet: allow (cannot control from UI)
+   * - If catalog has the key: user must be granted it
    */
   canUseAiAssistant(): boolean {
     if (!this.auth.user()) {
@@ -78,9 +82,15 @@ export class AccessControlService {
     if (!this.loaded()) {
       return false;
     }
+
+    const catalog = this.catalogKeys();
+    if (catalog && !this.matches(catalog, AI_ASSISTANT_PERMISSION)) {
+      // Key not seeded in backend yet — keep assistant available until catalog is updated.
+      return true;
+    }
+
     const set = this.rawGranted();
     if (!set) {
-      // Permissions payload unknown/unusable — fail-open so ERP stays usable.
       return true;
     }
     return this.matches(set, AI_ASSISTANT_PERMISSION);
@@ -89,6 +99,7 @@ export class AccessControlService {
   clear(): void {
     this.apply(null);
     this.rawGranted.set(null);
+    this.catalogKeys.set(null);
     this.loaded.set(false);
   }
 
@@ -97,14 +108,27 @@ export class AccessControlService {
     if (!user?.userId) {
       this.apply(null);
       this.rawGranted.set(null);
+      this.catalogKeys.set(null);
       return of(undefined);
     }
 
+    const catalog$ = this.getPermissionCatalog().pipe(
+      tap((keys) => this.catalogKeys.set(keys)),
+      catchError(() => {
+        this.catalogKeys.set(null);
+        return of(null);
+      }),
+    );
+
     if (user.isSuperUser) {
-      this.apply(null);
-      this.rawGranted.set(null);
-      this.loaded.set(true);
-      return of(undefined);
+      return catalog$.pipe(
+        tap(() => {
+          this.apply(null);
+          this.rawGranted.set(null);
+          this.loaded.set(true);
+        }),
+        map(() => undefined),
+      );
     }
 
     const effectiveBranch =
@@ -113,26 +137,40 @@ export class AccessControlService {
       user.branches?.find((b) => b.isDefault)?.branchId ??
       user.branches?.[0]?.branchId;
 
-    if (effectiveBranch != null) {
-      return this.getByUserAndBranch(user.userId, effectiveBranch).pipe(
-        tap((data) => this.ingestPermissions(this.flatten(data.permissions))),
-        map(() => undefined),
-        catchError(() => {
-          this.ingestPermissions(null);
-          return of(undefined);
-        }),
-      );
-    }
+    const userPerms$: Observable<string[] | null> =
+      effectiveBranch != null
+        ? this.getByUserAndBranch(user.userId, effectiveBranch).pipe(
+            map((data) => this.flatten(data.permissions)),
+            catchError(() => of(null)),
+          )
+        : this.getCurrentUser(user.userId).pipe(
+            map((data) => {
+              const branch =
+                data.branches?.find((b) => b.isDefault) ?? data.branches?.[0] ?? null;
+              return this.flatten(branch?.permissions ?? null);
+            }),
+            catchError(() => of(null)),
+          );
 
-    return this.getCurrentUser(user.userId).pipe(
-      tap((data) => {
-        const branch = data.branches?.find((b) => b.isDefault) ?? data.branches?.[0] ?? null;
-        this.ingestPermissions(this.flatten(branch?.permissions ?? null));
-      }),
+    return forkJoin({ catalog: catalog$, userPerms: userPerms$ }).pipe(
+      tap(({ userPerms }) => this.ingestPermissions(userPerms)),
       map(() => undefined),
-      catchError(() => {
-        this.ingestPermissions(null);
-        return of(undefined);
+    );
+  }
+
+  private getPermissionCatalog(): Observable<ReadonlySet<string>> {
+    return this.http.get<ApiResponse<Permission[]>>(buildApiUrl('/api/Permissions')).pipe(
+      map((response) => unwrapApiResponse(response)),
+      map((list) => {
+        const keys = new Set<string>();
+        for (const item of list ?? []) {
+          const key = item.permissionKey?.trim();
+          if (key) {
+            keys.add(key);
+            keys.add(key.toLowerCase());
+          }
+        }
+        return keys;
       }),
     );
   }
