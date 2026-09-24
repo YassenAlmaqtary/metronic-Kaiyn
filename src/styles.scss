@@ -297,8 +297,37 @@ html:not(.dark) .kt-select:focus {
 html:not(.dark) .kt-btn-light,
 html:not(.dark) .kt-btn-outline {
 	background: #ffffff !important;
-	border-color: #e2e8f0 !important;
+	border-color: #cbd5e1 !important;
+	color: #1e3a5f !important;
 	border-radius: 0.8rem;
+	box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+}
+
+html:not(.dark) .kt-btn-outline:hover {
+	border-color: #0061ff !important;
+	color: #0061ff !important;
+	background: #f0f6ff !important;
+}
+
+/* Login / primary must never blend into light canvas */
+html:not(.dark) .kt-btn-primary {
+	background-image: linear-gradient(135deg, #5b9bff 0%, #0061ff 48%, #0047d6 100%) !important;
+	color: #ffffff !important;
+	border-color: transparent !important;
+}
+
+.auth-sign-out-btn {
+	background-image: linear-gradient(135deg, #5b9bff 0%, #0061ff 48%, #0047d6 100%) !important;
+	color: #ffffff !important;
+	border: none !important;
+	font-weight: 700;
+	min-height: 2.5rem;
+	box-shadow: 0 10px 22px -12px rgba(0, 97, 255, 0.7);
+}
+
+.auth-sign-out-btn:hover {
+	background-image: linear-gradient(135deg, #6aa4ff 0%, #0052e6 50%, #003fbf 100%) !important;
+	color: #ffffff !important;
 }
 
 /* ===== حقول ليل ===== */

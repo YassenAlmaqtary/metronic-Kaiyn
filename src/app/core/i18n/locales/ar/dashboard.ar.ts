@@ -19,6 +19,7 @@ export const dashboardAr = {
   'dashboard.viewDetails': 'عرض التفاصيل',
   'dashboard.quick.go': 'تنفيذ',
   'dashboard.fiscalYear': 'السنة المالية',
+  'dashboard.companyName': 'شركة كيان التجارية',
 
   'dashboard.kpi.salesTotal': 'إجمالي المبيعات',
   'dashboard.kpi.salesGrowth': 'نمو المبيعات',

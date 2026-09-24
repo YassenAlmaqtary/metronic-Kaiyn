@@ -8,6 +8,27 @@
 	filter: none;
 }
 
+/* Visible against light header canvas (not white-on-white) */
+:host .sidebar-toggle-btn,
+:host #sidebar_toggle .sidebar-toggle-btn {
+	background: linear-gradient(145deg, #5b9bff 0%, #0061ff 55%, #0047d6 100%) !important;
+	border: 2px solid #ffffff !important;
+	color: #ffffff !important;
+	box-shadow:
+		0 8px 18px -8px rgba(0, 97, 255, 0.75),
+		0 0 0 1px rgba(0, 70, 180, 0.25);
+}
+
+:host .sidebar-toggle-btn i,
+:host #sidebar_toggle .sidebar-toggle-btn i {
+	color: #ffffff !important;
+}
+
+:host .sidebar-toggle-btn:hover {
+	background: linear-gradient(145deg, #6aa4ff 0%, #0052e6 55%, #003fbf 100%) !important;
+	box-shadow: 0 12px 22px -8px rgba(0, 97, 255, 0.85);
+}
+
 :host .kt-menu-link:hover .kt-menu-title,
 :host .kt-menu-link:hover .kt-menu-icon,
 :host .kt-menu-item.active > .kt-menu-link .kt-menu-title,

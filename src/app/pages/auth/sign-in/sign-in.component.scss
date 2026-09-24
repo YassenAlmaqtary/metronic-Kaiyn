@@ -19,3 +19,20 @@ html.dark .page-bg,
 		radial-gradient(ellipse 60% 45% at 0% 100%, rgba(14, 165, 233, 0.12), transparent 50%),
 		linear-gradient(165deg, #060d18 0%, #0a1528 45%, #0b1a30 100%);
 }
+
+.auth-sign-in-btn {
+	background-image: linear-gradient(135deg, #5b9bff 0%, #0061ff 48%, #0047d6 100%) !important;
+	color: #ffffff !important;
+	border: none !important;
+	min-height: 2.85rem;
+	font-weight: 700;
+	box-shadow: 0 12px 28px -12px rgba(0, 97, 255, 0.7);
+}
+
+.auth-sign-in-btn:hover:not(:disabled) {
+	background-image: linear-gradient(135deg, #6aa4ff 0%, #0052e6 50%, #003fbf 100%) !important;
+}
+
+.auth-sign-in-btn:disabled {
+	opacity: 0.7;
+}

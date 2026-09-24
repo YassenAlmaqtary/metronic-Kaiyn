@@ -55,47 +55,56 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   private metronicInit = inject(MetronicInitService);
   private destroyRef = inject(DestroyRef);
 
-  readonly userName = this.auth.userName;
-  readonly today = new Date();
+	readonly userName = this.auth.userName;
+	readonly today = new Date();
+	readonly now = signal(new Date());
 
-  loading = signal(true);
-  errorMessage = signal('');
-  overview = signal<DashboardOverview | null>(null);
-  branches = signal<Branch[]>([]);
-  selectedBranchId = signal<number | null>(this.resolveInitialBranch());
+	loading = signal(true);
+	errorMessage = signal('');
+	overview = signal<DashboardOverview | null>(null);
+	branches = signal<Branch[]>([]);
+	selectedBranchId = signal<number | null>(this.resolveInitialBranch());
 
-  private charts = new Map<string, ApexChartInstance>();
-  private viewReady = false;
+	private charts = new Map<string, ApexChartInstance>();
+	private viewReady = false;
+	private clockTimer: ReturnType<typeof setInterval> | null = null;
 
-  constructor() {
-    effect(() => {
-      this.language.locale();
-      const data = this.overview();
-      if (!this.viewReady || !data) {
-        return;
-      }
-      setTimeout(() => this.renderAllCharts(data), 0);
-    });
-  }
+	constructor() {
+		effect(() => {
+			this.language.locale();
+			const data = this.overview();
+			if (!this.viewReady || !data) {
+				return;
+			}
+			setTimeout(() => this.renderAllCharts(data), 0);
+		});
+	}
 
-  ngOnInit(): void {
-    this.branchesService
-      .getAll()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (items) => {
-          const active = items.filter((b) => b.isActive !== false);
-          const allowedIds = new Set(
-            (this.auth.user()?.branches ?? []).map((b) => b.branchId).filter(Boolean),
-          );
-          this.branches.set(
-            allowedIds.size ? active.filter((b) => allowedIds.has(b.branchId)) : active,
-          );
-        },
-        error: () => this.branches.set([]),
-      });
-    this.load();
-  }
+	ngOnInit(): void {
+		this.clockTimer = setInterval(() => this.now.set(new Date()), 30_000);
+		this.destroyRef.onDestroy(() => {
+			if (this.clockTimer) {
+				clearInterval(this.clockTimer);
+				this.clockTimer = null;
+			}
+		});
+		this.branchesService
+			.getAll()
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe({
+				next: (items) => {
+					const active = items.filter((b) => b.isActive !== false);
+					const allowedIds = new Set(
+						(this.auth.user()?.branches ?? []).map((b) => b.branchId).filter(Boolean),
+					);
+					this.branches.set(
+						allowedIds.size ? active.filter((b) => allowedIds.has(b.branchId)) : active,
+					);
+				},
+				error: () => this.branches.set([]),
+			});
+		this.load();
+	}
 
   ngAfterViewInit(): void {
     this.viewReady = true;
@@ -109,21 +118,34 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.clockTimer) {
+      clearInterval(this.clockTimer);
+      this.clockTimer = null;
+    }
     this.destroyCharts();
   }
 
-  greetingKey(): TranslationKey {
-    const hour = new Date().getHours();
-    if (hour < 12) {
-      return 'dashboard.greeting.morning';
-    }
-    if (hour < 17) {
-      return 'dashboard.greeting.afternoon';
-    }
-    return 'dashboard.greeting.evening';
-  }
+	greetingKey(): TranslationKey {
+		const hour = new Date().getHours();
+		if (hour < 12) {
+			return 'dashboard.greeting.morning';
+		}
+		if (hour < 17) {
+			return 'dashboard.greeting.afternoon';
+		}
+		return 'dashboard.greeting.evening';
+	}
 
-  onBranchChange(value: string | number | null): void {
+	selectedBranchLabel(): string {
+		const id = this.selectedBranchId();
+		if (id == null) {
+			return this.language.translate('dashboard.allBranches');
+		}
+		const match = this.branches().find((b) => b.branchId === id);
+		return match?.branchName?.trim() || this.language.translate('dashboard.branch');
+	}
+
+	onBranchChange(value: string | number | null): void {
     const id = value === null || value === '' || value === 'null' ? null : Number(value);
     this.selectedBranchId.set(Number.isFinite(id as number) ? (id as number) : null);
     this.persistBranch(this.selectedBranchId());

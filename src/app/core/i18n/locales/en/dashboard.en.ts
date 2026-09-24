@@ -19,6 +19,7 @@ export const dashboardEn = {
   'dashboard.viewDetails': 'View details',
   'dashboard.quick.go': 'Go',
   'dashboard.fiscalYear': 'Fiscal year',
+  'dashboard.companyName': 'Kayian Trading Co.',
 
   'dashboard.kpi.salesTotal': 'Total sales',
   'dashboard.kpi.salesGrowth': 'sales growth',
