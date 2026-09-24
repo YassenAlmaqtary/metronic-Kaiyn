@@ -15,6 +15,10 @@ export const dashboardAr = {
   'dashboard.allBranches': 'كل الفروع',
   'dashboard.exportCsv': 'تصدير CSV',
   'dashboard.staleBanner': 'مستندات معلّقة منذ 3 أيام أو أكثر — يُفضّل مراجعتها',
+  'dashboard.decisionCenter': 'مركز القرارات',
+  'dashboard.viewDetails': 'عرض التفاصيل',
+  'dashboard.quick.go': 'تنفيذ',
+  'dashboard.fiscalYear': 'السنة المالية',
 
   'dashboard.kpi.salesTotal': 'إجمالي المبيعات',
   'dashboard.kpi.salesGrowth': 'نمو المبيعات',

@@ -15,6 +15,10 @@ export const dashboardEn = {
   'dashboard.allBranches': 'All branches',
   'dashboard.exportCsv': 'Export CSV',
   'dashboard.staleBanner': 'Documents pending for 3+ days — please review them',
+  'dashboard.decisionCenter': 'Decision center',
+  'dashboard.viewDetails': 'View details',
+  'dashboard.quick.go': 'Go',
+  'dashboard.fiscalYear': 'Fiscal year',
 
   'dashboard.kpi.salesTotal': 'Total sales',
   'dashboard.kpi.salesGrowth': 'sales growth',
