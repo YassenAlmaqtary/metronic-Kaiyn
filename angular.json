@@ -33,10 +33,11 @@
             ],
             "styles": [
               "src/tailwind.css",
-              "src/styles.scss",
               "public/assets/vendors/apexcharts/apexcharts.css",
               "public/assets/vendors/keenicons/styles.bundle.css",
-              "public/assets/css/styles.css"
+              "public/assets/css/styles.css",
+              "src/kayian-theme.css",
+              "src/styles.scss"
             ],
             "scripts": [
               "public/assets/js/core.bundle.js",

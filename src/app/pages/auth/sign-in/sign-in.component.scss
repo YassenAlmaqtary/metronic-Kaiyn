@@ -5,10 +5,17 @@
 }
 
 .page-bg {
-	background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+	background:
+		radial-gradient(ellipse 70% 45% at 95% -5%, rgba(0, 97, 255, 0.14), transparent 55%),
+		radial-gradient(ellipse 55% 40% at 5% 100%, rgba(99, 102, 241, 0.08), transparent 50%),
+		linear-gradient(165deg, #eaf0fb 0%, #f4f7fe 40%, #eef3fb 100%);
 }
 
 :host-context(.dark) .page-bg,
+html.dark .page-bg,
 .dark .page-bg {
-	background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+	background:
+		radial-gradient(ellipse 75% 50% at 100% 0%, rgba(37, 99, 235, 0.28), transparent 55%),
+		radial-gradient(ellipse 60% 45% at 0% 100%, rgba(14, 165, 233, 0.12), transparent 50%),
+		linear-gradient(165deg, #060d18 0%, #0a1528 45%, #0b1a30 100%);
 }

@@ -1,5 +1,16 @@
 @use "./tailwind";
 
+/*
+  Soft UI — نهار فاتح + ليل كحلي جذاب
+*/
+
+:root {
+	--background: #eaf1fb;
+	--color-background: #eaf1fb;
+	--primary: #0061ff;
+	--color-primary: #0061ff;
+}
+
 html[lang="ar"] body {
 	font-family: "Cairo", "Inter", sans-serif;
 }
@@ -8,11 +19,424 @@ html[lang="en"] body {
 	font-family: "Inter", sans-serif;
 }
 
+/* ===== نهار: Body ملوّن ناعم ===== */
+html:not(.dark),
+html:not(.dark) body,
+html:not(.dark) body[app-root],
+html:not(.dark) body.kayian-canvas,
+html:not(.dark) body.bg-background {
+	background-color: #eaf1fb !important;
+	background-image:
+		radial-gradient(ellipse 70% 45% at 95% -5%, rgba(0, 97, 255, 0.14), transparent 55%),
+		radial-gradient(ellipse 55% 40% at 5% 100%, rgba(56, 189, 248, 0.1), transparent 50%),
+		linear-gradient(165deg, #e4eefb 0%, #eef4fc 45%, #eaf6f3 100%) !important;
+	background-attachment: fixed !important;
+	background-repeat: no-repeat !important;
+	min-height: 100%;
+	color: #0f172a;
+}
+
+/* ===== ليل: Body ليلي فاخر ===== */
+html.dark,
+html.dark body,
+html.dark body[app-root],
+html.dark body.kayian-canvas,
+html.dark body.bg-background {
+	background-color: #070f1c !important;
+	background-image:
+		radial-gradient(ellipse 75% 50% at 100% 0%, rgba(37, 99, 235, 0.28), transparent 55%),
+		radial-gradient(ellipse 60% 45% at 0% 100%, rgba(14, 165, 233, 0.12), transparent 50%),
+		radial-gradient(ellipse 45% 35% at 50% 40%, rgba(30, 58, 110, 0.35), transparent 60%),
+		linear-gradient(165deg, #060d18 0%, #0a1528 45%, #0b1a30 100%) !important;
+	background-attachment: fixed !important;
+	background-repeat: no-repeat !important;
+	min-height: 100%;
+	color: #e8eef8;
+}
+
+.kt-wrapper,
+#content,
+main#content,
+.flex.grow,
+.dash-page {
+	background-color: transparent !important;
+	background-image: none !important;
+}
+
+/* ===== Header ===== */
+/* ===== Header بنفس روح الثيم (ليس أبيض صريح) ===== */
+html:not(.dark) .kt-header,
+html:not(.dark) .kt-header.bg-background {
+	background:
+		linear-gradient(
+			90deg,
+			rgba(219, 234, 254, 0.92),
+			rgba(236, 253, 245, 0.88),
+			rgba(224, 242, 254, 0.92)
+		) !important;
+	backdrop-filter: blur(14px) saturate(1.15);
+	border-bottom: 1px solid rgba(147, 197, 253, 0.35) !important;
+	box-shadow: 0 10px 28px -20px rgba(30, 80, 140, 0.35);
+}
+
+html:not(.dark) .kt-header .kt-menu-title,
+html:not(.dark) .kt-header a {
+	color: #1e3a5f;
+}
+
+html:not(.dark) .kt-header .kt-btn-ghost i,
+html:not(.dark) .kt-header .text-muted-foreground {
+	color: #475569;
+}
+
+html.dark .kt-header,
+html.dark .kt-header.bg-background {
+	background: linear-gradient(180deg, rgba(17, 28, 51, 0.94), rgba(12, 22, 40, 0.9)) !important;
+	backdrop-filter: blur(18px) saturate(1.2);
+	border-bottom: 1px solid rgba(59, 130, 246, 0.18) !important;
+	box-shadow: 0 12px 32px -18px rgba(0, 0, 0, 0.55);
+	color: #e8eef8;
+}
+
+html.dark .kt-header .kt-menu-title,
+html.dark .kt-header a,
+html.dark .kt-header .text-secondary-foreground {
+	color: #cbd5e1;
+}
+
+/* ===== Sidebar كحلي (مشترك مع لمسة ليلية أقوى) ===== */
+.kt-sidebar,
+.kt-sidebar.bg-background,
+.kt-sidebar.dark,
+.kt-sidebar:not(.dark) {
+	background:
+		radial-gradient(ellipse 120% 40% at 50% -10%, rgba(0, 97, 255, 0.28), transparent 55%),
+		linear-gradient(180deg, #0a1730 0%, #111c44 42%, #0b1b33 100%) !important;
+	border-inline-end: 1px solid rgba(255, 255, 255, 0.07) !important;
+	box-shadow: -16px 0 40px -18px rgba(5, 15, 40, 0.65);
+	color: #e2e8f0;
+}
+
+html.dark .kt-sidebar {
+	background:
+		radial-gradient(ellipse 120% 45% at 50% -8%, rgba(59, 130, 246, 0.35), transparent 55%),
+		linear-gradient(180deg, #07101f 0%, #0d1a36 45%, #091427 100%) !important;
+	border-inline-end: 1px solid rgba(59, 130, 246, 0.15) !important;
+}
+
+.kt-sidebar .kt-menu-title,
+.kt-sidebar .kt-menu-icon,
+.kt-sidebar .sidebar-brand-name {
+	color: #dbe4f0 !important;
+	transition: color 0.2s ease;
+}
+
+.kt-sidebar .kt-menu-heading,
+.kt-sidebar .text-secondary-foreground {
+	color: #8ba0b8 !important;
+	letter-spacing: 0.02em;
+}
+
+.kt-sidebar .kt-menu-link {
+	transition:
+		background 0.2s ease,
+		transform 0.2s ease,
+		box-shadow 0.2s ease;
+	margin-inline: 0.15rem;
+}
+
+.kt-sidebar .kt-menu-link:hover {
+	background: rgba(255, 255, 255, 0.08) !important;
+	border-radius: 0.85rem;
+}
+
+.kt-sidebar .kt-menu-link:hover .kt-menu-title,
+.kt-sidebar .kt-menu-link:hover .kt-menu-icon {
+	color: #ffffff !important;
+}
+
+.kt-sidebar .kt-menu-item.active > .kt-menu-link,
+.kt-sidebar .kt-menu-link.router-link-active,
+.kt-sidebar .kt-menu-item.active > .kt-menu-accordion .kt-menu-link.router-link-active {
+	background: linear-gradient(135deg, #3b82f6 0%, #0061ff 55%, #0047d6 100%) !important;
+	border-radius: 0.85rem !important;
+	box-shadow:
+		0 10px 24px -8px rgba(0, 97, 255, 0.75),
+		0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+}
+
+.kt-sidebar .kt-menu-item.active > .kt-menu-link .kt-menu-title,
+.kt-sidebar .kt-menu-item.active > .kt-menu-link .kt-menu-icon,
+.kt-sidebar .kt-menu-link.router-link-active .kt-menu-title,
+.kt-sidebar .kt-menu-link.router-link-active .kt-menu-icon {
+	color: #ffffff !important;
+	font-weight: 600;
+}
+
+.kt-sidebar img {
+	filter: brightness(1.08) drop-shadow(0 4px 10px rgba(0, 97, 255, 0.25));
+}
+
+/* ===== بطاقات نهار ===== */
+html:not(.dark) .kt-card {
+	background:
+		linear-gradient(165deg, rgba(255, 255, 255, 0.82), rgba(236, 246, 255, 0.9)) !important;
+	border: 1px solid rgba(147, 197, 253, 0.28) !important;
+	border-radius: 1.1rem !important;
+	box-shadow: 0 12px 32px -18px rgba(30, 90, 150, 0.28) !important;
+	backdrop-filter: blur(8px);
+}
+
+html:not(.dark) .kt-card:hover {
+	border-color: rgba(0, 97, 255, 0.28) !important;
+	box-shadow: 0 18px 40px -18px rgba(0, 97, 255, 0.28) !important;
+}
+
+html:not(.dark) .kt-card-header {
+	background: linear-gradient(180deg, rgba(191, 219, 254, 0.22), transparent) !important;
+	border-bottom: 1px solid rgba(147, 197, 253, 0.22) !important;
+	border-radius: 1.1rem 1.1rem 0 0;
+}
+
+/* ===== بطاقات ليل ===== */
+html.dark .kt-card {
+	background: linear-gradient(165deg, #142038 0%, #111c33 55%, #0e1930 100%) !important;
+	border: 1px solid rgba(59, 130, 246, 0.16) !important;
+	border-radius: 1.1rem !important;
+	box-shadow:
+		0 1px 0 rgba(255, 255, 255, 0.04) inset,
+		0 16px 40px -18px rgba(0, 0, 0, 0.55) !important;
+	color: #e8eef8;
+	transition:
+		transform 0.22s ease,
+		box-shadow 0.22s ease,
+		border-color 0.22s ease;
+}
+
+html.dark .kt-card:hover {
+	transform: translateY(-2px);
+	border-color: rgba(96, 165, 250, 0.35) !important;
+	box-shadow:
+		0 1px 0 rgba(147, 197, 253, 0.08) inset,
+		0 20px 44px -16px rgba(37, 99, 235, 0.35) !important;
+}
+
+html.dark .kt-card-header {
+	background: linear-gradient(180deg, rgba(59, 130, 246, 0.12), transparent) !important;
+	border-bottom: 1px solid rgba(59, 130, 246, 0.14) !important;
+	border-radius: 1.1rem 1.1rem 0 0;
+	color: #e8eef8;
+}
+
+.kt-card-content {
+	background: transparent !important;
+}
+
+/* ===== جداول نهار ===== */
+html:not(.dark) .kt-table thead th,
+html:not(.dark) .kt-table > thead > tr > th {
+	background: linear-gradient(180deg, #eef3ff, #f4f7fe) !important;
+	color: #1e3a5f !important;
+	border-color: #e8eef8 !important;
+	font-weight: 650;
+}
+
+html:not(.dark) .kt-table tbody tr > td {
+	background: #ffffff !important;
+	border-color: #eef2f8 !important;
+}
+
+html:not(.dark) .kt-table tbody tr:nth-child(even) > td {
+	background: #f8faff !important;
+}
+
+html:not(.dark) .kt-table tbody tr:hover > td {
+	background: #eaf1ff !important;
+}
+
+/* ===== جداول ليل ===== */
+html.dark .kt-table thead th,
+html.dark .kt-table > thead > tr > th {
+	background: linear-gradient(180deg, #1a2d4d, #15243f) !important;
+	color: #bfdbfe !important;
+	border-color: rgba(59, 130, 246, 0.18) !important;
+	font-weight: 650;
+}
+
+html.dark .kt-table tbody tr > td {
+	background: rgba(17, 28, 51, 0.85) !important;
+	border-color: rgba(59, 130, 246, 0.1) !important;
+	color: #e2e8f0;
+}
+
+html.dark .kt-table tbody tr:nth-child(even) > td {
+	background: rgba(20, 34, 58, 0.95) !important;
+}
+
+html.dark .kt-table tbody tr:hover > td {
+	background: rgba(37, 99, 235, 0.18) !important;
+}
+
+/* ===== حقول نهار ===== */
+html:not(.dark) .kt-input,
+html:not(.dark) .kt-select,
+html:not(.dark) input.kt-input,
+html:not(.dark) select.kt-input {
+	background: #ffffff !important;
+	border-color: #e2e8f0 !important;
+	border-radius: 0.8rem;
+	color: #0f172a;
+}
+
+html:not(.dark) .kt-input:focus,
+html:not(.dark) .kt-select:focus {
+	border-color: #0061ff !important;
+	box-shadow: 0 0 0 4px rgba(0, 97, 255, 0.14);
+}
+
+html:not(.dark) .kt-btn-light,
+html:not(.dark) .kt-btn-outline {
+	background: #ffffff !important;
+	border-color: #e2e8f0 !important;
+	border-radius: 0.8rem;
+}
+
+/* ===== حقول ليل ===== */
+html.dark .kt-input,
+html.dark .kt-select,
+html.dark input.kt-input,
+html.dark select.kt-input,
+html.dark textarea.kt-input {
+	background: #0e1930 !important;
+	border-color: rgba(59, 130, 246, 0.22) !important;
+	border-radius: 0.8rem;
+	color: #e8eef8 !important;
+}
+
+html.dark .kt-input::placeholder {
+	color: #64748b;
+}
+
+html.dark .kt-input:focus,
+html.dark .kt-select:focus {
+	border-color: #3b82f6 !important;
+	box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.22);
+	background: #122240 !important;
+}
+
+html.dark .kt-btn-light,
+html.dark .kt-btn-outline,
+html.dark .kt-btn-ghost {
+	background: rgba(30, 47, 74, 0.75) !important;
+	border-color: rgba(59, 130, 246, 0.22) !important;
+	color: #e2e8f0 !important;
+	border-radius: 0.8rem;
+}
+
+html.dark .kt-btn-light:hover,
+html.dark .kt-btn-outline:hover {
+	border-color: rgba(96, 165, 250, 0.45) !important;
+	background: rgba(37, 99, 235, 0.2) !important;
+}
+
+.kt-btn-light:hover,
+.kt-btn-outline:hover,
+.kt-btn-primary:hover {
+	transform: translateY(-1px);
+}
+
+.kt-btn-primary {
+	transition:
+		transform 0.15s ease,
+		box-shadow 0.15s ease,
+		filter 0.15s ease;
+}
+
+/* Badges */
+.kt-badge-success {
+	background: #dcfce7 !important;
+	color: #166534 !important;
+	border-radius: 999px;
+}
+
+.kt-badge-warning {
+	background: #fef3c7 !important;
+	color: #92400e !important;
+	border-radius: 999px;
+}
+
+.kt-badge-primary,
+.kt-badge-info {
+	background: #e8f0ff !important;
+	color: #0061ff !important;
+	border-radius: 999px;
+}
+
+html.dark .kt-badge-success {
+	background: rgba(34, 197, 94, 0.18) !important;
+	color: #86efac !important;
+}
+
+html.dark .kt-badge-warning {
+	background: rgba(245, 158, 11, 0.18) !important;
+	color: #fcd34d !important;
+}
+
+html.dark .kt-badge-primary,
+html.dark .kt-badge-info {
+	background: rgba(59, 130, 246, 0.2) !important;
+	color: #93c5fd !important;
+}
+
+html:not(.dark) .kt-container-fixed > div > h1,
+html:not(.dark) .kt-container-fixed h1.text-mono {
+	color: #0f2744;
+	letter-spacing: -0.02em;
+}
+
+html.dark .kt-container-fixed > div > h1,
+html.dark .kt-container-fixed h1.text-mono,
+html.dark .text-mono {
+	color: #e8eef8 !important;
+}
+
+html.dark .text-secondary-foreground,
+html.dark .kt-container-fixed .text-secondary-foreground {
+	color: #94a3b8 !important;
+}
+
+html.dark .text-foreground {
+	color: #e8eef8 !important;
+}
+
+html.dark a.text-primary,
+html.dark .text-primary {
+	color: #60a5fa !important;
+}
+
+/* Dashboard dark polish */
+html.dark .dash-kpi-card,
+html.dark .dash-panel,
+html.dark .dash-mini-kpi {
+	background: linear-gradient(165deg, #142038, #111c33) !important;
+	border-color: rgba(59, 130, 246, 0.16) !important;
+	color: #e8eef8;
+}
+
+html.dark .dash-panel-head {
+	background: linear-gradient(180deg, rgba(59, 130, 246, 0.1), transparent) !important;
+	border-bottom-color: rgba(59, 130, 246, 0.14) !important;
+}
+
 /* Polished form controls across ERP pages */
 .kt-container-fixed .kt-form-label {
 	font-size: 0.8125rem;
 	font-weight: 500;
 	color: var(--tw-secondary-foreground, var(--color-secondary-foreground, #78829d));
+}
+
+html.dark .kt-container-fixed .kt-form-label {
+	color: #94a3b8;
 }
 
 .kt-container-fixed .kt-form-label.required::after {
@@ -26,16 +450,19 @@ html[lang="en"] body {
 }
 
 .kt-container-fixed .kt-card.shadow-sm {
-	box-shadow:
-		0 1px 2px rgb(0 0 0 / 0.04),
-		0 1px 3px rgb(0 0 0 / 0.06);
+	box-shadow: 0 12px 32px -18px rgba(15, 50, 120, 0.28);
+}
+
+html.dark .kt-container-fixed .kt-card.shadow-sm {
+	box-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.55);
 }
 
 .channel-stats-bg {
 	background-image: url('/assets/media/images/2600x1600/bg-3.png');
 }
 
-.dark .channel-stats-bg {
+.dark .channel-stats-bg,
+html.dark .channel-stats-bg {
 	background-image: url('/assets/media/images/2600x1600/bg-3-dark.png');
 }
 
@@ -43,6 +470,7 @@ html[lang="en"] body {
 	background-image: url('/assets/media/images/2600x1600/2.png');
 }
 
-.dark .entry-callout-bg {
+.dark .entry-callout-bg,
+html.dark .entry-callout-bg {
 	background-image: url('/assets/media/images/2600x1600/2-dark.png');
 }

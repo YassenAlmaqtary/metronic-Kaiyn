@@ -3,8 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <script>
-    document.documentElement.classList.add('light');
-    document.documentElement.setAttribute('data-kt-theme-mode', 'light');
+    (function () {
+      var theme = localStorage.getItem('kayian-sidebar-theme');
+      var isDark = theme !== 'light';
+      var html = document.documentElement;
+      html.classList.toggle('dark', isDark);
+      html.classList.toggle('light', !isDark);
+      html.setAttribute('data-kt-theme-mode', isDark ? 'dark' : 'light');
+      html.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    })();
   </script>
   <title>KayianERP</title>
   <base href="/" />
@@ -31,6 +38,6 @@
   <link href="assets/media/app/favicon.ico" rel="shortcut icon" />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
-<body app-root class="antialiased flex h-full text-base text-foreground bg-background">
+<body app-root class="antialiased flex h-full text-base text-foreground kayian-canvas">
 </body>
 </html>

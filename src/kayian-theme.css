@@ -1,0 +1,69 @@
+/**
+ * Kayian Soft UI — light + night tokens
+ */
+:root {
+	--kayian-navy: #0a1730;
+	--kayian-navy-mid: #111c44;
+	--kayian-blue: #0061ff;
+	--kayian-blue-soft: #e8f0ff;
+	--kayian-canvas: #eaf1fb;
+
+	--primary: #0061ff;
+	--primary-foreground: #ffffff;
+	--ring: #3b82f6;
+	--background: #eaf1fb;
+	--color-background: #eaf1fb;
+	--foreground: #0f172a;
+	--card: #ffffff;
+	--card-foreground: #0f172a;
+	--muted: #eef2f8;
+	--muted-foreground: #64748b;
+	--accent: #e8f0ff;
+	--accent-foreground: #0061ff;
+	--border: #e2e8f0;
+	--input: #e2e8f0;
+	--radius: 0.9rem;
+}
+
+html.dark {
+	--primary: #3b82f6;
+	--primary-foreground: #ffffff;
+	--ring: #60a5fa;
+	--background: #070f1c;
+	--color-background: #070f1c;
+	--foreground: #e8eef8;
+	--card: #111c33;
+	--card-foreground: #e8eef8;
+	--muted: #152238;
+	--muted-foreground: #94a3b8;
+	--accent: #1a2f55;
+	--accent-foreground: #93c5fd;
+	--border: #1e2f4a;
+	--input: #1e2f4a;
+	--mono: #e8eef8;
+	--mono-foreground: #0b1220;
+	--secondary: #152238;
+	--secondary-foreground: #e2e8f0;
+}
+
+.kt-btn-primary {
+	background-image: linear-gradient(135deg, #5b9bff 0%, #0061ff 48%, #0047d6 100%) !important;
+	border-color: transparent !important;
+	box-shadow:
+		0 10px 24px -10px rgba(0, 97, 255, 0.65),
+		0 1px 0 rgba(255, 255, 255, 0.25) inset;
+	border-radius: 0.85rem;
+	font-weight: 600;
+}
+
+.kt-btn-primary:hover {
+	background-image: linear-gradient(135deg, #6aa4ff 0%, #0052e6 50%, #003fbf 100%) !important;
+	box-shadow: 0 14px 28px -10px rgba(0, 97, 255, 0.75);
+}
+
+html.dark .kt-btn-primary {
+	background-image: linear-gradient(135deg, #60a5fa 0%, #2563eb 45%, #1d4ed8 100%) !important;
+	box-shadow:
+		0 12px 28px -10px rgba(37, 99, 235, 0.55),
+		0 0 0 1px rgba(147, 197, 253, 0.15) inset;
+}

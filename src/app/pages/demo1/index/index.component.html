@@ -1,28 +1,68 @@
 <div class="kt-container-fixed flex flex-col gap-6 pb-24 dash-page">
-	<div class="flex flex-wrap items-start justify-between gap-4">
-		<div>
-			<h1 class="text-2xl font-semibold text-foreground tracking-tight">
+	<div class="dash-hero">
+		<div class="dash-hero-copy">
+			<p class="dash-hero-kicker">Kayian ERP</p>
+			<h1 class="dash-hero-title">
 				{{ greetingKey() | translate }}@if (userName()) {، {{ userName() }}}
 			</h1>
-			<p class="text-sm text-secondary-foreground mt-1">
+			<p class="dash-hero-sub">
 				{{ 'dashboard.summaryFor' | translate }}
 				{{ today | date: 'd MMMM y' }}
 			</p>
+			<div class="dash-hero-actions">
+				<label class="dash-hero-branch">
+					<span>{{ 'dashboard.branch' | translate }}</span>
+					<select
+						class="kt-select h-10 min-w-44"
+						[ngModel]="selectedBranchId()"
+						(ngModelChange)="onBranchChange($event)"
+					>
+						<option [ngValue]="null">{{ 'dashboard.allBranches' | translate }}</option>
+						@for (branch of branches(); track branch.branchId) {
+							<option [ngValue]="branch.branchId">{{ branch.branchName }}</option>
+						}
+					</select>
+				</label>
+			</div>
 		</div>
-		<div class="flex flex-wrap items-center gap-2">
-			<label class="flex items-center gap-2">
-				<span class="text-xs text-secondary-foreground whitespace-nowrap">{{ 'dashboard.branch' | translate }}</span>
-				<select
-					class="kt-select h-10 min-w-44"
-					[ngModel]="selectedBranchId()"
-					(ngModelChange)="onBranchChange($event)"
-				>
-					<option [ngValue]="null">{{ 'dashboard.allBranches' | translate }}</option>
-					@for (branch of branches(); track branch.branchId) {
-						<option [ngValue]="branch.branchId">{{ branch.branchName }}</option>
-					}
-				</select>
-			</label>
+		<div class="dash-hero-visual" aria-hidden="true">
+			<svg class="dash-hero-skyline" viewBox="0 0 420 220" preserveAspectRatio="xMidYMax meet">
+				<defs>
+					<linearGradient id="dashHeroSky" x1="0" y1="0" x2="0" y2="1">
+						<stop offset="0%" stop-color="#7dd3fc" stop-opacity="0.55" />
+						<stop offset="55%" stop-color="#dbeafe" stop-opacity="0.25" />
+						<stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+					</linearGradient>
+					<linearGradient id="dashHeroBuilding" x1="0" y1="0" x2="0" y2="1">
+						<stop offset="0%" stop-color="#93c5fd" />
+						<stop offset="100%" stop-color="#1d4ed8" />
+					</linearGradient>
+				</defs>
+				<rect width="420" height="220" fill="url(#dashHeroSky)" />
+				<circle cx="340" cy="48" r="28" fill="#fde68a" opacity="0.9" />
+				<circle cx="340" cy="48" r="40" fill="#fef3c7" opacity="0.35" />
+				<g fill="url(#dashHeroBuilding)" opacity="0.92">
+					<rect x="40" y="110" width="36" height="110" rx="4" />
+					<rect x="88" y="70" width="44" height="150" rx="4" />
+					<rect x="144" y="95" width="38" height="125" rx="4" />
+					<rect x="196" y="55" width="52" height="165" rx="5" />
+					<rect x="260" y="88" width="42" height="132" rx="4" />
+					<rect x="314" y="120" width="34" height="100" rx="4" />
+					<rect x="358" y="78" width="40" height="142" rx="4" />
+				</g>
+				<g fill="#bfdbfe" opacity="0.55">
+					<rect x="98" y="88" width="8" height="8" rx="1" />
+					<rect x="112" y="88" width="8" height="8" rx="1" />
+					<rect x="98" y="104" width="8" height="8" rx="1" />
+					<rect x="112" y="104" width="8" height="8" rx="1" />
+					<rect x="210" y="72" width="8" height="8" rx="1" />
+					<rect x="224" y="72" width="8" height="8" rx="1" />
+					<rect x="210" y="88" width="8" height="8" rx="1" />
+					<rect x="224" y="88" width="8" height="8" rx="1" />
+					<rect x="370" y="96" width="8" height="8" rx="1" />
+					<rect x="384" y="96" width="8" height="8" rx="1" />
+				</g>
+			</svg>
 		</div>
 	</div>
 
@@ -46,21 +86,22 @@
 		</div>
 	} @else if (overview(); as data) {
 		@if (data.kpis.stalePendingCount > 0) {
-			<div class="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-foreground">
-				{{ 'dashboard.staleBanner' | translate }} ({{ data.kpis.stalePendingCount }})
+			<div class="dash-alert">
+				<span class="dash-alert-icon"><i class="ki-filled ki-information-2"></i></span>
+				<span class="dash-alert-text">
+					{{ 'dashboard.staleBanner' | translate }}
+					<strong>({{ data.kpis.stalePendingCount }})</strong>
+				</span>
 			</div>
 		}
 
 		<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-			<div class="dash-kpi-card dash-kpi-sales">
-				<div class="dash-kpi-top">
-					<div>
-						<div class="dash-kpi-label">{{ 'dashboard.kpi.salesTotal' | translate }}</div>
-						<div class="dash-kpi-value">{{ data.kpis.salesTotal | number: '1.2-2' }}</div>
-					</div>
+			<div class="dash-kpi-card tone-green">
+				<div class="dash-kpi-head">
+					<div class="dash-kpi-label">{{ 'dashboard.kpi.salesTotal' | translate }}</div>
 					<span class="dash-kpi-icon"><i class="ki-filled ki-chart-line-up"></i></span>
 				</div>
-				<div id="erp_spark_sales" class="dash-spark"></div>
+				<div class="dash-kpi-value">{{ data.kpis.salesTotal | number: '1.2-2' }}</div>
 				<div class="dash-kpi-foot">
 					@if (data.kpis.salesGrowthPct != null) {
 						<span class="dash-chip" [class.is-up]="data.kpis.salesGrowthPct >= 0" [class.is-down]="data.kpis.salesGrowthPct < 0">
@@ -69,40 +110,46 @@
 							{{ 'dashboard.kpi.salesGrowth' | translate }}
 						</span>
 					} @else {
-						<span class="text-xs text-secondary-foreground">{{ 'dashboard.kpi.salesGrowthEmpty' | translate }}</span>
+						<span class="dash-chip is-muted">{{ 'dashboard.kpi.salesGrowthEmpty' | translate }}</span>
 					}
 				</div>
+				<div id="erp_spark_sales" class="dash-spark"></div>
+				<div class="dash-kpi-orb" aria-hidden="true"></div>
 			</div>
 
-			<div class="dash-kpi-card dash-kpi-purchases">
-				<div class="dash-kpi-top">
-					<div>
-						<div class="dash-kpi-label">{{ 'dashboard.kpi.purchases' | translate }}</div>
-						<div class="dash-kpi-value">{{ data.kpis.purchasesTotal | number: '1.2-2' }}</div>
-					</div>
+			<div class="dash-kpi-card tone-red">
+				<div class="dash-kpi-head">
+					<div class="dash-kpi-label">{{ 'dashboard.kpi.purchases' | translate }}</div>
 					<span class="dash-kpi-icon"><i class="ki-filled ki-basket"></i></span>
 				</div>
-				<div class="dash-meter">
-					<span class="dash-meter-fill tone-red" [style.width.%]="kpiShare(data.kpis.purchasesTotal, data.kpis.salesTotal)"></span>
-				</div>
+				<div class="dash-kpi-value">{{ data.kpis.purchasesTotal | number: '1.2-2' }}</div>
 				<div class="dash-kpi-foot">
 					<span class="dash-chip is-down">
 						{{ data.kpis.purchasesCount }} {{ 'dashboard.kpi.purchasesHint' | translate }}
 					</span>
+					<span class="dash-kpi-share">{{ kpiShare(data.kpis.purchasesTotal, data.kpis.salesTotal) | number: '1.0-0' }}%</span>
 				</div>
+				<div class="dash-wave" aria-hidden="true">
+					<svg viewBox="0 0 160 48" preserveAspectRatio="none">
+						<defs>
+							<linearGradient id="waveFillRed" x1="0" y1="0" x2="0" y2="1">
+								<stop offset="0%" stop-color="currentColor" stop-opacity="0.35" />
+								<stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+							</linearGradient>
+						</defs>
+						<path d="M0 28 C28 12, 48 34, 78 20 S128 10, 160 24 L160 48 L0 48 Z" fill="url(#waveFillRed)" />
+						<path d="M0 28 C28 12, 48 34, 78 20 S128 10, 160 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+					</svg>
+				</div>
+				<div class="dash-kpi-orb" aria-hidden="true"></div>
 			</div>
 
-			<div class="dash-kpi-card dash-kpi-debts">
-				<div class="dash-kpi-top">
-					<div>
-						<div class="dash-kpi-label">{{ 'dashboard.kpi.customerDebts' | translate }}</div>
-						<div class="dash-kpi-value">{{ data.kpis.customerDebts | number: '1.2-2' }}</div>
-					</div>
+			<div class="dash-kpi-card tone-amber">
+				<div class="dash-kpi-head">
+					<div class="dash-kpi-label">{{ 'dashboard.kpi.customerDebts' | translate }}</div>
 					<span class="dash-kpi-icon"><i class="ki-filled ki-wallet"></i></span>
 				</div>
-				<div class="dash-meter">
-					<span class="dash-meter-fill tone-amber" [style.width.%]="kpiShare(data.kpis.customerDebts, data.kpis.salesTotal || data.kpis.customerDebts)"></span>
-				</div>
+				<div class="dash-kpi-value">{{ data.kpis.customerDebts | number: '1.2-2' }}</div>
 				<div class="dash-kpi-foot">
 					@if (data.kpis.customerDebts > 0) {
 						<span class="dash-chip is-warn">{{ 'dashboard.kpi.debtsUrgent' | translate }}</span>
@@ -110,35 +157,59 @@
 						<span class="dash-chip is-up">{{ 'dashboard.kpi.debtsClear' | translate }}</span>
 					}
 				</div>
+				<div class="dash-wave" aria-hidden="true">
+					<svg viewBox="0 0 160 48" preserveAspectRatio="none">
+						<defs>
+							<linearGradient id="waveFillAmber" x1="0" y1="0" x2="0" y2="1">
+								<stop offset="0%" stop-color="currentColor" stop-opacity="0.35" />
+								<stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+							</linearGradient>
+						</defs>
+						<path d="M0 26 C30 8, 55 32, 90 18 S130 12, 160 26 L160 48 L0 48 Z" fill="url(#waveFillAmber)" />
+						<path d="M0 26 C30 8, 55 32, 90 18 S130 12, 160 26" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+					</svg>
+				</div>
+				<div class="dash-kpi-orb" aria-hidden="true"></div>
 			</div>
 
-			<div class="dash-kpi-card dash-kpi-customers">
-				<div class="dash-kpi-top">
-					<div>
-						<div class="dash-kpi-label">{{ 'dashboard.kpi.customersTotal' | translate }}</div>
-						<div class="dash-kpi-value">
-							{{ data.kpis.customersCount }}
-							<span class="dash-kpi-unit">{{ 'dashboard.kpi.customersUnit' | translate }}</span>
-						</div>
-					</div>
+			<div class="dash-kpi-card tone-blue">
+				<div class="dash-kpi-head">
+					<div class="dash-kpi-label">{{ 'dashboard.kpi.customersTotal' | translate }}</div>
 					<span class="dash-kpi-icon"><i class="ki-filled ki-people"></i></span>
 				</div>
-				<div class="dash-meter">
-					<span class="dash-meter-fill tone-blue" [style.width.%]="customersMeter(data.kpis.customersCount)"></span>
+				<div class="dash-kpi-value">
+					{{ data.kpis.customersCount }}
+					<span class="dash-kpi-unit">{{ 'dashboard.kpi.customersUnit' | translate }}</span>
 				</div>
 				<div class="dash-kpi-foot">
 					<span class="dash-chip is-info">{{ 'dashboard.kpi.statsUpdated' | translate }}</span>
+					<span class="dash-kpi-share">{{ customersMeter(data.kpis.customersCount) | number: '1.0-0' }}%</span>
 				</div>
+				<div class="dash-wave" aria-hidden="true">
+					<svg viewBox="0 0 160 48" preserveAspectRatio="none">
+						<defs>
+							<linearGradient id="waveFillBlue" x1="0" y1="0" x2="0" y2="1">
+								<stop offset="0%" stop-color="currentColor" stop-opacity="0.35" />
+								<stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+							</linearGradient>
+						</defs>
+						<path d="M0 30 C35 14, 60 30, 95 16 S135 12, 160 22 L160 48 L0 48 Z" fill="url(#waveFillBlue)" />
+						<path d="M0 30 C35 14, 60 30, 95 16 S135 12, 160 22" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+					</svg>
+				</div>
+				<div class="dash-kpi-orb" aria-hidden="true"></div>
 			</div>
 		</div>
 
 		<div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
-			<a class="dash-mini-kpi" routerLink="/demo1/sales/sales-invoices">
+			<a class="dash-mini-kpi tone-blue" routerLink="/demo1/sales/sales-invoices">
+				<span class="dash-mini-icon"><i class="ki-filled ki-chart-line-up"></i></span>
 				<div class="dash-mini-kpi-label">{{ 'dashboard.kpi.salesMonth' | translate }}</div>
 				<div class="dash-mini-kpi-value">{{ data.kpis.salesMonthTotal | number: '1.0-0' }}</div>
 				<div class="dash-mini-kpi-hint">{{ data.kpis.salesMonthCount }} {{ 'dashboard.kpi.salesMonthHint' | translate }}</div>
 			</a>
-			<div class="dash-mini-kpi">
+			<div class="dash-mini-kpi tone-green">
+				<span class="dash-mini-icon"><i class="ki-filled ki-calendar"></i></span>
 				<div class="dash-mini-kpi-label">{{ 'dashboard.kpi.salesToday' | translate }}</div>
 				<div class="dash-mini-kpi-value">{{ data.kpis.salesTodayTotal | number: '1.0-0' }}</div>
 				<div class="dash-mini-kpi-hint">
@@ -149,7 +220,8 @@
 					}
 				</div>
 			</div>
-			<a class="dash-mini-kpi" routerLink="/demo1/sales/sales-invoices" [queryParams]="{ filter: 'drafts' }">
+			<a class="dash-mini-kpi tone-amber" routerLink="/demo1/sales/sales-invoices" [queryParams]="{ filter: 'drafts' }">
+				<span class="dash-mini-icon"><i class="ki-filled ki-document"></i></span>
 				<div class="dash-mini-kpi-label">{{ 'dashboard.kpi.draftInvoices' | translate }}</div>
 				<div class="dash-mini-kpi-value">{{ data.kpis.draftInvoices }}</div>
 				<div class="dash-mini-kpi-hint">
@@ -160,7 +232,8 @@
 					}
 				</div>
 			</a>
-			<a class="dash-mini-kpi" routerLink="/demo1/inventory/stock-receivings">
+			<a class="dash-mini-kpi tone-red" routerLink="/demo1/inventory/stock-receivings">
+				<span class="dash-mini-icon"><i class="ki-filled ki-delivery"></i></span>
 				<div class="dash-mini-kpi-label">{{ 'dashboard.kpi.pendingStock' | translate }}</div>
 				<div class="dash-mini-kpi-value">{{ data.kpis.pendingStockDocs }}</div>
 				<div class="dash-mini-kpi-hint">
@@ -171,7 +244,8 @@
 					}
 				</div>
 			</a>
-			<a class="dash-mini-kpi" routerLink="/demo1/products/items">
+			<a class="dash-mini-kpi tone-orange" routerLink="/demo1/products/items">
+				<span class="dash-mini-icon"><i class="ki-filled ki-information-2"></i></span>
 				<div class="dash-mini-kpi-label">{{ 'dashboard.kpi.lowStock' | translate }}</div>
 				<div class="dash-mini-kpi-value">{{ data.kpis.lowStockCount }}</div>
 				<div class="dash-mini-kpi-hint">
@@ -182,7 +256,8 @@
 					}
 				</div>
 			</a>
-			<a class="dash-mini-kpi" routerLink="/demo1/products/items">
+			<a class="dash-mini-kpi tone-violet" routerLink="/demo1/products/items">
+				<span class="dash-mini-icon"><i class="ki-filled ki-package"></i></span>
 				<div class="dash-mini-kpi-label">{{ 'dashboard.kpi.products' | translate }}</div>
 				<div class="dash-mini-kpi-value">{{ data.kpis.productsCount }}</div>
 				<div class="dash-mini-kpi-hint">{{ 'dashboard.kpi.statsUpdated' | translate }}</div>
@@ -258,8 +333,9 @@
 			</div>
 		</div>
 
-		<div class="flex flex-col gap-2">
-			<div class="text-xs font-semibold uppercase tracking-wide text-secondary-foreground">
+		<div class="flex flex-col gap-3">
+			<div class="dash-section-title">
+				<span class="dash-section-dot"></span>
 				{{ 'dashboard.chartsSection' | translate }}
 			</div>
 			<div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-5">
@@ -349,23 +425,29 @@
 			</div>
 		</div>
 
-		<div class="flex flex-wrap gap-2">
-			<a class="kt-btn kt-btn-primary" routerLink="/demo1/sales/sales-invoices/new">
-				<i class="ki-filled ki-plus"></i>
-				{{ 'dashboard.quick.newInvoice' | translate }}
-			</a>
-			<a class="kt-btn kt-btn-light" routerLink="/demo1/inventory/stock-issues/new">
-				<i class="ki-filled ki-exit-right"></i>
-				{{ 'dashboard.quick.newIssue' | translate }}
-			</a>
-			<a class="kt-btn kt-btn-light" routerLink="/demo1/inventory/stock-receivings/new">
-				<i class="ki-filled ki-entrance-right"></i>
-				{{ 'dashboard.quick.newReceiving' | translate }}
-			</a>
-			<a class="kt-btn kt-btn-light" routerLink="/demo1/inventory/stock-takings/new">
-				<i class="ki-filled ki-questionnaire-tablet"></i>
-				{{ 'dashboard.quick.newTaking' | translate }}
-			</a>
+		<div class="dash-quick">
+			<div class="dash-section-title mb-1">
+				<span class="dash-section-dot"></span>
+				{{ 'dashboard.quickActions' | translate }}
+			</div>
+			<div class="dash-quick-grid">
+				<a class="dash-quick-item is-primary" routerLink="/demo1/sales/sales-invoices/new">
+					<span class="dash-quick-icon"><i class="ki-filled ki-plus"></i></span>
+					<span>{{ 'dashboard.quick.newInvoice' | translate }}</span>
+				</a>
+				<a class="dash-quick-item tone-red" routerLink="/demo1/inventory/stock-issues/new">
+					<span class="dash-quick-icon"><i class="ki-filled ki-exit-right"></i></span>
+					<span>{{ 'dashboard.quick.newIssue' | translate }}</span>
+				</a>
+				<a class="dash-quick-item tone-green" routerLink="/demo1/inventory/stock-receivings/new">
+					<span class="dash-quick-icon"><i class="ki-filled ki-entrance-right"></i></span>
+					<span>{{ 'dashboard.quick.newReceiving' | translate }}</span>
+				</a>
+				<a class="dash-quick-item tone-amber" routerLink="/demo1/inventory/stock-takings/new">
+					<span class="dash-quick-icon"><i class="ki-filled ki-questionnaire-tablet"></i></span>
+					<span>{{ 'dashboard.quick.newTaking' | translate }}</span>
+				</a>
+			</div>
 		</div>
 
 		<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 items-start">
