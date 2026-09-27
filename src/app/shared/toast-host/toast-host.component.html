@@ -1,0 +1,24 @@
+<div class="app-toast-host" aria-live="polite" aria-relevant="additions">
+	@for (t of toasts(); track t.id) {
+		<div
+			class="app-toast"
+			[class.app-toast-success]="t.kind === 'success'"
+			[class.app-toast-error]="t.kind === 'error'"
+			[class.app-toast-info]="t.kind === 'info'"
+			role="status">
+			<span class="app-toast-icon" aria-hidden="true">
+				@if (t.kind === 'success') {
+					<i class="ki-filled ki-check-circle"></i>
+				} @else if (t.kind === 'error') {
+					<i class="ki-filled ki-information-2"></i>
+				} @else {
+					<i class="ki-filled ki-notification-on"></i>
+				}
+			</span>
+			<p class="app-toast-message">{{ t.message }}</p>
+			<button class="app-toast-close" type="button" (click)="dismiss(t.id)" aria-label="close">
+				<i class="ki-filled ki-cross"></i>
+			</button>
+		</div>
+	}
+</div>

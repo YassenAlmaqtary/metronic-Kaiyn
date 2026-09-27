@@ -22,10 +22,7 @@
 		<div class="kt-card"><div class="kt-card-content p-4 flex items-center gap-3"><div class="flex size-10 items-center justify-center rounded-lg bg-info/10 text-info"><i class="ki-filled ki-chart-line-up"></i></div><div><div class="text-xs text-secondary-foreground">{{ 'receiptVouchers.stats.amount' | translate }}</div><div class="text-lg font-semibold text-mono">{{ stats().amount | number: '1.0-0' }}</div></div></div></div>
 	</div>
 
-	@if (successMessage()) {
-		<div class="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-700 flex items-center gap-2"><i class="ki-filled ki-check-circle"></i>{{ successMessage() }}</div>
-	}
-	@if (errorMessage()) {
+		@if (errorMessage()) {
 		<div class="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
 			<span class="flex items-center gap-2"><i class="ki-filled ki-information-2"></i>{{ errorMessage() }}</span>
 			<button class="kt-btn kt-btn-sm kt-btn-light" type="button" (click)="loadVouchers()">{{ 'receiptVouchers.retry' | translate }}</button>

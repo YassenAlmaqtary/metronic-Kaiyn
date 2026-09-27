@@ -233,6 +233,7 @@ export const routes: Routes = [
       { path: 'inventory/stock-transfers/:id', component: StockTransferFormComponent },
       { path: 'inventory/stock-receivings', component: StockReceivingsListComponent },
       { path: 'inventory/stock-receivings/new', component: StockReceivingFormComponent },
+      { path: 'inventory/stock-receivings/:id/edit', component: StockReceivingFormComponent },
       { path: 'inventory/stock-receivings/:id', component: StockReceivingFormComponent },
       { path: 'inventory/stock-receiving-types', component: StockReceivingTypesListComponent },
       { path: 'inventory/stock-receiving-types/new', component: StockReceivingTypeFormComponent },

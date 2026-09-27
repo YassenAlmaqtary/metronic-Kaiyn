@@ -6,6 +6,7 @@ import { Unit } from '../../../../core/api/models/unit.models';
 import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.util';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { UnitsService } from '../../../../core/services/units.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -21,11 +22,11 @@ type UnitFilter = 'all' | 'active';
 export class UnitsListComponent implements OnInit {
   private unitsService = inject(UnitsService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   units = signal<Unit[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<UnitFilter>('all');
   deleteTarget = signal<Unit | null>(null);
@@ -52,11 +53,6 @@ export class UnitsListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadUnits();
   }
 
@@ -104,7 +100,7 @@ export class UnitsListComponent implements OnInit {
 
   openDeleteDialog(unit: Unit): void {
     this.deleteTarget.set(unit);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -126,7 +122,7 @@ export class UnitsListComponent implements OnInit {
         this.units.update((list) => list.filter((item) => item.unitId !== unit.unitId));
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('units.deleteSuccess'));
+        this.toast.success(this.language.translate('units.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

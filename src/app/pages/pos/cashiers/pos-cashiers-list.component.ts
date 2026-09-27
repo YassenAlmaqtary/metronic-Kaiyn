@@ -8,6 +8,7 @@ import { extractApiErrorMessage } from '../../../core/api/utils/api-response.uti
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../core/services/branches.service';
 import { LanguageService } from '../../../core/services/language.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { PosService } from '../../../core/services/pos.service';
 import { UsersService } from '../../../core/services/users.service';
 import { csvExportFilename } from '../../../core/utils/csv-export-filename';
@@ -23,14 +24,14 @@ export class PosCashiersListComponent implements OnInit {
   private usersService = inject(UsersService);
   private branchesService = inject(BranchesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   cashiers = signal<PosCashier[]>([]);
   users = signal<User[]>([]);
   branches = signal<Branch[]>([]);
   loading = signal(true);
   saving = signal(false);
-  errorMessage = signal('');
-  successMessage = signal('');
+  errorMessage = signal('');
   searchTerm = signal('');
   showForm = signal(false);
   formUserId = signal<number | null>(null);
@@ -92,7 +93,7 @@ export class PosCashiersListComponent implements OnInit {
     this.formUserId.set(this.availableUsers()[0]?.userId ?? null);
     this.formBranchId.set(this.branches()[0]?.branchId ?? null);
     this.showForm.set(true);
-    this.successMessage.set('');
+    
   }
 
   exportCsv(): void {
@@ -132,7 +133,7 @@ export class PosCashiersListComponent implements OnInit {
         next: () => {
           this.saving.set(false);
           this.showForm.set(false);
-          this.successMessage.set(this.language.translate('posAdmin.cashiers.saveSuccess'));
+          this.toast.success(this.language.translate('posAdmin.cashiers.saveSuccess'));
           this.load();
         },
         error: (err) => {
@@ -151,7 +152,7 @@ export class PosCashiersListComponent implements OnInit {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.successMessage.set(this.language.translate('posAdmin.cashiers.saveSuccess'));
+          this.toast.success(this.language.translate('posAdmin.cashiers.saveSuccess'));
           this.load();
         },
         error: (err) => {

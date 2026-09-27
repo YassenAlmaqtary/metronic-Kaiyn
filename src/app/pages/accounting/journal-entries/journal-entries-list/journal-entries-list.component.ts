@@ -18,6 +18,7 @@ import { BranchesService } from '../../../../core/services/branches.service';
 import { JournalEntriesService } from '../../../../core/services/journal-entries.service';
 import { JournalTypesService } from '../../../../core/services/journal-types.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
 type JournalFilter = 'all' | 'unposted' | 'posted';
@@ -36,6 +37,7 @@ export class JournalEntriesListComponent implements OnInit {
   private branchesService = inject(BranchesService);
   private auth = inject(AuthService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   entries = signal<JournalEntry[]>([]);
   periods = signal<AccountingPeriod[]>([]);
@@ -44,7 +46,6 @@ export class JournalEntriesListComponent implements OnInit {
   loading = signal(true);
   actionLoading = signal(false);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<JournalFilter>('all');
   periodFilter = signal<number | null>(null);
@@ -140,11 +141,6 @@ export class JournalEntriesListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadLookups();
     this.loadEntries();
   }
@@ -325,7 +321,7 @@ export class JournalEntriesListComponent implements OnInit {
   openActionDialog(entry: JournalEntry | null, action: JournalAction): void {
     this.actionTarget.set(entry);
     this.actionType.set(action);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
     this.actionForm.reset({ actorName: this.auth.userName() || '' });
   }
@@ -438,7 +434,7 @@ export class JournalEntriesListComponent implements OnInit {
     this.actionLoading.set(false);
     this.actionTarget.set(null);
     this.actionType.set(null);
-    this.successMessage.set(message);
+    this.toast.success(message);
   }
 
   private failAction(

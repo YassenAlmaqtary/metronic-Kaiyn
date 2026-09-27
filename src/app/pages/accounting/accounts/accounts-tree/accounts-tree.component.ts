@@ -14,6 +14,7 @@ import { TranslationKey } from '../../../../core/i18n';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { AccountsService } from '../../../../core/services/accounts.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import {
   buildAccountTree,
   collectAllParentIds,
@@ -32,6 +33,7 @@ type AccountFilter = 'all' | 'active' | 'stopped';
 export class AccountsTreeComponent implements OnInit {
   private accountsService = inject(AccountsService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
   private router = inject(Router);
 
   readonly AccountStructureType = AccountStructureType;
@@ -43,7 +45,6 @@ export class AccountsTreeComponent implements OnInit {
   loading = signal(true);
   deleting = signal(false);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<AccountFilter>('all');
   deleteTarget = signal<AccountTreeNode | null>(null);
@@ -95,13 +96,11 @@ export class AccountsTreeComponent implements OnInit {
 
   ngOnInit(): void {
     const navState = history.state as { successMessage?: string; selectId?: number };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-    }
+    // successMessage is shown globally by ToastHost; only keep selectId here.
     if (navState?.selectId) {
       this.selectedId.set(navState.selectId);
+      history.replaceState({}, '');
     }
-    history.replaceState({}, '');
     this.loadAccounts();
   }
 
@@ -246,7 +245,7 @@ export class AccountsTreeComponent implements OnInit {
     }
 
     this.deleteTarget.set(account);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -270,7 +269,7 @@ export class AccountsTreeComponent implements OnInit {
         if (this.selectedId() === account.accId) {
           this.selectedId.set(null);
         }
-        this.successMessage.set(this.language.translate('accounts.deleteSuccess'));
+        this.toast.success(this.language.translate('accounts.deleteSuccess'));
         this.loadAccounts();
       },
       error: (error) => {

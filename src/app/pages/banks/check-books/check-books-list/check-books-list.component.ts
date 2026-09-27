@@ -10,6 +10,7 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BankAccountsService } from '../../../../core/services/bank-accounts.service';
 import { CheckBooksService } from '../../../../core/services/check-books.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -27,6 +28,7 @@ export class CheckBooksListComponent implements OnInit {
   private bankAccountsService = inject(BankAccountsService);
   private router = inject(Router);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   get basePath(): string {
     return this.router.url.includes('/accounting/')
@@ -41,7 +43,6 @@ export class CheckBooksListComponent implements OnInit {
   loading = signal(true);
   actionLoading = signal(false);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<CheckBookFilter>('all');
   bankAccountFilter = signal<number | null>(null);
@@ -105,11 +106,6 @@ export class CheckBooksListComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.bankAccountsService.getAll().subscribe({
       next: (items) => this.bankAccounts.set(items),
       error: () => this.bankAccounts.set([]),
@@ -198,7 +194,7 @@ export class CheckBooksListComponent implements OnInit {
   openActionDialog(item: CheckBook, action: CheckBookAction): void {
     this.actionTarget.set(item);
     this.actionType.set(action);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -248,7 +244,7 @@ export class CheckBooksListComponent implements OnInit {
     this.actionLoading.set(false);
     this.actionTarget.set(null);
     this.actionType.set(null);
-    this.successMessage.set(this.language.translate(messageKey));
+    this.toast.success(this.language.translate(messageKey));
   }
 
   private failAction(

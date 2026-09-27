@@ -1,0 +1,104 @@
+:host {
+  pointer-events: none;
+}
+
+.app-toast-host {
+  position: fixed;
+  inset-inline-end: 1.25rem;
+  top: 5.25rem;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: min(24rem, calc(100vw - 2rem));
+}
+
+.app-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.85rem;
+  border: 1px solid transparent;
+  box-shadow:
+    0 10px 30px -12px rgb(15 23 42 / 0.35),
+    0 2px 8px rgb(15 23 42 / 0.08);
+  background: var(--background, #fff);
+  animation: app-toast-in 0.22s ease-out;
+}
+
+.app-toast-success {
+  border-color: color-mix(in oklab, var(--color-success, #10b981) 35%, transparent);
+  background: color-mix(in oklab, var(--color-success, #10b981) 10%, white);
+  color: color-mix(in oklab, var(--color-success, #047857) 90%, black);
+}
+
+.app-toast-error {
+  border-color: color-mix(in oklab, var(--color-destructive, #ef4444) 35%, transparent);
+  background: color-mix(in oklab, var(--color-destructive, #ef4444) 10%, white);
+  color: color-mix(in oklab, var(--color-destructive, #b91c1c) 90%, black);
+}
+
+.app-toast-info {
+  border-color: color-mix(in oklab, var(--color-primary, #3b82f6) 35%, transparent);
+  background: color-mix(in oklab, var(--color-primary, #3b82f6) 10%, white);
+  color: color-mix(in oklab, var(--color-primary, #1d4ed8) 90%, black);
+}
+
+.app-toast-icon {
+  flex-shrink: 0;
+  font-size: 1.15rem;
+  line-height: 1;
+  margin-top: 0.1rem;
+}
+
+.app-toast-message {
+  margin: 0;
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.app-toast-close {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+.app-toast-close:hover {
+  opacity: 1;
+}
+
+@keyframes app-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.4rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+:host-context(html.dark) .app-toast-success,
+:host-context(.dark) .app-toast-success {
+  background: color-mix(in oklab, var(--color-success, #10b981) 18%, #0f172a);
+}
+
+:host-context(html.dark) .app-toast-error,
+:host-context(.dark) .app-toast-error {
+  background: color-mix(in oklab, var(--color-destructive, #ef4444) 18%, #0f172a);
+}
+
+:host-context(html.dark) .app-toast-info,
+:host-context(.dark) .app-toast-info {
+  background: color-mix(in oklab, var(--color-primary, #3b82f6) 18%, #0f172a);
+}

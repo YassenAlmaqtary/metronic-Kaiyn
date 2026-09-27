@@ -11,6 +11,7 @@ import {
 import { extractApiErrorMessage } from '../../../core/api/utils/api-response.util';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../core/services/language.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { PosService } from '../../../core/services/pos.service';
 
 interface ReturnLine {
@@ -30,6 +31,7 @@ interface ReturnLine {
 export class PosReturnsPageComponent {
   private pos = inject(PosService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   search = signal('');
   paid = signal<PosOrderListItem[]>([]);
@@ -39,8 +41,7 @@ export class PosReturnsPageComponent {
   reason = signal('');
   loading = signal(false);
   saving = signal(false);
-  errorMessage = signal('');
-  successMessage = signal('');
+  errorMessage = signal('');
 
   doSearch(): void {
     this.loading.set(true);
@@ -126,7 +127,7 @@ export class PosReturnsPageComponent {
     this.pos.createReturn(body).subscribe({
       next: (res) => {
         this.saving.set(false);
-        this.successMessage.set(
+        this.toast.success(
           res?.message ||
             this.language.translate('pos.returnSuccess') +
               (res?.returnOrderId ? ` #${res.returnOrderId}` : ''),

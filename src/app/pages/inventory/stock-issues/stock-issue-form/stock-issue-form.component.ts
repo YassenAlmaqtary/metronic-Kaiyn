@@ -149,7 +149,7 @@ export class StockIssueFormComponent implements OnInit {
     this.loading.set(true);
     this.service.getById(id).subscribe({
       next: (d) => {
-        this.isReadOnly.set(isStockDocPosted(d.status, d.datePosted));
+        this.isReadOnly.set(isStockDocPosted(d.status, d.datePosted, { kind: 'issue' }));
         this.form.patchValue({
           issueNumber: d.issueNumber ?? '',
           issueDate: d.issueDate?.slice(0, 10) ?? this.today(),
@@ -529,7 +529,7 @@ export class StockIssueFormComponent implements OnInit {
     this.saving.set(true);
 
     const payload: SaveStockIssueRequest = {
-      issueId: this.issueId() ?? undefined,
+      issueId: this.issueId() ?? 0,
       issueNumber: raw.issueNumber,
       issueDate: new Date(raw.issueDate).toISOString(),
       branchId: raw.branchId,

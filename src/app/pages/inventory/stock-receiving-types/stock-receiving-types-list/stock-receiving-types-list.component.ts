@@ -7,6 +7,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslationKey } from '../../../../core/i18n';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { StockReceivingTypesService } from '../../../../core/services/stock-receiving-types.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -21,11 +22,11 @@ type ReceivingTypeFilter = 'all' | 'active';
 export class StockReceivingTypesListComponent implements OnInit {
   private stockReceivingTypesService = inject(StockReceivingTypesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   types = signal<StockReceivingType[]>([]);
   loading = signal(true);
-  errorMessage = signal('');
-  successMessage = signal('');
+  errorMessage = signal('');
   searchTerm = signal('');
   filter = signal<ReceivingTypeFilter>('all');
   deleteTarget = signal<StockReceivingType | null>(null);
@@ -60,11 +61,6 @@ export class StockReceivingTypesListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadTypes();
   }
 
@@ -133,7 +129,7 @@ export class StockReceivingTypesListComponent implements OnInit {
 
   openDeleteDialog(item: StockReceivingType): void {
     this.deleteTarget.set(item);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -157,7 +153,7 @@ export class StockReceivingTypesListComponent implements OnInit {
         );
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.t('stockReceivingTypes.deleteSuccess'));
+        this.toast.success(this.t('stockReceivingTypes.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

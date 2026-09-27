@@ -10,12 +10,7 @@
 		</a>
 	</div>
 
-	@if (successMessage()) {
-		<div class="rounded border border-success/30 bg-success/10 p-3 text-success">
-			{{ successMessage() }}
-		</div>
-	}
-	@if (errorMessage()) {
+		@if (errorMessage()) {
 		<div class="rounded border border-destructive/30 bg-destructive/10 p-3 text-destructive">
 			{{ errorMessage() }}
 		</div>
@@ -115,15 +110,15 @@
 												<button
 													class="kt-btn kt-btn-sm kt-btn-success"
 													type="button"
-													[disabled]="actionLoading() === issue.issueId"
-													(click)="post(issue)">
+													[disabled]="actionLoading()"
+													(click)="openActionDialog(issue, 'post')">
 													{{ 'stockIssues.post' | translate }}
 												</button>
 												<button
 													class="kt-btn kt-btn-sm kt-btn-destructive"
 													type="button"
-													[disabled]="actionLoading() === issue.issueId"
-													(click)="delete(issue)">
+													[disabled]="actionLoading()"
+													(click)="openActionDialog(issue, 'delete')">
 													<i class="ki-filled ki-trash"></i>
 												</button>
 											}
@@ -137,4 +132,59 @@
 			}
 		</div>
 	</div>
+
+	@if (actionType(); as action) {
+		<div
+			class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+			(click)="closeActionDialog()">
+			<div class="kt-card w-full max-w-md shadow-xl" (click)="$event.stopPropagation()">
+				<div class="kt-card-header px-5 py-4 border-b border-border">
+					<h2 class="text-lg font-semibold text-mono">
+						@if (action === 'post') {
+							{{ 'stockIssues.postTitle' | translate }}
+						} @else {
+							{{ 'stockIssues.deleteTitle' | translate }}
+						}
+					</h2>
+				</div>
+				<div class="kt-card-content px-5 py-4 text-sm text-secondary-foreground flex flex-col gap-2">
+					@if (action === 'post') {
+						<p>{{ 'stockIssues.postConfirm' | translate }}</p>
+					} @else {
+						<p>{{ 'stockIssues.deleteConfirm' | translate }}</p>
+					}
+					@if (actionTarget(); as issue) {
+						<p class="font-medium text-mono text-foreground">
+							{{ issue.issueNumber || issue.issueId }}
+						</p>
+					}
+				</div>
+				<div class="kt-card-footer px-5 py-4 border-t border-border flex justify-end gap-2">
+					<button
+						class="kt-btn kt-btn-light"
+						type="button"
+						[disabled]="actionLoading()"
+						(click)="closeActionDialog()">
+						{{ 'common.cancel' | translate }}
+					</button>
+					<button
+						class="kt-btn"
+						type="button"
+						[class.kt-btn-success]="action === 'post'"
+						[class.kt-btn-destructive]="action === 'delete'"
+						[disabled]="actionLoading()"
+						(click)="confirmAction()">
+						@if (actionLoading()) {
+							<span
+								class="size-4 rounded-full border-2 border-current border-t-transparent animate-spin"></span>
+						} @else if (action === 'post') {
+							{{ 'stockIssues.post' | translate }}
+						} @else {
+							{{ 'stockIssues.delete' | translate }}
+						}
+					</button>
+				</div>
+			</div>
+		</div>
+	}
 </div>

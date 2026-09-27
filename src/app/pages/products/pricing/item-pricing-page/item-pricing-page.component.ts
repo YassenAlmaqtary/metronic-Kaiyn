@@ -22,6 +22,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { PricingService } from '../../../../core/services/pricing.service';
 import { ProductGroupsService } from '../../../../core/services/product-groups.service';
 import { ProductsService } from '../../../../core/services/products.service';
@@ -41,12 +42,12 @@ export class ItemPricingPageComponent implements OnInit {
   private productsService = inject(ProductsService);
   private auth = inject(AuthService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   activeTab = signal<PricingTab>('dashboard');
   loading = signal(false);
   saving = signal(false);
   errorMessage = signal('');
-  successMessage = signal('');
 
   priceLists = signal<PriceList[]>([]);
   branches = signal<Branch[]>([]);
@@ -123,7 +124,7 @@ export class ItemPricingPageComponent implements OnInit {
   setTab(tab: PricingTab): void {
     this.activeTab.set(tab);
     this.errorMessage.set('');
-    this.successMessage.set('');
+    
 
     if (tab === 'lists') {
       this.loadPriceLists();
@@ -228,7 +229,7 @@ export class ItemPricingPageComponent implements OnInit {
 
     this.saving.set(true);
     this.errorMessage.set('');
-    this.successMessage.set('');
+    
 
     this.pricingService
       .updatePrice(
@@ -246,7 +247,7 @@ export class ItemPricingPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.successMessage.set(this.language.translate('pricing.updatePriceSuccess'));
+          this.toast.success(this.language.translate('pricing.updatePriceSuccess'));
           this.cancelEditPrice();
           this.loadDashboard();
         },
@@ -289,7 +290,7 @@ export class ItemPricingPageComponent implements OnInit {
 
     this.saving.set(true);
     this.errorMessage.set('');
-    this.successMessage.set('');
+    
 
     const editId = this.editingListId();
     const request$ =
@@ -300,7 +301,7 @@ export class ItemPricingPageComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.saving.set(false);
-        this.successMessage.set(
+        this.toast.success(
           this.language.translate(editId != null ? 'pricing.listUpdateSuccess' : 'pricing.listCreateSuccess'),
         );
         this.resetListForm();
@@ -336,7 +337,7 @@ export class ItemPricingPageComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.deleteListTarget.set(null);
-        this.successMessage.set(this.language.translate('pricing.listDeleteSuccess'));
+        this.toast.success(this.language.translate('pricing.listDeleteSuccess'));
         if (this.selectedPriceListId() === list.priceListId) {
           this.selectedPriceListId.set(null);
         }
@@ -404,7 +405,7 @@ export class ItemPricingPageComponent implements OnInit {
 
     this.saving.set(true);
     this.errorMessage.set('');
-    this.successMessage.set('');
+    
 
     const editId = this.editingAssignmentId();
     const request$ =
@@ -415,7 +416,7 @@ export class ItemPricingPageComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.saving.set(false);
-        this.successMessage.set(
+        this.toast.success(
           this.language.translate(
             editId != null ? 'pricing.assignmentUpdateSuccess' : 'pricing.assignmentCreateSuccess',
           ),
@@ -453,7 +454,7 @@ export class ItemPricingPageComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.deleteAssignmentTarget.set(null);
-        this.successMessage.set(this.language.translate('pricing.assignmentDeleteSuccess'));
+        this.toast.success(this.language.translate('pricing.assignmentDeleteSuccess'));
         this.loadAssignments();
       },
       error: (error) => {
@@ -475,7 +476,7 @@ export class ItemPricingPageComponent implements OnInit {
     const raw = this.bulkForm.getRawValue();
     this.saving.set(true);
     this.errorMessage.set('');
-    this.successMessage.set('');
+    
 
     this.pricingService
       .bulkUpdate(
@@ -490,7 +491,7 @@ export class ItemPricingPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.successMessage.set(this.language.translate('pricing.bulkSuccess'));
+          this.toast.success(this.language.translate('pricing.bulkSuccess'));
           if (this.selectedPriceListId() === raw.priceListId) {
             this.loadDashboard();
           }

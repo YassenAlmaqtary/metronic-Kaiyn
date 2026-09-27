@@ -12,13 +12,7 @@
 		</a>
 	</div>
 
-	@if (successMessage()) {
-		<div class="rounded border border-success/30 bg-success/10 p-3 text-sm text-success">
-			{{ successMessage() }}
-		</div>
-	}
-
-	@if (errorMessage()) {
+		@if (errorMessage()) {
 		<div
 			class="rounded border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive flex items-center justify-between gap-3">
 			<span>{{ errorMessage() }}</span>

@@ -4,13 +4,7 @@
 		<p class="text-sm text-secondary-foreground mt-1">{{ 'pricing.subtitle' | translate }}</p>
 	</div>
 
-	@if (successMessage()) {
-		<div class="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-700">
-			{{ successMessage() }}
-		</div>
-	}
-
-	@if (errorMessage()) {
+		@if (errorMessage()) {
 		<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
 			{{ errorMessage() }}
 		</div>

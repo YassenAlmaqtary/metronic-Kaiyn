@@ -7,6 +7,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { CustomerGroupsService } from '../../../../core/services/customer-groups.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -21,11 +22,11 @@ type CustomerGroupFilter = 'all' | 'active';
 export class CustomerGroupsListComponent implements OnInit {
   private customerGroupsService = inject(CustomerGroupsService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   customerGroups = signal<CustomerGroup[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<CustomerGroupFilter>('all');
   deleteTarget = signal<CustomerGroup | null>(null);
@@ -52,11 +53,6 @@ export class CustomerGroupsListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadCustomerGroups();
   }
 
@@ -115,7 +111,7 @@ export class CustomerGroupsListComponent implements OnInit {
 
   openDeleteDialog(group: CustomerGroup): void {
     this.deleteTarget.set(group);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -137,7 +133,7 @@ export class CustomerGroupsListComponent implements OnInit {
         this.customerGroups.update((list) => list.filter((item) => item.groupId !== group.groupId));
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('customerGroups.deleteSuccess'));
+        this.toast.success(this.language.translate('customerGroups.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

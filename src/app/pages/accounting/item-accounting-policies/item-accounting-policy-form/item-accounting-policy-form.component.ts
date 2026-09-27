@@ -17,6 +17,7 @@ import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { AccountsService } from '../../../../core/services/accounts.service';
 import { ItemAccountingPoliciesService } from '../../../../core/services/item-accounting-policies.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-item-accounting-policy-form',
@@ -30,13 +31,13 @@ export class ItemAccountingPolicyFormComponent implements OnInit {
   private policiesService = inject(ItemAccountingPoliciesService);
   private accountsService = inject(AccountsService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   loading = signal(false);
   saving = signal(false);
   addingRule = signal(false);
   deletingRuleId = signal<number | null>(null);
   errorMessage = signal('');
-  successMessage = signal('');
   isEditMode = signal(false);
   policyId = signal<number | null>(null);
   rules = signal<ItemAccountingPolicyRule[]>([]);
@@ -109,12 +110,6 @@ export class ItemAccountingPolicyFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
-
     this.accountsService.getAll().subscribe({
       next: (accounts) =>
         this.accounts.set([...accounts].sort((a, b) => a.accCode - b.accCode)),
@@ -195,7 +190,7 @@ export class ItemAccountingPolicyFormComponent implements OnInit {
 
     this.saving.set(true);
     this.errorMessage.set('');
-    this.successMessage.set('');
+    
 
     const raw = this.form.getRawValue();
 
@@ -252,7 +247,7 @@ export class ItemAccountingPolicyFormComponent implements OnInit {
 
     this.addingRule.set(true);
     this.errorMessage.set('');
-    this.successMessage.set('');
+    
 
     const raw = this.ruleForm.getRawValue();
     const payload: CreateItemAccountingPolicyRuleRequest = {
@@ -274,7 +269,7 @@ export class ItemAccountingPolicyFormComponent implements OnInit {
           isActive: true,
         });
         this.addingRule.set(false);
-        this.successMessage.set(this.t('itemAccountingPolicies.ruleCreateSuccess'));
+        this.toast.success(this.t('itemAccountingPolicies.ruleCreateSuccess'));
       },
       error: (error) => {
         this.addingRule.set(false);
@@ -292,13 +287,13 @@ export class ItemAccountingPolicyFormComponent implements OnInit {
 
     this.deletingRuleId.set(rule.ruleId);
     this.errorMessage.set('');
-    this.successMessage.set('');
+    
 
     this.policiesService.deleteRule(rule.ruleId).subscribe({
       next: () => {
         this.rules.update((list) => list.filter((item) => item.ruleId !== rule.ruleId));
         this.deletingRuleId.set(null);
-        this.successMessage.set(this.t('itemAccountingPolicies.ruleDeleteSuccess'));
+        this.toast.success(this.t('itemAccountingPolicies.ruleDeleteSuccess'));
       },
       error: (error) => {
         this.deletingRuleId.set(null);

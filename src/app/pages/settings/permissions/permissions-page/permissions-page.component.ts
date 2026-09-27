@@ -11,6 +11,7 @@ import { Role } from '../../../../core/api/models/role.models';
 import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.util';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { PermissionsService } from '../../../../core/services/permissions.service';
 import { RolesService } from '../../../../core/services/roles.service';
 
@@ -24,6 +25,7 @@ export class PermissionsPageComponent implements OnInit {
   private permissionsService = inject(PermissionsService);
   private rolesService = inject(RolesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
 
   permissions = signal<Permission[]>([]);
@@ -34,8 +36,7 @@ export class PermissionsPageComponent implements OnInit {
   loadingMatrix = signal(false);
   saving = signal(false);
 
-  errorMessage = signal('');
-  successMessage = signal('');
+  errorMessage = signal('');
   searchTerm = signal('');
 
   selectedRoleId = signal<number | null>(null);
@@ -101,7 +102,7 @@ export class PermissionsPageComponent implements OnInit {
 
   onRoleChange(value: number | null): void {
     this.selectedRoleId.set(value);
-    this.successMessage.set('');
+    
 
     if (value) {
       this.loadRoleMatrix(value);
@@ -178,12 +179,12 @@ export class PermissionsPageComponent implements OnInit {
 
     this.saving.set(true);
     this.errorMessage.set('');
-    this.successMessage.set('');
+    
 
     this.permissionsService.setRolePermissionsBulk(request).subscribe({
       next: () => {
         this.saving.set(false);
-        this.successMessage.set(this.language.translate('permissions.saveSuccess'));
+        this.toast.success(this.language.translate('permissions.saveSuccess'));
         this.loadRoleMatrix(roleId);
       },
       error: (error) => {

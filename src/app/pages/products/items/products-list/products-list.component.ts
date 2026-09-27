@@ -6,6 +6,7 @@ import { Product } from '../../../../core/api/models/product.models';
 import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.util';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { ProductsService } from '../../../../core/services/products.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -21,11 +22,11 @@ type ProductFilter = 'all' | 'active';
 export class ProductsListComponent implements OnInit {
   private productsService = inject(ProductsService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   products = signal<Product[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<ProductFilter>('all');
   deleteTarget = signal<Product | null>(null);
@@ -52,11 +53,6 @@ export class ProductsListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadProducts();
   }
 
@@ -108,7 +104,7 @@ export class ProductsListComponent implements OnInit {
 
   openDeleteDialog(product: Product): void {
     this.deleteTarget.set(product);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -130,7 +126,7 @@ export class ProductsListComponent implements OnInit {
         this.products.update((list) => list.filter((item) => item.productId !== product.productId));
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('products.deleteSuccess'));
+        this.toast.success(this.language.translate('products.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

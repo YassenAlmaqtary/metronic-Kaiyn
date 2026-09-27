@@ -8,6 +8,7 @@ import { extractApiErrorMessage } from '../../../core/api/utils/api-response.uti
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../core/services/branches.service';
 import { LanguageService } from '../../../core/services/language.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { PosService } from '../../../core/services/pos.service';
 import { csvExportFilename } from '../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../core/utils/download-csv';
@@ -21,13 +22,13 @@ export class PosShiftsListComponent implements OnInit {
   private pos = inject(PosService);
   private branchesService = inject(BranchesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   shifts = signal<PosShift[]>([]);
   branches = signal<Branch[]>([]);
   loading = signal(true);
   saving = signal(false);
-  errorMessage = signal('');
-  successMessage = signal('');
+  errorMessage = signal('');
   searchTerm = signal('');
   statusFilter = signal<'all' | 'Open' | 'Closed'>('all');
   branchFilter = signal<number | null>(null);
@@ -146,7 +147,7 @@ export class PosShiftsListComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.closeTarget.set(null);
-        this.successMessage.set(this.language.translate('posAdmin.shifts.closeSuccess'));
+        this.toast.success(this.language.translate('posAdmin.shifts.closeSuccess'));
         this.load();
       },
       error: (err) => {

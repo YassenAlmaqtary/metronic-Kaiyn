@@ -10,6 +10,7 @@ import {
 import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.util';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { StockAdjustmentsService } from '../../../../core/services/stock-adjustments.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -23,12 +24,12 @@ import { downloadCsv } from '../../../../core/utils/download-csv';
 export class StockAdjustmentsListComponent implements OnInit {
   private service = inject(StockAdjustmentsService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   items = signal<StockAdjustmentListItem[]>([]);
   loading = signal(false);
   actionLoading = signal<number | null>(null);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   draftsOnly = signal(false);
 
@@ -106,7 +107,7 @@ export class StockAdjustmentsListComponent implements OnInit {
           );
           return;
         }
-        this.successMessage.set(this.language.translate('stockAdjustments.postSuccess'));
+        this.toast.success(this.language.translate('stockAdjustments.postSuccess'));
         this.load();
       },
       error: (e) => {

@@ -73,14 +73,7 @@
 		</div>
 	</div>
 
-	@if (successMessage()) {
-		<div class="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-700 flex items-center gap-2">
-			<i class="ki-filled ki-check-circle"></i>
-			{{ successMessage() }}
-		</div>
-	}
-
-	@if (errorMessage()) {
+		@if (errorMessage()) {
 		<div class="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
 			<span class="flex items-center gap-2">
 				<i class="ki-filled ki-information-2"></i>

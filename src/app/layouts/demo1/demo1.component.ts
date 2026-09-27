@@ -6,6 +6,7 @@ import { AccessControlService } from '../../core/services/access-control.service
 import { AiAssistantPanelComponent } from '../../partials/ai-assistant/ai-assistant-panel.component';
 import { ModalsSearchComponent } from '../../partials/modals-search/modals-search.component';
 import { ThemeToggleService } from '../../partials/theme-toggle/theme-toggle.service';
+import { ToastHostComponent } from '../../shared/toast-host/toast-host.component';
 import { FooterComponent } from './footer/footer.component';
 import { HeaderComponent } from './header/header.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
@@ -19,6 +20,7 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 		FooterComponent,
 		ModalsSearchComponent,
 		AiAssistantPanelComponent,
+		ToastHostComponent,
 	],
 	templateUrl: './demo1.component.html',
 	styleUrl: './demo1.component.scss'

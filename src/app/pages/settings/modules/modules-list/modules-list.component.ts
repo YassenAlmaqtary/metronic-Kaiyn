@@ -7,6 +7,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { AI_ASSISTANT_MODULE_KEY } from '../../../../core/services/access-control.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { ModulesService } from '../../../../core/services/modules.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -20,11 +21,11 @@ import { downloadCsv } from '../../../../core/utils/download-csv';
 export class ModulesListComponent implements OnInit {
   private modulesService = inject(ModulesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   modules = signal<AppModule[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   deleteTarget = signal<AppModule | null>(null);
   deleting = signal(false);
@@ -51,11 +52,6 @@ export class ModulesListComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadModules();
   }
 
@@ -103,7 +99,7 @@ export class ModulesListComponent implements OnInit {
       next: () => {
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('modules.deleteSuccess'));
+        this.toast.success(this.language.translate('modules.deleteSuccess'));
         this.loadModules();
       },
       error: (error) => {

@@ -12,7 +12,7 @@ import {
   StoreItemForTaking,
   TakingAvailableForAdjustment,
 } from '../api/models/stock-taking.models';
-import { unwrapApiResponse } from '../api/utils/api-response.util';
+import { unwrapApiAction, unwrapApiResponse } from '../api/utils/api-response.util';
 
 @Injectable({ providedIn: 'root' })
 export class StockTakingsService {
@@ -76,18 +76,28 @@ export class StockTakingsService {
       .pipe(map((r) => unwrapApiResponse(r)));
   }
 
-  post(id: number): Observable<unknown> {
+  post(id: number): Observable<void> {
     return this.http
       .post<ApiResponse<unknown>>(buildApiUrl(toApiPath(`${this.basePath}/{id}/post`, { id })), {})
-      .pipe(map((r) => unwrapApiResponse(r)));
+      .pipe(
+        map((r) => {
+          unwrapApiAction(r);
+          return undefined;
+        }),
+      );
   }
 
-  cancel(id: number): Observable<unknown> {
+  cancel(id: number): Observable<void> {
     return this.http
       .post<ApiResponse<unknown>>(
         buildApiUrl(toApiPath(`${this.basePath}/{id}/cancel`, { id })),
         {},
       )
-      .pipe(map((r) => unwrapApiResponse(r)));
+      .pipe(
+        map((r) => {
+          unwrapApiAction(r);
+          return undefined;
+        }),
+      );
   }
 }

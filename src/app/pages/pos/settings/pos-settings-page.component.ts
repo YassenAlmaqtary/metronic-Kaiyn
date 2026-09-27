@@ -7,6 +7,7 @@ import { extractApiErrorMessage } from '../../../core/api/utils/api-response.uti
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../core/services/branches.service';
 import { LanguageService } from '../../../core/services/language.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { PosService } from '../../../core/services/pos.service';
 
 interface SettingRow {
@@ -23,6 +24,7 @@ export class PosSettingsPageComponent implements OnInit {
   private pos = inject(PosService);
   private branchesService = inject(BranchesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   branches = signal<Branch[]>([]);
   devices = signal<PosDevice[]>([]);
@@ -31,8 +33,7 @@ export class PosSettingsPageComponent implements OnInit {
   rows = signal<SettingRow[]>([]);
   loading = signal(false);
   saving = signal(false);
-  errorMessage = signal('');
-  successMessage = signal('');
+  errorMessage = signal('');
 
   ngOnInit(): void {
     this.branchesService.getAll().subscribe({
@@ -52,7 +53,7 @@ export class PosSettingsPageComponent implements OnInit {
     }
     this.loading.set(true);
     this.errorMessage.set('');
-    this.successMessage.set('');
+    
     this.pos.getSettings(branchId, this.deviceId() ?? undefined).subscribe({
       next: (map) => {
         const entries = Object.entries(map || {}).map(([key, value]) => ({ key, value: String(value ?? '') }));
@@ -105,7 +106,7 @@ export class PosSettingsPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.successMessage.set(this.language.translate('posAdmin.settings.saveSuccess'));
+          this.toast.success(this.language.translate('posAdmin.settings.saveSuccess'));
         },
         error: (err) => {
           this.saving.set(false);

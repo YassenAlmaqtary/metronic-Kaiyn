@@ -43,6 +43,8 @@ export const stockTransfersAr = {
   'stockTransfers.back': 'رجوع',
   'stockTransfers.save': 'حفظ',
   'stockTransfers.postAfterSave': 'يمكن ترحيل المستند من القائمة بعد الحفظ.',
+  'stockTransfers.postTitle': 'تأكيد الترحيل',
+  'stockTransfers.deleteTitle': 'تأكيد الحذف',
   'stockTransfers.postConfirm': 'هل أنت متأكد من ترحيل التحويل المخزني هذا؟',
   'stockTransfers.deleteConfirm': 'هل أنت متأكد من حذف التحويل المخزني هذا؟',
   'stockTransfers.saveSuccess': 'تم حفظ التحويل المخزني بنجاح',

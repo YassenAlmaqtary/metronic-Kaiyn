@@ -3,10 +3,28 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ApiResponse } from '../models/api-response.model';
 
 export function unwrapApiResponse<T>(response: ApiResponse<T>): T {
-  if (!response.success || response.data === undefined || response.data === null) {
+  if (!response.success) {
+    throw new Error(response.message || response.errors?.join(', ') || 'Request failed');
+  }
+  if (response.data === undefined || response.data === null) {
     throw new Error(response.message || response.errors?.join(', ') || 'Request failed');
   }
   return response.data;
+}
+
+/**
+ * For action endpoints (post / delete / toggle) that return `{ success: true }`
+ * with null/empty `data`. Treating null data as failure was hiding real posts
+ * and showing the API message without refreshing the UI.
+ */
+export function unwrapApiAction(response: ApiResponse<unknown>): void {
+  if (!response?.success) {
+    throw new Error(
+      response?.message ||
+        (Array.isArray(response?.errors) ? response.errors.join(', ') : '') ||
+        'Request failed',
+    );
+  }
 }
 
 export function extractApiErrorMessage(error: unknown, fallback = 'Request failed'): string {

@@ -8,6 +8,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { CurrenciesService } from '../../../../core/services/currencies.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -22,12 +23,12 @@ type CurrencyFilter = 'all' | 'active';
 export class CurrenciesListComponent implements OnInit {
   private currenciesService = inject(CurrenciesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   currencies = signal<Currency[]>([]);
   baseCurrency = signal<Currency | null>(null);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<CurrencyFilter>('all');
   deleteTarget = signal<Currency | null>(null);
@@ -54,11 +55,6 @@ export class CurrenciesListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadCurrencies();
     this.loadBaseCurrency();
   }
@@ -118,7 +114,7 @@ export class CurrenciesListComponent implements OnInit {
 
   openDeleteDialog(currency: Currency): void {
     this.deleteTarget.set(currency);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -140,7 +136,7 @@ export class CurrenciesListComponent implements OnInit {
         this.currencies.update((list) => list.filter((item) => item.id !== currency.id));
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('currencies.deleteSuccess'));
+        this.toast.success(this.language.translate('currencies.deleteSuccess'));
         if (this.baseCurrency()?.id === currency.id) {
           this.loadBaseCurrency();
         }

@@ -15,6 +15,9 @@ import { ThemeToggleService } from '../../../partials/theme-toggle/theme-toggle.
   templateUrl: './header.component.html',
 })
 export class HeaderComponent {
+  /** Set to `true` to restore header mega tabs (Home / Files / Account / …). */
+  protected readonly showHeaderMegaTabs = false;
+
   protected themeService = inject(ThemeToggleService);
   protected authService = inject(AuthService);
   protected globalSearch = inject(GlobalSearchService);

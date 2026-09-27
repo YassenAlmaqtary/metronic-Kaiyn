@@ -16,7 +16,7 @@ import {
   StockIssueListItem,
   StockIssueType,
 } from '../api/models/stock-issue.models';
-import { unwrapApiResponse } from '../api/utils/api-response.util';
+import { unwrapApiAction, unwrapApiResponse } from '../api/utils/api-response.util';
 
 @Injectable({ providedIn: 'root' })
 export class StockIssuesService {
@@ -56,18 +56,25 @@ export class StockIssuesService {
       .pipe(map((r) => unwrapApiResponse(r)));
   }
 
-  post(id: number): Observable<unknown> {
+  post(id: number): Observable<void> {
     return this.http
       .post<ApiResponse<unknown>>(buildApiUrl(toApiPath(`${this.basePath}/{id}/post`, { id })), {})
-      .pipe(map((r) => unwrapApiResponse(r)));
+      .pipe(
+        map((r) => {
+          unwrapApiAction(r);
+          return undefined;
+        }),
+      );
   }
 
   delete(id: number): Observable<void> {
     return this.http
       .delete<ApiResponse<unknown>>(buildApiUrl(toApiPath(`${this.basePath}/{id}`, { id })))
       .pipe(
-        map((r) => unwrapApiResponse(r)),
-        map(() => undefined),
+        map((r) => {
+          unwrapApiAction(r);
+          return undefined;
+        }),
       );
   }
 

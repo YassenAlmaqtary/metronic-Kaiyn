@@ -7,6 +7,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { ProductGroupsService } from '../../../../core/services/product-groups.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -21,11 +22,11 @@ type ProductGroupFilter = 'all' | 'active';
 export class ProductGroupsListComponent implements OnInit {
   private productGroupsService = inject(ProductGroupsService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   productGroups = signal<ProductGroup[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<ProductGroupFilter>('all');
   deleteTarget = signal<ProductGroup | null>(null);
@@ -52,11 +53,6 @@ export class ProductGroupsListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadProductGroups();
   }
 
@@ -104,7 +100,7 @@ export class ProductGroupsListComponent implements OnInit {
 
   openDeleteDialog(group: ProductGroup): void {
     this.deleteTarget.set(group);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -126,7 +122,7 @@ export class ProductGroupsListComponent implements OnInit {
         this.productGroups.update((list) => list.filter((item) => item.groupId !== group.groupId));
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('productGroups.deleteSuccess'));
+        this.toast.success(this.language.translate('productGroups.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

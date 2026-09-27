@@ -6,6 +6,7 @@ import { Role } from '../../../../core/api/models/role.models';
 import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.util';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { RolesService } from '../../../../core/services/roles.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -19,11 +20,11 @@ import { downloadCsv } from '../../../../core/utils/download-csv';
 export class RolesListComponent implements OnInit {
   private rolesService = inject(RolesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   roles = signal<Role[]>([]);
   loading = signal(true);
-  errorMessage = signal('');
-  successMessage = signal('');
+  errorMessage = signal('');
   searchTerm = signal('');
   deleteTarget = signal<Role | null>(null);
   deleting = signal(false);
@@ -44,11 +45,6 @@ export class RolesListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadRoles();
   }
 
@@ -102,7 +98,7 @@ export class RolesListComponent implements OnInit {
     }
 
     this.deleteTarget.set(role);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -124,7 +120,7 @@ export class RolesListComponent implements OnInit {
         this.roles.update((list) => list.filter((item) => item.roleId !== role.roleId));
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('roles.deleteSuccess'));
+        this.toast.success(this.language.translate('roles.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

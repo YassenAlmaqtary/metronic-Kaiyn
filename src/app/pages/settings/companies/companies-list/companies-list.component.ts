@@ -8,6 +8,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { CompaniesService } from '../../../../core/services/companies.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -20,11 +21,11 @@ import { downloadCsv } from '../../../../core/utils/download-csv';
 export class CompaniesListComponent implements OnInit {
   private companiesService = inject(CompaniesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   companies = signal<Company[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   deleteTarget = signal<Company | null>(null);
   deleting = signal(false);
@@ -51,11 +52,6 @@ export class CompaniesListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadCompanies();
   }
 
@@ -108,7 +104,7 @@ export class CompaniesListComponent implements OnInit {
 
   openDeleteDialog(company: Company): void {
     this.deleteTarget.set(company);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -130,7 +126,7 @@ export class CompaniesListComponent implements OnInit {
         this.companies.update((list) => list.filter((item) => item.companyId !== company.companyId));
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('companies.deleteSuccess'));
+        this.toast.success(this.language.translate('companies.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

@@ -150,7 +150,7 @@ export class StockReceivingFormComponent implements OnInit {
     this.loading.set(true);
     this.service.getById(id).subscribe({
       next: (d) => {
-        this.isReadOnly.set(isStockDocPosted(d.status, d.datePosted));
+        this.isReadOnly.set(isStockDocPosted(d.status, d.datePosted, { kind: 'receiving' }));
         this.form.patchValue({
           receivingNumber: d.receivingNumber ?? '',
           receivingDate: d.receivingDate?.slice(0, 10) ?? this.today(),

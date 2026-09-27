@@ -17,6 +17,7 @@ import { AccountingPeriodsService } from '../../../../core/services/accounting-p
 import { BranchesService } from '../../../../core/services/branches.service';
 import { CustomersService } from '../../../../core/services/customers.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { SalesInvoicesService } from '../../../../core/services/sales-invoices.service';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -34,6 +35,7 @@ export class SalesInvoicesListComponent implements OnInit {
   private customersService = inject(CustomersService);
   private accountingPeriodsService = inject(AccountingPeriodsService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   readonly SalesInvoiceStatus = SalesInvoiceStatus;
 
@@ -43,7 +45,6 @@ export class SalesInvoicesListComponent implements OnInit {
   openPeriods = signal<AccountingPeriodLookup[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<InvoiceFilter>('all');
   statusFilter = signal<number | null>(null);
@@ -79,11 +80,6 @@ export class SalesInvoicesListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadBranches();
     this.loadCustomers();
     this.loadInvoices();
@@ -217,7 +213,7 @@ export class SalesInvoicesListComponent implements OnInit {
   openPostDialog(invoice: SalesInvoiceListItem): void {
     this.postTarget.set(invoice);
     this.postForm.reset({ periodId: null, responsibleName: '' });
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
     this.loadOpenPeriods();
   }
@@ -269,7 +265,7 @@ export class SalesInvoicesListComponent implements OnInit {
         next: () => {
           this.posting.set(false);
           this.postTarget.set(null);
-          this.successMessage.set(this.language.translate('salesInvoices.postSuccess'));
+          this.toast.success(this.language.translate('salesInvoices.postSuccess'));
           this.loadInvoices();
         },
         error: (error) => {
@@ -283,7 +279,7 @@ export class SalesInvoicesListComponent implements OnInit {
 
   openCancelDialog(invoice: SalesInvoiceListItem): void {
     this.cancelTarget.set(invoice);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -304,7 +300,7 @@ export class SalesInvoicesListComponent implements OnInit {
       next: () => {
         this.cancelling.set(false);
         this.cancelTarget.set(null);
-        this.successMessage.set(this.language.translate('salesInvoices.cancelSuccess'));
+        this.toast.success(this.language.translate('salesInvoices.cancelSuccess'));
         this.loadInvoices();
       },
       error: (error) => {

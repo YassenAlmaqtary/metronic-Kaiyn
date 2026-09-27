@@ -9,6 +9,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { StoresService } from '../../../../core/services/stores.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -25,13 +26,13 @@ export class WarehousesListComponent implements OnInit {
   private storesService = inject(StoresService);
   private branchesService = inject(BranchesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   stores = signal<Store[]>([]);
   branches = signal<Branch[]>([]);
   loading = signal(true);
   actionLoading = signal(false);
-  errorMessage = signal('');
-  successMessage = signal('');
+  errorMessage = signal('');
   searchTerm = signal('');
   filter = signal<WarehouseFilter>('all');
   branchFilter = signal<number | null>(null);
@@ -101,11 +102,6 @@ export class WarehousesListComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadBranches();
     this.loadStores();
   }
@@ -181,7 +177,7 @@ export class WarehousesListComponent implements OnInit {
 
   openDeleteDialog(store: Store): void {
     this.deleteTarget.set(store);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -204,7 +200,7 @@ export class WarehousesListComponent implements OnInit {
         this.stores.update((list) => list.filter((row) => row.storeId !== store.storeId));
         this.actionLoading.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('warehouses.deleteSuccess'));
+        this.toast.success(this.language.translate('warehouses.deleteSuccess'));
       },
       error: (error) => {
         this.actionLoading.set(false);

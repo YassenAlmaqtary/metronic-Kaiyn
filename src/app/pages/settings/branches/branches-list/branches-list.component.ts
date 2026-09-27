@@ -8,6 +8,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -20,11 +21,11 @@ import { downloadCsv } from '../../../../core/utils/download-csv';
 export class BranchesListComponent implements OnInit {
   private branchesService = inject(BranchesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   branches = signal<Branch[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   deleteTarget = signal<Branch | null>(null);
   deleting = signal(false);
@@ -52,11 +53,6 @@ export class BranchesListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadBranches();
   }
 
@@ -106,7 +102,7 @@ export class BranchesListComponent implements OnInit {
 
   openDeleteDialog(branch: Branch): void {
     this.deleteTarget.set(branch);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -128,7 +124,7 @@ export class BranchesListComponent implements OnInit {
         this.branches.update((list) => list.filter((item) => item.id !== branch.id));
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('branches.deleteSuccess'));
+        this.toast.success(this.language.translate('branches.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

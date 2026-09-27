@@ -9,6 +9,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { ReceiptVouchersService } from '../../../../core/services/receipt-vouchers.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -26,13 +27,13 @@ export class ReceiptVouchersListComponent implements OnInit {
   private receiptVouchersService = inject(ReceiptVouchersService);
   private branchesService = inject(BranchesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   vouchers = signal<ReceiptVoucher[]>([]);
   branches = signal<Branch[]>([]);
   loading = signal(true);
   actionLoading = signal(false);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<VoucherFilter>('all');
   branchFilter = signal<number | null>(null);
@@ -92,11 +93,6 @@ export class ReceiptVouchersListComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.branchesService.getAll().subscribe({
       next: (items) => this.branches.set(items),
       error: () => this.branches.set([]),
@@ -169,7 +165,7 @@ export class ReceiptVouchersListComponent implements OnInit {
   openActionDialog(voucher: ReceiptVoucher, action: VoucherAction): void {
     this.actionTarget.set(voucher);
     this.actionType.set(action);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -219,7 +215,7 @@ export class ReceiptVouchersListComponent implements OnInit {
     this.actionLoading.set(false);
     this.actionTarget.set(null);
     this.actionType.set(null);
-    this.successMessage.set(this.language.translate(messageKey));
+    this.toast.success(this.language.translate(messageKey));
   }
 
   private failAction(

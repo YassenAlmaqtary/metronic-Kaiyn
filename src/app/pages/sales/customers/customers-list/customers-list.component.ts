@@ -7,6 +7,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { CustomersService } from '../../../../core/services/customers.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -21,11 +22,11 @@ type CustomerFilter = 'all' | 'active';
 export class CustomersListComponent implements OnInit {
   private customersService = inject(CustomersService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   customers = signal<Customer[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<CustomerFilter>('all');
   deleteTarget = signal<Customer | null>(null);
@@ -60,11 +61,6 @@ export class CustomersListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadCustomers();
   }
 
@@ -125,7 +121,7 @@ export class CustomersListComponent implements OnInit {
 
   openDeleteDialog(customer: Customer): void {
     this.deleteTarget.set(customer);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -149,7 +145,7 @@ export class CustomersListComponent implements OnInit {
         );
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('customers.deleteSuccess'));
+        this.toast.success(this.language.translate('customers.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

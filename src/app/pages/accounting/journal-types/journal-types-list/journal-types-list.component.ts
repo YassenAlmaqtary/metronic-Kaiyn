@@ -7,6 +7,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { JournalTypesService } from '../../../../core/services/journal-types.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -21,11 +22,11 @@ type JournalTypeFilter = 'all' | 'active';
 export class JournalTypesListComponent implements OnInit {
   private journalTypesService = inject(JournalTypesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   journalTypes = signal<JournalType[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<JournalTypeFilter>('all');
   deleteTarget = signal<JournalType | null>(null);
@@ -52,11 +53,6 @@ export class JournalTypesListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadJournalTypes();
   }
 
@@ -112,7 +108,7 @@ export class JournalTypesListComponent implements OnInit {
 
   openDeleteDialog(item: JournalType): void {
     this.deleteTarget.set(item);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -136,7 +132,7 @@ export class JournalTypesListComponent implements OnInit {
         );
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('journalTypes.deleteSuccess'));
+        this.toast.success(this.language.translate('journalTypes.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

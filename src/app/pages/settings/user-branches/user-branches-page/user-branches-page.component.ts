@@ -10,6 +10,7 @@ import { TranslationKey } from '../../../../core/i18n';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../../core/services/branches.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { RolesService } from '../../../../core/services/roles.service';
 import { UserBranchesService } from '../../../../core/services/user-branches.service';
 import { UsersService } from '../../../../core/services/users.service';
@@ -27,6 +28,7 @@ export class UserBranchesPageComponent implements OnInit {
   private branchesService = inject(BranchesService);
   private rolesService = inject(RolesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   users = signal<User[]>([]);
   branches = signal<Branch[]>([]);
@@ -45,8 +47,7 @@ export class UserBranchesPageComponent implements OnInit {
   deleting = signal(false);
   deleteTarget = signal<UserBranchDto | null>(null);
 
-  errorMessage = signal('');
-  successMessage = signal('');
+  errorMessage = signal('');
 
   availableBranches = computed(() => {
     const assignedIds = new Set(this.assignments().map((item) => item.branchId));
@@ -113,7 +114,7 @@ export class UserBranchesPageComponent implements OnInit {
 
   onUserChange(userId: number | null): void {
     this.selectedUserId.set(userId);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
     this.resetAddForm();
 
@@ -167,7 +168,7 @@ export class UserBranchesPageComponent implements OnInit {
 
     this.saving.set(true);
     this.errorMessage.set('');
-    this.successMessage.set('');
+    
 
     this.userBranchesService
       .create({
@@ -179,7 +180,7 @@ export class UserBranchesPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.successMessage.set(this.t('userBranches.createSuccess'));
+          this.toast.success(this.t('userBranches.createSuccess'));
           this.resetAddForm();
           this.loadAssignments(userId);
         },
@@ -200,12 +201,12 @@ export class UserBranchesPageComponent implements OnInit {
 
     this.settingDefaultId.set(item.userBranchId);
     this.errorMessage.set('');
-    this.successMessage.set('');
+    
 
     this.userBranchesService.setDefault(userId, item.branchId).subscribe({
       next: () => {
         this.settingDefaultId.set(null);
-        this.successMessage.set(this.t('userBranches.setDefaultSuccess'));
+        this.toast.success(this.t('userBranches.setDefaultSuccess'));
         this.loadAssignments(userId);
       },
       error: (error) => {
@@ -219,7 +220,7 @@ export class UserBranchesPageComponent implements OnInit {
 
   openDeleteDialog(item: UserBranchDto): void {
     this.deleteTarget.set(item);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -241,7 +242,7 @@ export class UserBranchesPageComponent implements OnInit {
       next: () => {
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.t('userBranches.deleteSuccess'));
+        this.toast.success(this.t('userBranches.deleteSuccess'));
         this.loadAssignments(userId);
       },
       error: (error) => {

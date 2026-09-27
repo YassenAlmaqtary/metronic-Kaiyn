@@ -9,10 +9,7 @@
 		</div>
 	</div>
 
-	@if (successMessage()) {
-		<div class="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-700">{{ successMessage() }}</div>
-	}
-	@if (errorMessage()) {
+		@if (errorMessage()) {
 		<div class="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">{{ errorMessage() }}</div>
 	}
 

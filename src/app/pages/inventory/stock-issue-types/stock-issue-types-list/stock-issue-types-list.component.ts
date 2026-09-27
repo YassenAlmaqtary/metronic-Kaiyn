@@ -7,6 +7,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslationKey } from '../../../../core/i18n';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { StockIssueTypesService } from '../../../../core/services/stock-issue-types.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -21,11 +22,11 @@ type IssueTypeFilter = 'all' | 'active';
 export class StockIssueTypesListComponent implements OnInit {
   private stockIssueTypesService = inject(StockIssueTypesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   types = signal<StockIssueType[]>([]);
   loading = signal(true);
-  errorMessage = signal('');
-  successMessage = signal('');
+  errorMessage = signal('');
   searchTerm = signal('');
   filter = signal<IssueTypeFilter>('all');
   deleteTarget = signal<StockIssueType | null>(null);
@@ -60,11 +61,6 @@ export class StockIssueTypesListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadTypes();
   }
 
@@ -133,7 +129,7 @@ export class StockIssueTypesListComponent implements OnInit {
 
   openDeleteDialog(item: StockIssueType): void {
     this.deleteTarget.set(item);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -157,7 +153,7 @@ export class StockIssueTypesListComponent implements OnInit {
         );
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.t('stockIssueTypes.deleteSuccess'));
+        this.toast.success(this.t('stockIssueTypes.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

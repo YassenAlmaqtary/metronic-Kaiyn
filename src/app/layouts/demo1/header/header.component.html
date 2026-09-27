@@ -10,13 +10,18 @@
 					<i class="ki-filled ki-menu">
 					</i>
 				</button>
-				<button class="kt-btn kt-btn-icon kt-btn-ghost" data-kt-drawer-toggle="#mega_menu_wrapper">
-					<i class="ki-filled ki-burger-menu-2">
-					</i>
-				</button>
+				@if (showHeaderMegaTabs) {
+					<button class="kt-btn kt-btn-icon kt-btn-ghost" data-kt-drawer-toggle="#mega_menu_wrapper">
+						<i class="ki-filled ki-burger-menu-2">
+						</i>
+					</button>
+				}
 			</div>
 		</div>
 		<!-- End of Mobile Logo -->
+		<!-- Header mega tabs (الرئيسية / الملفات / حسابي / الشبكة / المتجر / المصادقة / المساعدة)
+		     Hidden for now — set showHeaderMegaTabs = true in header.component.ts to restore. -->
+		@if (showHeaderMegaTabs) {
 		<!--Megamenu Contaoner-->
 		<div class="flex items-stretch" id="megaMenuContainer">
 			<!--Megamenu Inner-->
@@ -1832,8 +1837,15 @@
 			<!--End of Megamenu Inner-->
 		</div>
 		<!--End of Megamenu Contaoner-->
+		}
+
+		<!-- Keep topbar on the far side (not in the mega-tabs slot next to the sidebar). -->
+		@if (!showHeaderMegaTabs) {
+			<div class="hidden lg:block flex-1 min-w-0" aria-hidden="true"></div>
+		}
+
 		<!-- Topbar -->
-		<div class="flex items-center gap-2.5">
+		<div class="flex items-center gap-2.5 shrink-0 ms-auto">
 			<app-language-toggle></app-language-toggle>
 			<app-theme-toggle></app-theme-toggle>
 		<!-- Search -->

@@ -7,6 +7,7 @@ import { OpeningBalance } from '../../../../core/api/models/opening-balance.mode
 import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.util';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { OpeningBalancesService } from '../../../../core/services/opening-balances.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -23,12 +24,12 @@ type OpeningBalanceAction = 'delete' | 'post';
 export class OpeningBalancesListComponent implements OnInit {
   private openingBalancesService = inject(OpeningBalancesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   items = signal<OpeningBalance[]>([]);
   loading = signal(true);
   actionLoading = signal(false);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<OpeningBalanceFilter>('all');
   actionTarget = signal<OpeningBalance | null>(null);
@@ -64,11 +65,6 @@ export class OpeningBalancesListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadItems();
   }
 
@@ -133,7 +129,7 @@ export class OpeningBalancesListComponent implements OnInit {
   openActionDialog(item: OpeningBalance, action: OpeningBalanceAction): void {
     this.actionTarget.set(item);
     this.actionType.set(action);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -183,7 +179,7 @@ export class OpeningBalancesListComponent implements OnInit {
     this.actionLoading.set(false);
     this.actionTarget.set(null);
     this.actionType.set(null);
-    this.successMessage.set(this.language.translate(messageKey));
+    this.toast.success(this.language.translate(messageKey));
   }
 
   private failAction(

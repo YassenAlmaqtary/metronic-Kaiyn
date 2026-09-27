@@ -6,6 +6,7 @@ import { Salesman } from '../../../../core/api/models/salesman.models';
 import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.util';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { SalesmenService } from '../../../../core/services/salesmen.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -21,11 +22,11 @@ type SalesmanFilter = 'all' | 'active';
 export class SalesmenListComponent implements OnInit {
   private salesmenService = inject(SalesmenService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   salesmen = signal<Salesman[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<SalesmanFilter>('all');
   deleteTarget = signal<Salesman | null>(null);
@@ -52,11 +53,6 @@ export class SalesmenListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadSalesmen();
   }
 
@@ -117,7 +113,7 @@ export class SalesmenListComponent implements OnInit {
 
   openDeleteDialog(salesman: Salesman): void {
     this.deleteTarget.set(salesman);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -141,7 +137,7 @@ export class SalesmenListComponent implements OnInit {
         );
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('salesmen.deleteSuccess'));
+        this.toast.success(this.language.translate('salesmen.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

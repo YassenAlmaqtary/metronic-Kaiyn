@@ -11,6 +11,7 @@ import { TranslationKey } from '../../../../core/i18n';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { ItemAccountingPoliciesService } from '../../../../core/services/item-accounting-policies.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -24,11 +25,11 @@ type PolicyFilter = 'all' | 'active';
 export class ItemAccountingPoliciesListComponent implements OnInit {
   private policiesService = inject(ItemAccountingPoliciesService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   policies = signal<ItemAccountingPolicy[]>([]);
   loading = signal(true);
-  errorMessage = signal('');
-  successMessage = signal('');
+  errorMessage = signal('');
   searchTerm = signal('');
   filter = signal<PolicyFilter>('all');
   deleteTarget = signal<ItemAccountingPolicy | null>(null);
@@ -61,11 +62,6 @@ export class ItemAccountingPoliciesListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadPolicies();
   }
 
@@ -140,7 +136,7 @@ export class ItemAccountingPoliciesListComponent implements OnInit {
 
   openDeleteDialog(item: ItemAccountingPolicy): void {
     this.deleteTarget.set(item);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -164,7 +160,7 @@ export class ItemAccountingPoliciesListComponent implements OnInit {
         );
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.t('itemAccountingPolicies.deleteSuccess'));
+        this.toast.success(this.t('itemAccountingPolicies.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

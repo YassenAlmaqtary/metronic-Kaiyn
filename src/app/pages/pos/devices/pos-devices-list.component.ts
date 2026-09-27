@@ -8,6 +8,7 @@ import { extractApiErrorMessage } from '../../../core/api/utils/api-response.uti
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { BranchesService } from '../../../core/services/branches.service';
 import { LanguageService } from '../../../core/services/language.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { PosService } from '../../../core/services/pos.service';
 import { StoresService } from '../../../core/services/stores.service';
 import { csvExportFilename } from '../../../core/utils/csv-export-filename';
@@ -23,14 +24,14 @@ export class PosDevicesListComponent implements OnInit {
   private branchesService = inject(BranchesService);
   private storesService = inject(StoresService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   devices = signal<PosDevice[]>([]);
   branches = signal<Branch[]>([]);
   stores = signal<Store[]>([]);
   loading = signal(true);
   saving = signal(false);
-  errorMessage = signal('');
-  successMessage = signal('');
+  errorMessage = signal('');
   searchTerm = signal('');
   showForm = signal(false);
 
@@ -101,7 +102,7 @@ export class PosDevicesListComponent implements OnInit {
     this.formBranchId.set(this.branches()[0]?.branchId ?? null);
     this.formStoreId.set(this.stores()[0]?.storeId ?? null);
     this.showForm.set(true);
-    this.successMessage.set('');
+    
   }
 
   exportCsv(): void {
@@ -143,7 +144,7 @@ export class PosDevicesListComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.showForm.set(false);
-        this.successMessage.set(this.language.translate('posAdmin.devices.saveSuccess'));
+        this.toast.success(this.language.translate('posAdmin.devices.saveSuccess'));
         this.load();
       },
       error: (err) => {
@@ -162,7 +163,7 @@ export class PosDevicesListComponent implements OnInit {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.successMessage.set(this.language.translate('posAdmin.devices.saveSuccess'));
+          this.toast.success(this.language.translate('posAdmin.devices.saveSuccess'));
           this.load();
         },
         error: (err) => {

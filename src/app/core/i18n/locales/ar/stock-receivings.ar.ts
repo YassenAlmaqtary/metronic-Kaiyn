@@ -10,6 +10,7 @@ export const stockReceivingsAr = {
   'stockReceivings.posted': 'مرحّل',
   'stockReceivings.post': 'ترحيل',
   'stockReceivings.delete': 'حذف',
+  'stockReceivings.deleteTitle': 'تأكيد الحذف',
   'stockReceivings.deleteConfirm': 'هل تريد حذف هذا الاستلام المعلّق؟',
   'stockReceivings.search': 'بحث في الاستلامات...',
   'stockReceivings.loading': 'جارٍ التحميل...',

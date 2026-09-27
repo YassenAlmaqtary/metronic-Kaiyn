@@ -7,6 +7,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { AccountGroupsService } from '../../../../core/services/account-groups.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -19,11 +20,11 @@ import { downloadCsv } from '../../../../core/utils/download-csv';
 export class AccountGroupsListComponent implements OnInit {
   private accountGroupsService = inject(AccountGroupsService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   accountGroups = signal<AccountGroup[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   deleteTarget = signal<AccountGroup | null>(null);
   deleting = signal(false);
@@ -44,11 +45,6 @@ export class AccountGroupsListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadAccountGroups();
   }
 
@@ -87,7 +83,7 @@ export class AccountGroupsListComponent implements OnInit {
 
   openDeleteDialog(group: AccountGroup): void {
     this.deleteTarget.set(group);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -109,7 +105,7 @@ export class AccountGroupsListComponent implements OnInit {
         this.accountGroups.update((list) => list.filter((item) => item.groupId !== group.groupId));
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('accountGroups.deleteSuccess'));
+        this.toast.success(this.language.translate('accountGroups.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

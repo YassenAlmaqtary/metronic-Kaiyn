@@ -10,6 +10,7 @@ export const stockReceivingsEn = {
   'stockReceivings.posted': 'Posted',
   'stockReceivings.post': 'Post',
   'stockReceivings.delete': 'Delete',
+  'stockReceivings.deleteTitle': 'Confirm deletion',
   'stockReceivings.deleteConfirm': 'Delete this pending receiving?',
   'stockReceivings.search': 'Search receivings...',
   'stockReceivings.loading': 'Loading...',

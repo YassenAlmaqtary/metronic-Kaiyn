@@ -7,6 +7,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { User } from '../../../../core/api/models/user.models';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { UsersService } from '../../../../core/services/users.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -20,11 +21,11 @@ import { downloadCsv } from '../../../../core/utils/download-csv';
 export class UsersListComponent implements OnInit {
   private usersService = inject(UsersService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   users = signal<User[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   deleteTarget = signal<User | null>(null);
   deleting = signal(false);
@@ -45,11 +46,6 @@ export class UsersListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadUsers();
   }
 
@@ -99,7 +95,7 @@ export class UsersListComponent implements OnInit {
 
   openDeleteDialog(user: User): void {
     this.deleteTarget.set(user);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -121,7 +117,7 @@ export class UsersListComponent implements OnInit {
         this.users.update((list) => list.filter((item) => item.userId !== user.userId));
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('users.deleteSuccess'));
+        this.toast.success(this.language.translate('users.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

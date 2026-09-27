@@ -9,6 +9,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { AccountingPeriodsService } from '../../../../core/services/accounting-periods.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -25,12 +26,12 @@ export class AccountingPeriodsListComponent implements OnInit {
   private accountingPeriodsService = inject(AccountingPeriodsService);
   private auth = inject(AuthService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   periods = signal<AccountingPeriod[]>([]);
   loading = signal(true);
   actionLoading = signal(false);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<PeriodFilter>('all');
   actionTarget = signal<AccountingPeriod | null>(null);
@@ -59,11 +60,6 @@ export class AccountingPeriodsListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadPeriods();
   }
 
@@ -118,7 +114,7 @@ export class AccountingPeriodsListComponent implements OnInit {
   openActionDialog(period: AccountingPeriod, action: PeriodAction): void {
     this.actionTarget.set(period);
     this.actionType.set(action);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -188,7 +184,7 @@ export class AccountingPeriodsListComponent implements OnInit {
     this.actionLoading.set(false);
     this.actionTarget.set(null);
     this.actionType.set(null);
-    this.successMessage.set(this.language.translate(messageKey));
+    this.toast.success(this.language.translate(messageKey));
   }
 
   private failAction(

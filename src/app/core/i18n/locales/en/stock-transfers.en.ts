@@ -43,6 +43,8 @@ export const stockTransfersEn = {
   'stockTransfers.back': 'Back',
   'stockTransfers.save': 'Save',
   'stockTransfers.postAfterSave': 'Posting is available from the list after saving.',
+  'stockTransfers.postTitle': 'Confirm posting',
+  'stockTransfers.deleteTitle': 'Confirm deletion',
   'stockTransfers.postConfirm': 'Are you sure you want to post this stock transfer?',
   'stockTransfers.deleteConfirm': 'Are you sure you want to delete this stock transfer?',
   'stockTransfers.saveSuccess': 'Stock transfer saved successfully',

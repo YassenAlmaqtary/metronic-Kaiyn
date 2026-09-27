@@ -7,6 +7,7 @@ import { SystemLog } from '../../../../core/api/models/system-log.models';
 import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.util';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { SystemLogService } from '../../../../core/services/system-log.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -20,11 +21,11 @@ import { downloadCsv } from '../../../../core/utils/download-csv';
 export class SystemLogsListComponent implements OnInit {
   private systemLogService = inject(SystemLogService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   logs = signal<SystemLog[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
 
   selectedLog = signal<SystemLog | null>(null);
@@ -47,11 +48,6 @@ export class SystemLogsListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadLogs();
   }
 
@@ -103,7 +99,7 @@ export class SystemLogsListComponent implements OnInit {
     this.selectedLog.set(null);
     this.detailsError.set('');
     this.detailsLoading.set(true);
-    this.successMessage.set('');
+    
 
     this.systemLogService.getById(log.logID).subscribe({
       next: (details) => {

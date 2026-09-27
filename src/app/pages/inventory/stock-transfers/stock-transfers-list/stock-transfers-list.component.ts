@@ -8,6 +8,7 @@ import { StockTransferListItem } from '../../../../core/api/models/stock-transfe
 import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.util';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { StockTransfersService } from '../../../../core/services/stock-transfers.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -23,14 +24,17 @@ type ListFilter = 'all' | 'pending';
 export class StockTransfersListComponent implements OnInit {
   private service = inject(StockTransfersService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   transfers = signal<StockTransferListItem[]>([]);
   loading = signal(false);
   actionLoading = signal<number | null>(null);
+  actionBusy = signal(false);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<ListFilter>('all');
+  actionType = signal<'post' | 'delete' | null>(null);
+  actionTarget = signal<StockTransferListItem | null>(null);
 
   filtered = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -52,11 +56,6 @@ export class StockTransfersListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const state = history.state as { successMessage?: string };
-    if (state.successMessage) {
-      this.successMessage.set(state.successMessage);
-      history.replaceState({}, '');
-    }
     this.load();
   }
 
@@ -87,11 +86,11 @@ export class StockTransfersListComponent implements OnInit {
   }
 
   isPending(x: StockTransferListItem): boolean {
-    return isStockDocPending(x.status, x.datePosted);
+    return isStockDocPending(x.status, x.datePosted, { kind: 'transfer' });
   }
 
   statusKey(status?: number, datePosted?: string | null): string {
-    return isStockDocPosted(status, datePosted)
+    return isStockDocPosted(status, datePosted, { kind: 'transfer' })
       ? 'stockTransfers.status.posted'
       : 'stockTransfers.status.pending';
   }
@@ -123,34 +122,50 @@ export class StockTransfersListComponent implements OnInit {
   }
 
   post(x: StockTransferListItem): void {
-    if (!confirm(this.language.translate('stockTransfers.postConfirm'))) {
-      return;
-    }
-    this.run(x.transferId, () => this.service.post(x.transferId), 'stockTransfers.postSuccess');
+    this.openActionDialog(x, 'post');
   }
 
   delete(x: StockTransferListItem): void {
-    if (!confirm(this.language.translate('stockTransfers.deleteConfirm'))) {
-      return;
-    }
-    this.run(x.transferId, () => this.service.delete(x.transferId), 'stockTransfers.deleteSuccess');
+    this.openActionDialog(x, 'delete');
   }
 
-  private run(
-    id: number,
-    action: () => ReturnType<StockTransfersService['post']> | ReturnType<StockTransfersService['delete']>,
-    key: string,
-  ): void {
-    this.actionLoading.set(id);
+  openActionDialog(x: StockTransferListItem, action: 'post' | 'delete'): void {
+    this.actionTarget.set(x);
+    this.actionType.set(action);
+  }
+
+  closeActionDialog(): void {
+    if (this.actionBusy()) {
+      return;
+    }
+    this.actionType.set(null);
+    this.actionTarget.set(null);
+  }
+
+  confirmAction(): void {
+    const action = this.actionType();
+    const x = this.actionTarget();
+    if (!action || !x) {
+      return;
+    }
+    const id = x.transferId;
+    const request = action === 'post' ? this.service.post(id) : this.service.delete(id);
+    const key = action === 'post' ? 'stockTransfers.postSuccess' : 'stockTransfers.deleteSuccess';
+    this.actionBusy.set(true);
     this.errorMessage.set('');
-    action().subscribe({
+    
+    request.subscribe({
       next: () => {
-        this.actionLoading.set(null);
-        this.successMessage.set(this.language.translate(key));
+        this.actionBusy.set(false);
+        this.actionType.set(null);
+        this.actionTarget.set(null);
+        this.toast.success(this.language.translate(key));
         this.load();
       },
       error: (e) => {
-        this.actionLoading.set(null);
+        this.actionBusy.set(false);
+        this.actionType.set(null);
+        this.actionTarget.set(null);
         this.errorMessage.set(
           extractApiErrorMessage(e, this.language.translate('stockTransfers.loadError')),
         );

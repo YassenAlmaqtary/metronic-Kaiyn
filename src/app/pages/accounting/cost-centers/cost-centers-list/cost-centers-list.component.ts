@@ -7,6 +7,7 @@ import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { CostCentersService } from '../../../../core/services/cost-centers.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
 
@@ -21,11 +22,11 @@ type CostCenterFilter = 'all' | 'active';
 export class CostCentersListComponent implements OnInit {
   private costCentersService = inject(CostCentersService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   costCenters = signal<CostCenter[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<CostCenterFilter>('all');
   deleteTarget = signal<CostCenter | null>(null);
@@ -52,11 +53,6 @@ export class CostCentersListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadCostCenters();
   }
 
@@ -107,7 +103,7 @@ export class CostCentersListComponent implements OnInit {
 
   openDeleteDialog(item: CostCenter): void {
     this.deleteTarget.set(item);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -131,7 +127,7 @@ export class CostCentersListComponent implements OnInit {
         );
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('costCenters.deleteSuccess'));
+        this.toast.success(this.language.translate('costCenters.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);

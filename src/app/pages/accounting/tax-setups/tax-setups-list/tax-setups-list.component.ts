@@ -7,6 +7,7 @@ import { TaxSetup } from '../../../../core/api/models/tax-setup.models';
 import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.util';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { TaxSetupsService } from '../../../../core/services/tax-setups.service';
 import { csvExportFilename } from '../../../../core/utils/csv-export-filename';
 import { downloadCsv } from '../../../../core/utils/download-csv';
@@ -22,11 +23,11 @@ type TaxFilter = 'all' | 'active';
 export class TaxSetupsListComponent implements OnInit {
   private taxSetupsService = inject(TaxSetupsService);
   private language = inject(LanguageService);
+  private toast = inject(ToastService);
 
   taxSetups = signal<TaxSetup[]>([]);
   loading = signal(true);
   errorMessage = signal('');
-  successMessage = signal('');
   searchTerm = signal('');
   filter = signal<TaxFilter>('all');
   deleteTarget = signal<TaxSetup | null>(null);
@@ -53,11 +54,6 @@ export class TaxSetupsListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const navState = history.state as { successMessage?: string };
-    if (navState?.successMessage) {
-      this.successMessage.set(navState.successMessage);
-      history.replaceState({}, '');
-    }
     this.loadTaxSetups();
   }
 
@@ -108,7 +104,7 @@ export class TaxSetupsListComponent implements OnInit {
 
   openDeleteDialog(item: TaxSetup): void {
     this.deleteTarget.set(item);
-    this.successMessage.set('');
+    
     this.errorMessage.set('');
   }
 
@@ -130,7 +126,7 @@ export class TaxSetupsListComponent implements OnInit {
         this.taxSetups.update((list) => list.filter((row) => row.taxSetupId !== item.taxSetupId));
         this.deleting.set(false);
         this.deleteTarget.set(null);
-        this.successMessage.set(this.language.translate('taxSetups.deleteSuccess'));
+        this.toast.success(this.language.translate('taxSetups.deleteSuccess'));
       },
       error: (error) => {
         this.deleting.set(false);
