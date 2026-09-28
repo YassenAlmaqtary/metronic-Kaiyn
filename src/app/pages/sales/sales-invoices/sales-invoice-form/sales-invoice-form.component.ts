@@ -9,12 +9,13 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { merge } from 'rxjs';
+import { catchError, merge, of } from 'rxjs';
 
 import { Branch } from '../../../../core/api/models/branch.models';
 import { Currency } from '../../../../core/api/models/currency.models';
 import { Customer } from '../../../../core/api/models/customer.models';
 import { ProductLookup, ProductUnit } from '../../../../core/api/models/product.models';
+import { ProductBatch } from '../../../../core/api/models/pos.models';
 import {
   SalesInvoiceDetail,
   SalesInvoiceStatus,
@@ -30,6 +31,7 @@ import { BranchesService } from '../../../../core/services/branches.service';
 import { CurrenciesService } from '../../../../core/services/currencies.service';
 import { CustomersService } from '../../../../core/services/customers.service';
 import { LanguageService } from '../../../../core/services/language.service';
+import { PosService } from '../../../../core/services/pos.service';
 import { ProductsService } from '../../../../core/services/products.service';
 import { SalesInvoicesService } from '../../../../core/services/sales-invoices.service';
 import { SalesmenService } from '../../../../core/services/salesmen.service';
@@ -47,6 +49,8 @@ type SalesInvoiceLineGroup = FormGroup<{
   discountAmount: FormControl<number>;
   taxAmount: FormControl<number>;
   netAmount: FormControl<number>;
+  batchNumber: FormControl<string>;
+  expiryDate: FormControl<string>;
 }>;
 
 @Component({
@@ -66,6 +70,7 @@ export class SalesInvoiceFormComponent implements OnInit {
   private salesmenService = inject(SalesmenService);
   private currenciesService = inject(CurrenciesService);
   private productsService = inject(ProductsService);
+  private posService = inject(PosService);
   private language = inject(LanguageService);
   private documentPrint = inject(DocumentPrintService);
 
@@ -87,6 +92,9 @@ export class SalesInvoiceFormComponent implements OnInit {
   currencies = signal<Currency[]>([]);
   products = signal<ProductLookup[]>([]);
   lineUnits = signal<ProductUnit[][]>([]);
+  /** Per-line product flags for batch/expiry UI */
+  lineMeta = signal<Array<{ isBatchManaged: boolean; hasExpiry: boolean }>>([]);
+  lineBatches = signal<ProductBatch[][]>([]);
 
   headerTotalBeforeDiscount = signal(0);
   headerTaxAmount = signal(0);
@@ -107,7 +115,7 @@ export class SalesInvoiceFormComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.required],
     }),
-    currencyId: new FormControl<number | null>(null),
+    currencyId: new FormControl<number | null>(null, { validators: [Validators.required] }),
     exchangeRate: new FormControl(1, { nonNullable: true }),
     discountAmount: new FormControl(0, { nonNullable: true }),
     details: new FormArray<SalesInvoiceLineGroup>([]),
@@ -119,6 +127,10 @@ export class SalesInvoiceFormComponent implements OnInit {
     this.form.controls.branchId.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((branchId) => this.onBranchChange(branchId));
+
+    this.form.controls.currencyId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((currencyId) => this.onCurrencyChange(currencyId));
 
     this.form.controls.discountAmount.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -146,25 +158,55 @@ export class SalesInvoiceFormComponent implements OnInit {
 
   loadLookups(): void {
     this.branchesService.getAll().subscribe({
-      next: (branches) => this.branches.set(branches),
+      next: (branches) => {
+        this.branches.set(branches ?? []);
+        if (!this.isEditMode() && !this.form.controls.branchId.value && branches?.length) {
+          const first = branches[0];
+          this.form.controls.branchId.setValue(first.branchId);
+        }
+      },
       error: () => this.branches.set([]),
     });
     this.customersService.getAll().subscribe({
-      next: (customers) => this.customers.set(customers),
+      next: (customers) => this.customers.set(customers ?? []),
       error: () => this.customers.set([]),
     });
     this.salesmenService.getAll().subscribe({
-      next: (salesmen) => this.salesmen.set(salesmen),
+      next: (salesmen) => this.salesmen.set(salesmen ?? []),
       error: () => this.salesmen.set([]),
     });
     this.currenciesService.getAll().subscribe({
-      next: (currencies) => this.currencies.set(currencies),
-      error: () => this.currencies.set([]),
+      next: (currencies) => {
+        this.currencies.set(currencies ?? []);
+        this.applyDefaultCurrency(currencies ?? []);
+      },
+      error: () => {
+        this.currencies.set([]);
+        this.currenciesService.getBase().subscribe({
+          next: (base) => {
+            this.currencies.set([base]);
+            this.applyDefaultCurrency([base]);
+          },
+          error: () => undefined,
+        });
+      },
     });
     this.productsService.getAll().subscribe({
-      next: (products) => this.products.set(products),
+      next: (products) => this.products.set(this.normalizeProducts(products)),
       error: () => this.products.set([]),
     });
+  }
+
+  onCurrencyChange(currencyId: number | null): void {
+    if (this.isReadOnly() || currencyId == null) {
+      return;
+    }
+    const currency = this.currencies().find((c) => c.id === currencyId);
+    if (currency?.valuesCurr != null && Number(currency.valuesCurr) > 0) {
+      this.form.controls.exchangeRate.setValue(Number(currency.valuesCurr));
+    } else if (currency?.isBaseCurrency) {
+      this.form.controls.exchangeRate.setValue(1);
+    }
   }
 
   loadInvoice(id: number): void {
@@ -281,11 +323,23 @@ export class SalesInvoiceFormComponent implements OnInit {
         discountAmount: detail.discountAmount ?? 0,
         taxAmount: detail.taxAmount ?? 0,
         netAmount: detail.netAmount ?? 0,
+        batchNumber: detail.batchNumber ?? '',
+        expiryDate: detail.expiryDate ? String(detail.expiryDate).slice(0, 10) : '',
       });
       this.details.push(line);
       this.lineUnits.update((units) => [...units, []]);
+      this.lineMeta.update((metas) => [
+        ...metas,
+        {
+          isBatchManaged: !!detail.isBatchManaged,
+          hasExpiry: !!detail.hasExpiry,
+        },
+      ]);
+      this.lineBatches.update((all) => [...all, []]);
       this.bindLineChanges(line);
       this.loadUnitsForLine(this.details.controls.indexOf(line), detail.productId, detail.uomId);
+      this.loadProductLineMeta(this.details.controls.indexOf(line), detail.productId);
+      this.loadBatchesForLine(this.details.controls.indexOf(line), detail.productId, false);
     });
 
     this.recalculateHeaderTotals();
@@ -309,6 +363,8 @@ export class SalesInvoiceFormComponent implements OnInit {
       discountAmount: new FormControl(0, { nonNullable: true }),
       taxAmount: new FormControl(0, { nonNullable: true }),
       netAmount: new FormControl(0, { nonNullable: true }),
+      batchNumber: new FormControl('', { nonNullable: true }),
+      expiryDate: new FormControl('', { nonNullable: true }),
     });
   }
 
@@ -316,6 +372,8 @@ export class SalesInvoiceFormComponent implements OnInit {
     const line = this.createLineGroup();
     this.details.push(line);
     this.lineUnits.update((units) => [...units, []]);
+    this.lineMeta.update((metas) => [...metas, { isBatchManaged: false, hasExpiry: false }]);
+    this.lineBatches.update((all) => [...all, []]);
     this.bindLineChanges(line);
     this.recalculateHeaderTotals();
   }
@@ -323,7 +381,55 @@ export class SalesInvoiceFormComponent implements OnInit {
   removeLine(index: number): void {
     this.details.removeAt(index);
     this.lineUnits.update((units) => units.filter((_, i) => i !== index));
+    this.lineMeta.update((metas) => metas.filter((_, i) => i !== index));
+    this.lineBatches.update((all) => all.filter((_, i) => i !== index));
     this.recalculateHeaderTotals();
+  }
+
+  lineNeedsBatch(index: number): boolean {
+    return !!this.lineMeta()[index]?.isBatchManaged;
+  }
+
+  lineNeedsExpiry(index: number): boolean {
+    return !!this.lineMeta()[index]?.hasExpiry;
+  }
+
+  batchesForLine(index: number): ProductBatch[] {
+    return this.lineBatches()[index] ?? [];
+  }
+
+  onBatchPick(index: number, event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    const line = this.details.at(index);
+    if (!line) {
+      return;
+    }
+    if (!value) {
+      line.patchValue({ batchNumber: '', expiryDate: '' }, { emitEvent: false });
+      return;
+    }
+    const batch = this.batchesForLine(index).find((b) => this.batchKey(b) === value);
+    if (!batch) {
+      return;
+    }
+    line.patchValue(
+      {
+        batchNumber: batch.batchNumber ?? '',
+        expiryDate: batch.expiryDate ? String(batch.expiryDate).slice(0, 10) : '',
+      },
+      { emitEvent: false },
+    );
+  }
+
+  batchKey(batch: ProductBatch): string {
+    return `${batch.batchNumber ?? ''}|${batch.expiryDate ? String(batch.expiryDate).slice(0, 10) : ''}`;
+  }
+
+  batchLabel(batch: ProductBatch): string {
+    const batchNo = batch.batchNumber?.trim() || 'بدون تشغيلة';
+    const expiry = batch.expiryDate ? String(batch.expiryDate).slice(0, 10) : 'بدون صلاحية';
+    const qty = Number(batch.availableQty ?? 0);
+    return `${batchNo} — ${expiry} (متاح ${qty})`;
   }
 
   bindLineChanges(line: SalesInvoiceLineGroup): void {
@@ -346,38 +452,71 @@ export class SalesInvoiceFormComponent implements OnInit {
         }
 
         if (productId == null) {
-          this.lineUnits.update((units) => {
-            const next = [...units];
-            next[index] = [];
-            return next;
-          });
-          line.controls.uomId.setValue(null);
+          this.setLineUnits(index, []);
+          this.setLineMeta(index, { isBatchManaged: false, hasExpiry: false });
+          line.patchValue(
+            {
+              uomId: null,
+              unitPrice: 0,
+              discountRate: 0,
+              taxRate: 0,
+              batchNumber: '',
+              expiryDate: '',
+            },
+            { emitEvent: false },
+          );
+          this.recalculateLine(line);
           return;
         }
-        const product = this.products().find((item) => item.productId === productId);
+
+        // إعادة ضبط الحقول المرتبطة قبل الجلب حتى لا تبقى قيم صنف سابق
+        line.patchValue(
+          {
+            unitPrice: 0,
+            discountRate: 0,
+            batchNumber: '',
+            expiryDate: '',
+          },
+          { emitEvent: false },
+        );
+
+        const product = this.products().find((item) => Number(item.productId) === Number(productId));
         if (product?.taxRate != null) {
-          line.controls.taxRate.setValue(product.taxRate);
+          line.controls.taxRate.setValue(Number(product.taxRate), { emitEvent: false });
         }
-        this.loadUnitsForLine(index, productId);
+
+        this.loadUnitsForLine(index, Number(productId));
+        this.fillTaxForLine(line, Number(productId));
+        this.loadProductLineMeta(index, Number(productId));
+        this.loadBatchesForLine(index, Number(productId), true);
+      });
+
+    line.controls.uomId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((uomId) => {
+        const productId = Number(line.controls.productId.value);
+        if (!productId || uomId == null) {
+          return;
+        }
+        this.fillPriceForLine(line, productId, Number(uomId));
       });
   }
 
   loadUnitsForLine(index: number, productId: number, preserveUomId?: number): void {
-    this.productsService.getUnitsById(productId).subscribe({
-      next: (units) => {
-        this.lineUnits.update((all) => {
-          const next = [...all];
-          next[index] = units;
-          return next;
-        });
+    this.productsService
+      .getUnitsById(productId)
+      .pipe(catchError(() => of([] as ProductUnit[])))
+      .subscribe((raw) => {
+        const units = this.normalizeUnits(raw);
+        this.setLineUnits(index, units);
 
         const line = this.details.at(index);
-        if (!line) {
+        if (!line || Number(line.controls.productId.value) !== productId) {
           return;
         }
 
         if (preserveUomId != null && units.some((unit) => unit.unitId === preserveUomId)) {
-          line.controls.uomId.setValue(preserveUomId);
+          line.controls.uomId.setValue(preserveUomId, { emitEvent: false });
           return;
         }
 
@@ -385,17 +524,206 @@ export class SalesInvoiceFormComponent implements OnInit {
           units.find((unit) => unit.isSalesUnit) ??
           units.find((unit) => unit.isBaseUnit) ??
           units[0];
-        line.controls.uomId.setValue(preferred?.unitId ?? null);
+        const uomId = preferred?.unitId ?? null;
+        line.controls.uomId.setValue(uomId, { emitEvent: false });
+        if (uomId != null) {
+          this.fillPriceForLine(line, productId, uomId);
+        }
         this.recalculateLine(line);
-      },
-      error: () => {
-        this.lineUnits.update((all) => {
-          const next = [...all];
-          next[index] = [];
-          return next;
+      });
+  }
+
+  private fillPriceForLine(line: SalesInvoiceLineGroup, productId: number, unitId: number): void {
+    const branchId = this.form.controls.branchId.value ?? undefined;
+    this.posService
+      .getPrice(productId, unitId, branchId ?? undefined)
+      .pipe(catchError(() => of(0)))
+      .subscribe((posPrice) => {
+        if (Number(line.controls.productId.value) !== productId) {
+          return;
+        }
+        const price = Number(posPrice) || 0;
+        if (price > 0) {
+          line.controls.unitPrice.setValue(price);
+          this.recalculateLine(line);
+          return;
+        }
+
+        this.productsService
+          .getById(productId)
+          .pipe(catchError(() => of(null)))
+          .subscribe((product) => {
+            if (!product || Number(line.controls.productId.value) !== productId) {
+              return;
+            }
+            const fallback = Number(product.defaultSalesPrice ?? 0);
+            if (fallback > 0) {
+              line.controls.unitPrice.setValue(fallback);
+              this.recalculateLine(line);
+            }
+          });
+      });
+  }
+
+  private fillTaxForLine(line: SalesInvoiceLineGroup, productId: number): void {
+    const fromLookup = this.products().find((p) => Number(p.productId) === productId);
+    if (fromLookup?.taxRate != null && Number(fromLookup.taxRate) > 0) {
+      line.controls.taxRate.setValue(Number(fromLookup.taxRate), { emitEvent: false });
+      this.recalculateLine(line);
+      return;
+    }
+
+    this.posService
+      .getTax(productId)
+      .pipe(catchError(() => of({ taxRate: 0, isPriceInclusive: false })))
+      .subscribe((tax) => {
+        if (Number(line.controls.productId.value) !== productId) {
+          return;
+        }
+        line.controls.taxRate.setValue(Number(tax?.taxRate ?? 0), { emitEvent: false });
+        this.recalculateLine(line);
+      });
+  }
+
+  private loadProductLineMeta(index: number, productId: number): void {
+    this.productsService
+      .getById(productId)
+      .pipe(catchError(() => of(null)))
+      .subscribe((product) => {
+        if (!product || Number(this.details.at(index)?.controls.productId.value) !== productId) {
+          return;
+        }
+        this.setLineMeta(index, {
+          isBatchManaged: !!product.isBatchManaged,
+          hasExpiry: !!product.hasExpiry,
         });
-      },
+      });
+  }
+
+  private loadBatchesForLine(index: number, productId: number, autoSelect: boolean): void {
+    const storeId = this.form.controls.storeId.value;
+    if (!storeId) {
+      this.setLineBatches(index, []);
+      return;
+    }
+
+    this.posService.getBatches(productId, storeId).subscribe((batches) => {
+      if (Number(this.details.at(index)?.controls.productId.value) !== productId) {
+        return;
+      }
+      const list = Array.isArray(batches) ? batches : [];
+      this.setLineBatches(index, list);
+      const line = this.details.at(index);
+      if (!autoSelect || !line || list.length === 0) {
+        return;
+      }
+      if (line.controls.batchNumber.value || line.controls.expiryDate.value) {
+        return;
+      }
+      const first = list[0];
+      line.patchValue(
+        {
+          batchNumber: first.batchNumber ?? '',
+          expiryDate: first.expiryDate ? String(first.expiryDate).slice(0, 10) : '',
+        },
+        { emitEvent: false },
+      );
     });
+  }
+
+  private setLineBatches(index: number, batches: ProductBatch[]): void {
+    this.lineBatches.update((all) => {
+      const next = [...all];
+      while (next.length <= index) {
+        next.push([]);
+      }
+      next[index] = batches;
+      return next;
+    });
+  }
+
+  private setLineMeta(
+    index: number,
+    meta: { isBatchManaged: boolean; hasExpiry: boolean },
+  ): void {
+    this.lineMeta.update((all) => {
+      const next = [...all];
+      while (next.length <= index) {
+        next.push({ isBatchManaged: false, hasExpiry: false });
+      }
+      next[index] = meta;
+      return next;
+    });
+  }
+
+  private applyDefaultCurrency(currencies: Currency[]): void {
+    if (this.isEditMode() || this.form.controls.currencyId.value != null) {
+      return;
+    }
+    const base = currencies.find((c) => c.isBaseCurrency) ?? currencies[0];
+    if (!base) {
+      return;
+    }
+    this.form.controls.currencyId.setValue(base.id);
+    this.form.controls.exchangeRate.setValue(
+      base.isBaseCurrency ? 1 : Number(base.valuesCurr ?? 1) || 1,
+    );
+  }
+
+  private setLineUnits(index: number, units: ProductUnit[]): void {
+    this.lineUnits.update((all) => {
+      const next = [...all];
+      while (next.length <= index) {
+        next.push([]);
+      }
+      next[index] = units;
+      return next;
+    });
+  }
+
+  private normalizeUnits(raw: unknown): ProductUnit[] {
+    const list = this.asArray<ProductUnit>(raw);
+    return list
+      .map((u) => {
+        const r = u as ProductUnit & Record<string, unknown>;
+        return {
+          unitId: Number(r.unitId ?? r['UnitId'] ?? 0),
+          unitName: String(r.unitName ?? r['UnitName'] ?? ''),
+          conversionFactor: Number(r.conversionFactor ?? r['ConversionFactor'] ?? 1) || 1,
+          isBaseUnit: Boolean(r.isBaseUnit ?? r['IsBaseUnit'] ?? false),
+          isPurchasingUnit: Boolean(r.isPurchasingUnit ?? r['IsPurchasingUnit'] ?? false),
+          isSalesUnit: Boolean(r.isSalesUnit ?? r['IsSalesUnit'] ?? false),
+          barcode: (r.barcode ?? r['Barcode'] ?? null) as string | null,
+        };
+      })
+      .filter((u) => u.unitId > 0);
+  }
+
+  private normalizeProducts(raw: unknown): ProductLookup[] {
+    return this.asArray<ProductLookup>(raw).map((p) => {
+      const r = p as ProductLookup & Record<string, unknown>;
+      return {
+        productId: Number(r.productId ?? r['ProductId'] ?? r['Pro_ID'] ?? 0),
+        productName: String(r.productName ?? r['ProductName'] ?? r['Pro_Name'] ?? ''),
+        proCode: (r.proCode ?? r['ProCode'] ?? null) as string | null,
+        taxRate: (r.taxRate ?? r['TaxRate'] ?? null) as number | null,
+        groupId: (r.groupId ?? r['GroupId'] ?? null) as number | null,
+        isTax: (r.isTax ?? r['IsTax'] ?? null) as boolean | null,
+      };
+    }).filter((p) => p.productId > 0);
+  }
+
+  private asArray<T>(raw: unknown): T[] {
+    if (Array.isArray(raw)) {
+      return raw;
+    }
+    if (raw && typeof raw === 'object') {
+      const o = raw as Record<string, unknown>;
+      if (Array.isArray(o['$values'])) {
+        return o['$values'] as T[];
+      }
+    }
+    return [];
   }
 
   recalculateLine(line: SalesInvoiceLineGroup): void {
@@ -571,6 +899,21 @@ export class SalesInvoiceFormComponent implements OnInit {
       return;
     }
 
+    for (let i = 0; i < this.details.length; i++) {
+      const line = this.details.at(i);
+      if (!line) {
+        continue;
+      }
+      if (this.lineNeedsBatch(i) && !String(line.controls.batchNumber.value || '').trim()) {
+        this.errorMessage.set(this.language.translate('salesInvoices.batchRequired'));
+        return;
+      }
+      if (this.lineNeedsExpiry(i) && !String(line.controls.expiryDate.value || '').trim()) {
+        this.errorMessage.set(this.language.translate('salesInvoices.expiryRequired'));
+        return;
+      }
+    }
+
     this.saving.set(true);
     this.errorMessage.set('');
 
@@ -614,6 +957,8 @@ export class SalesInvoiceFormComponent implements OnInit {
         taxAmount: line.taxAmount,
         netAmount: line.netAmount,
         totalBeforeDiscount: line.totalBeforeDiscount,
+        batchNumber: String(line.batchNumber || '').trim() || null,
+        expiryDate: String(line.expiryDate || '').trim() || null,
       })),
     };
 

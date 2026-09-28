@@ -1,1 +1,262 @@
-<div class="kt-container-fixed pb-8"><form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-5"><div class="flex justify-between"><h1 class="text-xl font-semibold">{{'stockAdjustments.formTitle'|translate}} {{adjNo()}}</h1><div class="flex gap-2"><a class="kt-btn kt-btn-light" routerLink="/demo1/inventory/stock-adjustments">{{'stockAdjustments.cancel'|translate}}</a>@if(!readOnly()){<button class="kt-btn kt-btn-primary" [disabled]="saving()">{{'stockAdjustments.save'|translate}}</button>}</div></div>@if(errorMessage()){<div class="rounded bg-destructive/10 p-3 text-destructive">{{errorMessage()}}</div>}<div class="kt-card"><div class="kt-card-content grid grid-cols-1 md:grid-cols-3 gap-4 p-5"><label>{{'stockAdjustments.taking'|translate}}<select class="kt-input mt-1" formControlName="takingId"><option [ngValue]="null">{{'stockAdjustments.none'|translate}}</option>@for(x of availableTakings();track x.takingId){<option [ngValue]="x.takingId">{{x.takingNo}} - {{x.storeName}}</option>}</select></label><label>{{'stockAdjustments.store'|translate}}<select class="kt-input mt-1" formControlName="storeId"><option [ngValue]="null">{{'stockAdjustments.select'|translate}}</option>@for(x of stores();track x.storeId){<option [ngValue]="x.storeId">{{x.storeName}}</option>}</select></label><label>{{'stockAdjustments.date'|translate}}<input class="kt-input mt-1" type="date" formControlName="adjDate"></label><label class="md:col-span-3">{{'stockAdjustments.notes'|translate}}<input class="kt-input mt-1" formControlName="notes"></label></div></div><div class="flex gap-2"><button type="button" class="kt-btn kt-btn-primary" [disabled]="!form.controls.takingId.value||readOnly()" (click)="loadFromTaking()">{{'stockAdjustments.loadFromTaking'|translate}}</button><button type="button" class="kt-btn kt-btn-light" [disabled]="readOnly()" (click)="addLine()">{{'stockAdjustments.addLine'|translate}}</button></div><div class="kt-card"><div class="kt-card-content p-0"><div formArrayName="details" class="kt-scrollable-x-auto"><table class="kt-table"><thead><tr><th>{{'stockAdjustments.product'|translate}}</th><th>{{'stockAdjustments.unit'|translate}}</th><th>{{'stockAdjustments.oldQty'|translate}}</th><th>{{'stockAdjustments.adjQty'|translate}}</th><th>{{'stockAdjustments.newQty'|translate}}</th><th>{{'stockAdjustments.averageCost'|translate}}</th><th>{{'stockAdjustments.totalValue'|translate}}</th><th>{{'stockAdjustments.batch'|translate}}</th><th>{{'stockAdjustments.expiry'|translate}}</th><th></th></tr></thead><tbody>@for(line of details.controls;track $index;let i=$index){<tr [formGroupName]="i"><td><select class="kt-input min-w-40" formControlName="itemId"><option [ngValue]="null">{{'stockAdjustments.select'|translate}}</option>@for(x of products();track x.productId){<option [ngValue]="x.productId">{{x.productName}}</option>}</select></td><td><input class="kt-input w-20" type="number" formControlName="unitId"></td><td><input class="kt-input w-20" type="number" formControlName="oldQty" (input)="recalc(i)"></td><td><input class="kt-input w-20" type="number" formControlName="adjQty" (input)="recalc(i)"></td><td>{{line.controls['newQty'].value}}</td><td><input class="kt-input w-24" type="number" formControlName="averageCost" (input)="recalc(i)"></td><td>{{line.controls['totalValue'].value}}</td><td><input class="kt-input" formControlName="batchNumber"></td><td><input class="kt-input" type="date" formControlName="expiryDate"></td><td><button type="button" class="kt-btn kt-btn-sm kt-btn-destructive" (click)="removeLine(i)"><i class="ki-filled ki-trash"></i></button></td></tr>}</tbody></table></div></div></div></form></div>
+<div class="kt-container-fixed flex flex-col gap-5 max-w-6xl pb-10">
+	<div class="flex flex-wrap items-start justify-between gap-3">
+		<div>
+			<div class="flex items-center gap-2 text-sm text-secondary-foreground mb-1">
+				<a class="hover:text-primary" routerLink="/demo1/inventory/stock-adjustments">{{
+					'stockAdjustments.title' | translate
+				}}</a>
+				<i class="ki-filled ki-right text-xs rtl:rotate-180"></i>
+				<span class="text-mono font-medium">
+					@if (id()) {
+						{{ 'stockAdjustments.edit' | translate }}
+					} @else {
+						{{ 'stockAdjustments.create' | translate }}
+					}
+				</span>
+			</div>
+			<h1 class="text-xl font-semibold text-mono">
+				{{ 'stockAdjustments.formTitle' | translate }}
+				@if (adjNo()) {
+					<span class="text-secondary-foreground font-normal">{{ adjNo() }}</span>
+				}
+			</h1>
+		</div>
+		<div class="flex items-center gap-2">
+			<a class="kt-btn kt-btn-outline" routerLink="/demo1/inventory/stock-adjustments">{{
+				'stockAdjustments.cancel' | translate
+			}}</a>
+			@if (!readOnly()) {
+				<button
+					class="kt-btn kt-btn-primary"
+					type="button"
+					[disabled]="saving() || loading() || loadingItems()"
+					(click)="save()"
+				>
+					@if (saving()) {
+						<span
+							class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"
+						></span>
+					}
+					{{ 'stockAdjustments.save' | translate }}
+				</button>
+			}
+		</div>
+	</div>
+
+	@if (loading()) {
+		<div class="kt-card">
+			<div class="kt-card-content flex items-center justify-center gap-2 py-16 text-secondary-foreground">
+				<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'stockAdjustments.loading' | translate }}
+			</div>
+		</div>
+	} @else {
+		<form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="save()">
+			@if (readOnly()) {
+				<div class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800">
+					{{ 'stockAdjustments.readOnly' | translate }}
+				</div>
+			}
+
+			@if (errorMessage()) {
+				<div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+					{{ errorMessage() }}
+				</div>
+			}
+			@if (infoMessage()) {
+				<div class="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
+					{{ infoMessage() }}
+				</div>
+			}
+
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="border-b border-border bg-muted/30 px-5 py-3">
+					<h2 class="text-sm font-semibold text-mono">{{ 'stockAdjustments.headerFields' | translate }}</h2>
+				</div>
+				<div class="kt-card-content grid grid-cols-1 md:grid-cols-3 gap-4 p-5">
+					@if (adjNo()) {
+						<label>
+							<span class="kt-form-label">{{ 'stockAdjustments.number' | translate }}</span>
+							<input class="kt-input h-11 mt-1" [value]="adjNo()" readonly />
+						</label>
+					}
+					<label>
+						<span class="kt-form-label">{{ 'stockAdjustments.taking' | translate }}</span>
+						<select class="kt-select h-11 mt-1" formControlName="takingId">
+							<option [ngValue]="null">{{ 'stockAdjustments.none' | translate }}</option>
+							@for (x of availableTakings(); track x.takingId) {
+								<option [ngValue]="x.takingId">{{ x.takingNo }} — {{ x.storeName }}</option>
+							}
+						</select>
+					</label>
+					<label>
+						<span class="kt-form-label required">{{ 'stockAdjustments.store' | translate }}</span>
+						<select class="kt-select h-11 mt-1" formControlName="storeId">
+							<option [ngValue]="null">{{ 'stockAdjustments.select' | translate }}</option>
+							@for (x of stores(); track x.storeId) {
+								<option [ngValue]="x.storeId">{{ x.storeName }}</option>
+							}
+						</select>
+					</label>
+					<label>
+						<span class="kt-form-label required">{{ 'stockAdjustments.date' | translate }}</span>
+						<input class="kt-input h-11 mt-1" type="date" formControlName="adjDate" />
+					</label>
+					<label class="md:col-span-2">
+						<span class="kt-form-label">{{ 'stockAdjustments.notes' | translate }}</span>
+						<input class="kt-input h-11 mt-1" formControlName="notes" />
+					</label>
+				</div>
+			</div>
+
+			<div class="flex flex-wrap gap-2">
+				<button
+					type="button"
+					class="kt-btn kt-btn-primary"
+					[disabled]="readOnly() || loadingItems() || !form.controls.takingId.value"
+					(click)="loadFromTaking()"
+				>
+					@if (loadingItems()) {
+						{{ 'stockAdjustments.loadingItems' | translate }}
+					} @else {
+						{{ 'stockAdjustments.loadFromTaking' | translate }}
+					}
+				</button>
+				<button
+					type="button"
+					class="kt-btn kt-btn-light"
+					[disabled]="readOnly() || loadingItems()"
+					(click)="addLine()"
+				>
+					<i class="ki-filled ki-plus"></i>
+					{{ 'stockAdjustments.addLine' | translate }}
+				</button>
+			</div>
+
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="border-b border-border bg-muted/30 px-5 py-3 flex items-center justify-between gap-2">
+					<h2 class="text-sm font-semibold text-mono">{{ 'stockAdjustments.lines' | translate }}</h2>
+					<span class="text-xs text-secondary-foreground">{{ details.length }}</span>
+				</div>
+				<div class="kt-card-content p-0">
+					<div formArrayName="details" class="kt-scrollable-x-auto">
+						<table class="kt-table">
+							<thead>
+								<tr>
+									<th>{{ 'stockAdjustments.product' | translate }}</th>
+									<th>{{ 'stockAdjustments.unit' | translate }}</th>
+									<th>{{ 'stockAdjustments.oldQty' | translate }}</th>
+									<th>{{ 'stockAdjustments.adjQty' | translate }}</th>
+									<th>{{ 'stockAdjustments.newQty' | translate }}</th>
+									<th>{{ 'stockAdjustments.averageCost' | translate }}</th>
+									<th>{{ 'stockAdjustments.totalValue' | translate }}</th>
+									<th>{{ 'stockAdjustments.batch' | translate }}</th>
+									<th>{{ 'stockAdjustments.expiry' | translate }}</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								@for (line of details.controls; track $index; let i = $index) {
+									<tr [formGroupName]="i">
+										<td>
+											<select class="kt-select min-w-44" formControlName="itemId">
+												<option [ngValue]="null">{{ 'stockAdjustments.select' | translate }}</option>
+												@if (line.controls.itemId.value && !hasProduct(line.controls.itemId.value)) {
+													<option [ngValue]="line.controls.itemId.value">
+														{{ productLabel(line.controls.itemId.value, line.controls.itemName.value) }}
+													</option>
+												}
+												@for (x of products(); track x.productId) {
+													<option [ngValue]="x.productId">{{ x.productName }}</option>
+												}
+											</select>
+										</td>
+										<td>
+											<select class="kt-select min-w-28" formControlName="unitId">
+												<option [ngValue]="null">{{ 'stockAdjustments.select' | translate }}</option>
+												@if (
+													line.controls.unitId.value &&
+													!unitsFor(i).some((u) => u.unitId === line.controls.unitId.value)
+												) {
+													<option [ngValue]="line.controls.unitId.value">
+														{{ line.controls.unitName.value || line.controls.unitId.value }}
+													</option>
+												}
+												@for (u of unitsFor(i); track u.unitId) {
+													<option [ngValue]="u.unitId">{{ u.unitName }}</option>
+												}
+											</select>
+										</td>
+										<td>
+											<input class="kt-input w-24" type="number" formControlName="oldQty" (input)="recalc(i)" />
+										</td>
+										<td>
+											<input
+												class="kt-input w-24"
+												type="number"
+												formControlName="adjQty"
+												(input)="onAdjInput(i, $event)"
+											/>
+										</td>
+										<td class="text-sm whitespace-nowrap">
+											{{ line.controls.newQty.value | number: '1.0-4' }}
+										</td>
+										<td>
+											<input
+												class="kt-input w-28"
+												type="number"
+												formControlName="averageCost"
+												(input)="recalc(i)"
+											/>
+										</td>
+										<td class="text-sm whitespace-nowrap">
+											{{ line.controls.totalValue.value | number: '1.2-4' }}
+										</td>
+										<td><input class="kt-input min-w-24" formControlName="batchNumber" /></td>
+										<td><input class="kt-input" type="date" formControlName="expiryDate" /></td>
+										<td>
+											<button
+												type="button"
+												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-destructive"
+												[disabled]="readOnly()"
+												(click)="removeLine(i)"
+											>
+												<i class="ki-filled ki-trash"></i>
+											</button>
+										</td>
+									</tr>
+								} @empty {
+									<tr>
+										<td colspan="10" class="py-12 text-center text-secondary-foreground">
+											{{ 'stockAdjustments.emptyLines' | translate }}
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="kt-card-content flex items-center justify-between gap-3 p-5">
+					<span class="text-sm font-medium text-secondary-foreground">{{
+						'stockAdjustments.totals' | translate
+					}}</span>
+					<span class="text-lg font-semibold text-mono">{{ totalValueSum() | number: '1.2-4' }}</span>
+				</div>
+			</div>
+
+			@if (!readOnly()) {
+				<div class="flex justify-end gap-2">
+					<a class="kt-btn kt-btn-light" routerLink="/demo1/inventory/stock-adjustments">{{
+						'stockAdjustments.cancel' | translate
+					}}</a>
+					<button class="kt-btn kt-btn-primary" type="submit" [disabled]="saving() || loadingItems()">
+						{{ 'stockAdjustments.save' | translate }}
+					</button>
+				</div>
+			}
+		</form>
+	}
+</div>

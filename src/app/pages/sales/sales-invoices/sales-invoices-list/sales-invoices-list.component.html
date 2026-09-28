@@ -101,7 +101,13 @@
 						<tbody>
 							@for (invoice of filteredInvoices(); track invoice.invoiceId) {
 								<tr>
-									<td class="font-medium text-mono">{{ invoice.invoiceNo || '—' }}</td>
+									<td class="font-medium text-mono">
+										<a
+											class="font-medium text-primary"
+											[routerLink]="['/demo1/sales/sales-invoices', invoice.invoiceId]">
+											{{ invoice.invoiceNo || '—' }}
+										</a>
+									</td>
 									<td class="text-secondary-foreground text-sm">
 										{{ invoice.invoiceDate ? (invoice.invoiceDate | date: 'mediumDate') : '—' }}
 									</td>
@@ -115,27 +121,33 @@
 									<td>{{ invoice.netAmount | number: '1.2-2' }}</td>
 									<td>
 										<div class="flex items-center gap-1">
-											<a
-												class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-												[routerLink]="['/demo1/sales/sales-invoices', invoice.invoiceId]"
-												[attr.aria-label]="'salesInvoices.view' | translate">
-												<i class="ki-filled ki-notepad-edit"></i>
-											</a>
 											@if (isDraft(invoice)) {
+												<a
+													class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
+													[routerLink]="['/demo1/sales/sales-invoices', invoice.invoiceId]"
+													[attr.aria-label]="'salesInvoices.edit' | translate">
+													<i class="ki-filled ki-notepad-edit"></i>
+												</a>
 												<button
-													class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-primary hover:bg-primary/10"
+													class="kt-btn kt-btn-sm kt-btn-success"
 													type="button"
-													(click)="openPostDialog(invoice)"
-													[attr.aria-label]="'salesInvoices.post' | translate">
-													<i class="ki-filled ki-check-circle"></i>
+													(click)="openPostDialog(invoice)">
+													{{ 'salesInvoices.post' | translate }}
 												</button>
 												<button
-													class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost text-destructive hover:bg-destructive/10"
+													class="kt-btn kt-btn-sm kt-btn-destructive"
 													type="button"
 													(click)="openCancelDialog(invoice)"
 													[attr.aria-label]="'salesInvoices.cancelInvoice' | translate">
-													<i class="ki-filled ki-cross-circle"></i>
+													<i class="ki-filled ki-trash"></i>
 												</button>
+											} @else {
+												<a
+													class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
+													[routerLink]="['/demo1/sales/sales-invoices', invoice.invoiceId]"
+													[attr.aria-label]="'salesInvoices.view' | translate">
+													<i class="ki-filled ki-eye"></i>
+												</a>
 											}
 										</div>
 									</td>
@@ -191,7 +203,7 @@
 					<button class="kt-btn kt-btn-outline" type="button" [disabled]="posting()" (click)="closePostDialog()">
 						{{ 'salesInvoices.cancel' | translate }}
 					</button>
-					<button class="kt-btn kt-btn-primary" type="submit" [disabled]="posting()">
+					<button class="kt-btn kt-btn-success" type="submit" [disabled]="posting()">
 						@if (posting()) {
 							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
 						}

@@ -201,6 +201,53 @@
 										<input class="kt-input" [value]="line.controls.netAmount.value | number: '1.2-2'" type="text" readonly />
 									</div>
 
+									<div class="flex flex-col gap-1 lg:col-span-2">
+										<label class="kt-form-label">
+											{{ 'salesInvoices.batch' | translate }} / {{ 'salesInvoices.expiry' | translate }}
+											@if (lineNeedsBatch(i) || lineNeedsExpiry(i)) {
+												*
+											}
+										</label>
+										@if (batchesForLine(i).length) {
+											<select class="kt-input" (change)="onBatchPick(i, $event)">
+												<option value="">{{ 'salesInvoices.selectBatch' | translate }}</option>
+												@for (batch of batchesForLine(i); track batchKey(batch)) {
+													<option
+														[value]="batchKey(batch)"
+														[selected]="
+															batchKey(batch) ===
+															batchKey({
+																batchNumber: line.controls.batchNumber.value,
+																expiryDate: line.controls.expiryDate.value,
+															})
+														"
+													>
+														{{ batchLabel(batch) }}
+													</option>
+												}
+											</select>
+										}
+										<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+											<input
+												class="kt-input"
+												formControlName="batchNumber"
+												type="text"
+												[attr.placeholder]="'salesInvoices.batchHint' | translate"
+											/>
+											<input class="kt-input" formControlName="expiryDate" type="date" />
+										</div>
+										@if (lineNeedsBatch(i) && !line.controls.batchNumber.value.trim()) {
+											<span class="text-xs text-destructive">{{
+												'salesInvoices.batchRequired' | translate
+											}}</span>
+										}
+										@if (lineNeedsExpiry(i) && !line.controls.expiryDate.value) {
+											<span class="text-xs text-destructive">{{
+												'salesInvoices.expiryRequired' | translate
+											}}</span>
+										}
+									</div>
+
 									@if (!isReadOnly() && details.length > 1) {
 										<div class="flex items-end">
 											<button

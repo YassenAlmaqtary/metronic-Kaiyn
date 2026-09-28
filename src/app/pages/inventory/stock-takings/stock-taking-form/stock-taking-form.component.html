@@ -112,20 +112,41 @@
 										</select>
 									</td>
 									<td>
-										@if (line.controls['unitName'].value) {
-											<span class="text-sm whitespace-nowrap">{{ line.controls['unitName'].value }}</span>
-										}
-										<input class="kt-input w-24" formControlName="unitId" type="number" />
+										<select class="kt-select min-w-28" formControlName="unitId">
+											<option [ngValue]="null">{{ 'stockTakings.select' | translate }}</option>
+											@if (
+												line.controls['unitId'].value &&
+												!unitsFor(i).some((u) => u.unitId === line.controls['unitId'].value)
+											) {
+												<option [ngValue]="line.controls['unitId'].value">
+													{{ line.controls['unitName'].value || line.controls['unitId'].value }}
+												</option>
+											}
+											@for (u of unitsFor(i); track u.unitId) {
+												<option [ngValue]="u.unitId">{{ u.unitName }}</option>
+											}
+										</select>
 									</td>
-									<td>{{ line.controls['systemQty'].value }}</td>
+									<td class="text-sm whitespace-nowrap">
+										{{ line.controls['systemQty'].value | number: '1.0-4' }}
+									</td>
 									<td>
-										<input class="kt-input w-20" formControlName="countedQty" type="number" (input)="recalc(i)" />
+										<input
+											class="kt-input w-20"
+											formControlName="countedQty"
+											type="number"
+											(input)="onCountedInput(i, $event)"
+										/>
 									</td>
-									<td>{{ line.controls['differenceQty'].value }}</td>
+									<td class="text-sm whitespace-nowrap">
+										{{ line.controls['differenceQty'].value | number: '1.0-4' }}
+									</td>
 									<td>
 										<input class="kt-input w-24" formControlName="averageCost" type="number" (input)="recalc(i)" />
 									</td>
-									<td>{{ line.controls['differenceValue'].value }}</td>
+									<td class="text-sm whitespace-nowrap">
+										{{ line.controls['differenceValue'].value | number: '1.0-4' }}
+									</td>
 									<td><input class="kt-input" formControlName="batchNumber" /></td>
 									<td><input class="kt-input" type="date" formControlName="expiryDate" /></td>
 									<td><input class="kt-input" formControlName="notes" /></td>

@@ -246,6 +246,7 @@ export const routes: Routes = [
       { path: 'inventory/stock-takings/:id', component: StockTakingFormComponent },
       { path: 'inventory/stock-adjustments', component: StockAdjustmentsListComponent },
       { path: 'inventory/stock-adjustments/new', component: StockAdjustmentFormComponent },
+      { path: 'inventory/stock-adjustments/:id/edit', component: StockAdjustmentFormComponent },
       { path: 'inventory/stock-adjustments/:id', component: StockAdjustmentFormComponent },
       { path: 'inventory/reports/current-stock', component: CurrentStockReportComponent },
       { path: 'inventory/reports/item-movement', component: ItemMovementReportComponent },

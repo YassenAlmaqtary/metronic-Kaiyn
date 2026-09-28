@@ -47,10 +47,15 @@ export class StockAdjustmentsService {
 
   getItemsFromTaking(takingId: number): Observable<StockAdjustmentDetail[]> {
     return this.http
-      .get<ApiResponse<StockAdjustmentDetail[]>>(
+      .get<ApiResponse<StockAdjustmentDetail[] | { $values?: StockAdjustmentDetail[] }>>(
         buildApiUrl(toApiPath(`${this.basePath}/items-from-taking/{takingId}`, { takingId })),
       )
-      .pipe(map((r) => unwrapApiResponse(r)));
+      .pipe(
+        map((r) => {
+          const data = unwrapApiResponse(r);
+          return this.normalizeList(data);
+        }),
+      );
   }
 
   save(request: SaveStockAdjustmentRequest): Observable<StockAdjustmentHeader> {
@@ -66,5 +71,17 @@ export class StockAdjustmentsService {
         {},
       )
       .pipe(map((r) => unwrapApiResponse(r)));
+  }
+
+  private normalizeList(
+    raw: StockAdjustmentDetail[] | { $values?: StockAdjustmentDetail[] } | null | undefined,
+  ): StockAdjustmentDetail[] {
+    if (Array.isArray(raw)) {
+      return raw;
+    }
+    if (raw && typeof raw === 'object' && Array.isArray(raw.$values)) {
+      return raw.$values;
+    }
+    return [];
   }
 }

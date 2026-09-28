@@ -11,7 +11,7 @@ import {
   SalesInvoiceListItem,
   SaveSalesInvoiceRequest,
 } from '../api/models/sales-invoice.models';
-import { unwrapApiResponse } from '../api/utils/api-response.util';
+import { unwrapApiAction, unwrapApiResponse } from '../api/utils/api-response.util';
 
 @Injectable({ providedIn: 'root' })
 export class SalesInvoicesService {
@@ -64,21 +64,21 @@ export class SalesInvoicesService {
       .pipe(map((response) => unwrapApiResponse(response)));
   }
 
-  post(id: number, request: PostSalesInvoiceRequest): Observable<unknown> {
+  post(id: number, request: PostSalesInvoiceRequest): Observable<void> {
     return this.http
       .post<ApiResponse<unknown>>(
         buildApiUrl(toApiPath(`${this.basePath}/{id}/post`, { id })),
         request,
       )
-      .pipe(map((response) => unwrapApiResponse(response)));
+      .pipe(map((response) => unwrapApiAction(response)));
   }
 
-  cancel(id: number): Observable<unknown> {
+  cancel(id: number): Observable<void> {
     return this.http
       .post<ApiResponse<unknown>>(
         buildApiUrl(toApiPath(`${this.basePath}/{id}/cancel`, { id })),
         null,
       )
-      .pipe(map((response) => unwrapApiResponse(response)));
+      .pipe(map((response) => unwrapApiAction(response)));
   }
 }
