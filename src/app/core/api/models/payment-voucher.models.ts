@@ -1,9 +1,3 @@
-export interface PaymentType {
-  paymentTypeId: number;
-  paymentTypeName?: string | null;
-  defaultAccountId?: number | null;
-}
-
 export interface PaymentVoucherLine {
   lineId?: number;
   voucherId?: number;

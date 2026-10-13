@@ -1,0 +1,215 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex justify-between gap-4">
+		<div>
+			<h1 class="text-xl font-semibold">{{ 'auditLogs.system.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground">{{ 'auditLogs.system.subtitle' | translate }}</p>
+		</div>
+	</div>
+
+	@if (errorMessage()) {
+		<div class="rounded border border-destructive/30 bg-destructive/10 p-3 text-destructive flex items-center justify-between gap-3">
+			<span>{{ errorMessage() }}</span>
+			<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="load()">
+				{{ 'auditLogs.retry' | translate }}
+			</button>
+		</div>
+	}
+
+	<div class="kt-card">
+		<div class="kt-card-content p-5">
+			<div class="flex flex-wrap items-center gap-3 mb-4">
+				<button class="kt-btn kt-btn-sm" type="button" [class.kt-btn-primary]="actionType() === ''" (click)="setAction('')">
+					{{ 'auditLogs.filter.all' | translate }}
+				</button>
+				<button class="kt-btn kt-btn-sm" type="button" [class.kt-btn-primary]="actionType() === 'Insert'" (click)="setAction('Insert')">
+					{{ 'auditLogs.filter.insert' | translate }}
+				</button>
+				<button class="kt-btn kt-btn-sm" type="button" [class.kt-btn-primary]="actionType() === 'Update'" (click)="setAction('Update')">
+					{{ 'auditLogs.filter.update' | translate }}
+				</button>
+				<button class="kt-btn kt-btn-sm" type="button" [class.kt-btn-primary]="actionType() === 'Delete'" (click)="setAction('Delete')">
+					{{ 'auditLogs.filter.delete' | translate }}
+				</button>
+				<button type="button" class="kt-btn kt-btn-sm kt-btn-light" [disabled]="!items().length" (click)="exportCsv()">
+					<i class="ki-filled ki-file-down"></i>
+					{{ 'common.exportCsv' | translate }}
+				</button>
+				<form class="flex flex-wrap items-center gap-2 ms-auto" (ngSubmit)="applyFilters()">
+					<input
+						class="kt-input max-w-40"
+						name="tableName"
+						[ngModel]="tableName()"
+						(ngModelChange)="tableName.set($event)"
+						[placeholder]="'auditLogs.searchTable' | translate" />
+					<input
+						class="kt-input max-w-xs"
+						type="search"
+						name="searchTerm"
+						[ngModel]="searchTerm()"
+						(ngModelChange)="searchTerm.set($event)"
+						[placeholder]="'auditLogs.search' | translate" />
+					<button class="kt-btn kt-btn-sm kt-btn-primary" type="submit">
+						<i class="ki-filled ki-magnifier"></i>
+						{{ 'auditLogs.apply' | translate }}
+					</button>
+					<button class="kt-btn kt-btn-sm kt-btn-ghost" type="button" (click)="resetFilters()">
+						{{ 'auditLogs.reset' | translate }}
+					</button>
+				</form>
+			</div>
+
+			@if (loading()) {
+				<div class="py-12 text-center">{{ 'auditLogs.loading' | translate }}</div>
+			} @else if (!items().length) {
+				<div class="flex flex-col items-center justify-center gap-3 py-12 text-center">
+					<i class="ki-filled ki-shield-search text-3xl text-muted-foreground"></i>
+					<div>
+						<p class="font-medium text-mono">{{ 'auditLogs.empty' | translate }}</p>
+						<p class="text-sm text-secondary-foreground mt-1">{{ 'auditLogs.emptyHint' | translate }}</p>
+					</div>
+				</div>
+			} @else {
+				<div class="kt-scrollable-x-auto">
+					<table class="kt-table">
+						<thead>
+							<tr>
+								<th>{{ 'auditLogs.auditId' | translate }}</th>
+								<th>{{ 'auditLogs.performedAt' | translate }}</th>
+								<th>{{ 'auditLogs.performedBy' | translate }}</th>
+								<th>{{ 'auditLogs.actionType' | translate }}</th>
+								<th>{{ 'auditLogs.table' | translate }}</th>
+								<th>{{ 'auditLogs.recordId' | translate }}</th>
+								<th>{{ 'auditLogs.ip' | translate }}</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (item of items(); track item.auditId) {
+								<tr>
+									<td>
+										<a class="font-medium text-primary cursor-pointer" (click)="openDetails(item)">{{ item.auditId }}</a>
+									</td>
+									<td class="text-sm text-secondary-foreground whitespace-nowrap">{{ item.performedAt | date: 'medium' }}</td>
+									<td>{{ item.performedByUserName || item.performedByUserId }}</td>
+									<td>
+										@if (item.actionType) {
+											<span class="kt-badge" [class]="actionBadge(item.actionType)">{{ item.actionType }}</span>
+										} @else {
+											—
+										}
+									</td>
+									<td>{{ item.tableDisplayName || item.tableName || '—' }}</td>
+									<td>{{ item.recordId || '—' }}</td>
+									<td>{{ item.performedFromIP || '—' }}</td>
+									<td>
+										<button
+											class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
+											type="button"
+											(click)="openDetails(item)"
+											[attr.aria-label]="'auditLogs.view' | translate">
+											<i class="ki-filled ki-eye"></i>
+										</button>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+
+			<div class="flex flex-wrap items-center justify-between gap-3 mt-4 text-sm text-secondary-foreground">
+				<span>{{ 'auditLogs.total' | translate }}: {{ totalCount() }}</span>
+				<div class="flex items-center gap-2">
+					<button
+						class="kt-btn kt-btn-sm kt-btn-outline"
+						type="button"
+						[disabled]="loading() || pageNumber() <= 1"
+						(click)="goToPage(pageNumber() - 1)">
+						<i class="ki-filled ki-left rtl:rotate-180"></i>
+						{{ 'auditLogs.prev' | translate }}
+					</button>
+					<span>{{ 'auditLogs.page' | translate }} {{ pageNumber() }} {{ 'auditLogs.of' | translate }} {{ totalPages() }}</span>
+					<button
+						class="kt-btn kt-btn-sm kt-btn-outline"
+						type="button"
+						[disabled]="loading() || pageNumber() >= totalPages()"
+						(click)="goToPage(pageNumber() + 1)">
+						{{ 'auditLogs.next' | translate }}
+						<i class="ki-filled ki-right rtl:rotate-180"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@if (selected(); as details) {
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" (click)="closeDetails()">
+		<div class="kt-card w-full max-w-4xl max-h-[90vh] flex flex-col shadow-xl" (click)="$event.stopPropagation()">
+			<div class="kt-card-header px-5 py-4 border-b border-border flex items-center justify-between gap-3">
+				<h2 class="text-lg font-semibold text-mono">{{ 'auditLogs.details' | translate }} #{{ details.auditId }}</h2>
+				<button class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost" type="button" (click)="closeDetails()">
+					<i class="ki-filled ki-cross"></i>
+				</button>
+			</div>
+			<div class="kt-card-content flex flex-col gap-4 p-5 overflow-y-auto">
+				@if (detailsError()) {
+					<div class="rounded border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{{ detailsError() }}</div>
+				}
+				@if (detailsLoading()) {
+					<div class="flex items-center justify-center gap-2 py-6 text-secondary-foreground">
+						<span class="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+						{{ 'auditLogs.loadingDetails' | translate }}
+					</div>
+				}
+				<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+					<div>
+						<p class="text-secondary-foreground">{{ 'auditLogs.performedAt' | translate }}</p>
+						<p class="font-medium mt-1">{{ details.performedAt | date: 'medium' }}</p>
+					</div>
+					<div>
+						<p class="text-secondary-foreground">{{ 'auditLogs.performedBy' | translate }}</p>
+						<p class="font-medium mt-1">{{ details.performedByUserName || details.performedByUserId }}</p>
+					</div>
+					<div>
+						<p class="text-secondary-foreground">{{ 'auditLogs.actionType' | translate }}</p>
+						<p class="font-medium mt-1">{{ details.actionType || '—' }}</p>
+					</div>
+					<div>
+						<p class="text-secondary-foreground">{{ 'auditLogs.table' | translate }}</p>
+						<p class="font-medium mt-1">{{ details.tableDisplayName || details.tableName || '—' }}</p>
+					</div>
+					<div>
+						<p class="text-secondary-foreground">{{ 'auditLogs.recordId' | translate }}</p>
+						<p class="font-medium mt-1">{{ details.recordId || '—' }}</p>
+					</div>
+					<div>
+						<p class="text-secondary-foreground">{{ 'auditLogs.platform' | translate }}</p>
+						<p class="font-medium mt-1">{{ details.sourcePlatform }}</p>
+					</div>
+					<div>
+						<p class="text-secondary-foreground">{{ 'auditLogs.ip' | translate }}</p>
+						<p class="font-medium mt-1">{{ details.performedFromIP || '—' }}</p>
+					</div>
+					<div class="sm:col-span-2">
+						<p class="text-secondary-foreground">{{ 'auditLogs.device' | translate }}</p>
+						<p class="font-medium mt-1 break-all">{{ details.performedFromDevice || '—' }}</p>
+					</div>
+				</div>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="flex flex-col gap-1.5">
+						<p class="text-sm text-secondary-foreground">{{ 'auditLogs.oldValues' | translate }}</p>
+						<pre class="rounded-lg border border-border bg-muted/30 p-3 text-xs overflow-auto max-h-80" dir="ltr">{{ formatValues(details.oldValues) }}</pre>
+					</div>
+					<div class="flex flex-col gap-1.5">
+						<p class="text-sm text-secondary-foreground">{{ 'auditLogs.newValues' | translate }}</p>
+						<pre class="rounded-lg border border-border bg-muted/30 p-3 text-xs overflow-auto max-h-80" dir="ltr">{{ formatValues(details.newValues) }}</pre>
+					</div>
+				</div>
+			</div>
+			<div class="kt-card-footer px-5 py-4 border-t border-border flex justify-end">
+				<button class="kt-btn kt-btn-light" type="button" (click)="closeDetails()">{{ 'auditLogs.close' | translate }}</button>
+			</div>
+		</div>
+	</div>
+}

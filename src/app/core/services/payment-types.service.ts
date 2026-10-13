@@ -2,9 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
-import { buildApiUrl } from '../api/api-url';
+import { buildApiUrl, toApiPath } from '../api/api-url';
 import { ApiResponse } from '../api/models/api-response.model';
-import { PaymentType } from '../api/models/payment-voucher.models';
+import {
+  CreatePaymentTypeRequest,
+  PaymentType,
+  UpdatePaymentTypeRequest,
+} from '../api/models/payment-type.models';
+import { unwrapRawOrApiResponse } from '../api/utils/api-response.util';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentTypesService {
@@ -14,18 +19,30 @@ export class PaymentTypesService {
   getAll(): Observable<PaymentType[]> {
     return this.http
       .get<PaymentType[] | ApiResponse<PaymentType[]>>(buildApiUrl(this.basePath))
-      .pipe(map((response) => this.normalizeList(response)));
+      .pipe(map((response) => unwrapRawOrApiResponse(response) ?? []));
   }
 
-  private normalizeList(response: PaymentType[] | ApiResponse<PaymentType[]>): PaymentType[] {
-    if (Array.isArray(response)) {
-      return response;
-    }
+  getById(id: number): Observable<PaymentType> {
+    return this.http
+      .get<PaymentType | ApiResponse<PaymentType>>(buildApiUrl(toApiPath(`${this.basePath}/{id}`, { id })))
+      .pipe(map((response) => unwrapRawOrApiResponse(response)));
+  }
 
-    if (response.success && Array.isArray(response.data)) {
-      return response.data;
-    }
+  create(request: CreatePaymentTypeRequest): Observable<PaymentType> {
+    return this.http
+      .post<PaymentType | ApiResponse<PaymentType>>(buildApiUrl(this.basePath), request)
+      .pipe(map((response) => unwrapRawOrApiResponse(response)));
+  }
 
-    throw new Error(response.message || response.errors?.join(', ') || 'Request failed');
+  update(id: number, request: UpdatePaymentTypeRequest): Observable<void> {
+    return this.http
+      .put<unknown>(buildApiUrl(toApiPath(`${this.basePath}/{id}`, { id })), request)
+      .pipe(map(() => undefined));
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http
+      .delete<unknown>(buildApiUrl(toApiPath(`${this.basePath}/{id}`, { id })))
+      .pipe(map(() => undefined));
   }
 }

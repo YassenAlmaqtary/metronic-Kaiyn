@@ -266,6 +266,18 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         permission: 'journalTypes.view',
       },
       {
+        id: 'accounting-reference-types',
+        labelKey: 'menu.accounting.referenceTypes',
+        route: '/demo1/accounting/reference-types',
+        permission: 'referenceTypes.view',
+      },
+      {
+        id: 'accounting-payment-types',
+        labelKey: 'menu.accounting.paymentTypes',
+        route: '/demo1/accounting/payment-types',
+        permission: 'paymentTypes.view',
+      },
+      {
         id: 'accounting-item-policies',
         labelKey: 'menu.accounting.itemAccountingPolicies',
         route: '/demo1/accounting/item-accounting-policies',
@@ -436,6 +448,18 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         labelKey: 'menu.settings.systemLogs',
         route: '/demo1/settings/system-logs',
         permission: 'systemLogs.view',
+      },
+      {
+        id: 'settings-system-audit-log',
+        labelKey: 'menu.settings.systemAuditLog',
+        route: '/demo1/settings/system-audit-log',
+        permission: 'systemAuditLog.view',
+      },
+      {
+        id: 'settings-permission-audit-log',
+        labelKey: 'menu.settings.permissionAuditLog',
+        route: '/demo1/settings/permission-audit-log',
+        permission: 'permissionAuditLog.view',
       },
     ],
   },

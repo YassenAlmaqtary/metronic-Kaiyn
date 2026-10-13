@@ -55,6 +55,9 @@ import { branchesEn } from './branches.en';
 import { companiesEn } from './companies.en';
 import { systemLogsEn } from './system-logs.en';
 import { usersEn } from './users.en';
+import { referenceTypesEn } from './reference-types.en';
+import { paymentTypesEn } from './payment-types.en';
+import { auditLogsEn } from './audit-logs.en';
 
 export const en = mergeLocale(
   commonEn,
@@ -113,4 +116,7 @@ export const en = mergeLocale(
   suppliersEn,
   itemAccountingPoliciesEn,
   userBranchesEn,
+  referenceTypesEn,
+  paymentTypesEn,
+  auditLogsEn,
 );

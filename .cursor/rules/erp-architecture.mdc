@@ -1,0 +1,69 @@
+---
+description: KayianERP Angular code architecture and conventions (services, models, components, i18n, routing, menu)
+alwaysApply: true
+---
+
+# KayianERP architecture conventions
+
+Angular 21 standalone + signals, Tailwind 4 + Metronic (`kt-*` classes, `ki-filled ki-*` icons). Backend is ASP.NET at `environment.apiUrl`. UI layout rules live in `unified-erp-ui.mdc`.
+
+## API source of truth
+
+- Swagger: `http://localhost:5000/swagger/v1/swagger.json` ("Kian ERP API"). Before building a section, download it and read the endpoints of its tag plus the DTO schemas.
+- Schema names are fully qualified, e.g. `KianERPApi.DTOs.PaymentType.PaymentTypeDto`, `CreatePaymentTypeDto`, `UpdatePaymentTypeDto` → map to `PaymentType`, `CreatePaymentTypeRequest`, `UpdatePaymentTypeRequest` in our models.
+- Typical CRUD tag: `GET/POST /api/X`, `GET/PUT/DELETE /api/X/{id}`; extra actions like `/{id}/post`, `/{id}/toggle-active`, `/next-number`, `/lookup`.
+
+API contract: `http://localhost:5000/swagger/v1/swagger.json` (Kian ERP API). Before building a section, download it and read the endpoints + DTO schemas (named `KianERPApi.DTOs.<Area>.<Name>Dto`, e.g. `CreateXDto` / `UpdateXDto`) to derive models, required fields and max lengths.
+
+## Folder layout
+
+- `src/app/core/api/models/<entity>.models.ts` — interfaces: `Entity`, `CreateEntityRequest`, `UpdateEntityRequest` (include the id only if the Swagger `UpdateXDto` has it). Optional API fields are `?: T | null`.
+- `src/app/core/services/<entities>.service.ts` — hand-written service used by pages. `core/api/generated/*` is Swagger-generated and NOT used by pages; don't build on it.
+- `src/app/pages/<module>/<entities>/<entities>-list/` and `<entity>-form/` — each with `.ts`, `.html`, `.scss`.
+- `src/app/core/i18n/locales/{ar,en}/<entities>.{ar,en}.ts`
+- Modules: sales, pos, products, inventory, purchasing, accounting, banks, settings.
+
+## Service pattern (reference: `core/services/salesmen.service.ts`)
+
+```ts
+@Injectable({ providedIn: 'root' })
+export class XService {
+  private http = inject(HttpClient);
+  private readonly basePath = '/api/X';
+  getAll() { return this.http.get<ApiResponse<X[]>>(buildApiUrl(this.basePath)).pipe(map((r) => unwrapApiResponse(r))); }
+  getById(id) { ... buildApiUrl(toApiPath(`${this.basePath}/{id}`, { id })) ... }
+  create / update(id, req) / delete(id) -> Observable<void>
+}
+```
+
+- Always `buildApiUrl` + `toApiPath`; responses are `ApiResponse<T>` unwrapped with `unwrapApiResponse`.
+- Action endpoints (post/delete/toggle) with null `data`: use `unwrapApiAction`.
+- Controllers whose Swagger response is the bare DTO/array (no `ApiResponse` envelope, e.g. `PaymentTypes`, `ReferenceTypes`): type as `T | ApiResponse<T>` and use `unwrapRawOrApiResponse`; PUT/DELETE without a body → `map(() => undefined)`.
+- Paged endpoints return `ApiResponse<PagedResponse<T>>` (`core/api/models/audit-log.models.ts`); page with `pageNumber`/`pageSize` query params and prev/next buttons under the table.
+- When the API shape is inconsistent (PascalCase/camelCase, `$values`), add private `normalizeOne`/`normalizeList` like `stock-receivings.service.ts`.
+- Query params via `HttpParams`. Auth header + refresh-token are handled by interceptors; never add them manually.
+
+## Component pattern
+
+- Standalone, `inject()` for DI, state in `signal()`, derived via `computed()`. No NgModules, no constructor injection.
+- Imports from core via relative paths (`../../../../core/...`).
+- Templates use new control flow (`@if`, `@for ... track`), `| translate` pipe for all text.
+- List: `items`, `loading`, `errorMessage`, `searchTerm`, `filter`, `deleteTarget`, `deleting`/`actionLoading` signals; `filtered = computed(...)`; CSV export via `downloadCsv(csvExportFilename('x'), headers, rows)`; delete via in-page confirm modal (fixed overlay + `kt-card`), success via `ToastService.success`.
+- Simple form: typed `FormGroup` with `new FormControl(..., { nonNullable: true, validators })`; `isEditMode`/`entityId` from `route.snapshot.paramMap.get('id')`; trim strings, empty → `null`; after save `router.navigate([listRoute], { state: { successMessage: translate(key) } })` — `ToastHost` shows it automatically.
+- Document form: `FormArray<Line>` lines, lookups loaded in `loadLookups()`, `valueChanges.pipe(takeUntilDestroyed(this.destroyRef))`, totals in a signal, read-only + `form.disable()` when posted, print via `DocumentPrintService`, dates as ISO (`yyyy-MM-dd` in inputs, `toISOString()` in payload).
+- Errors: `this.errorMessage.set(extractApiErrorMessage(e, this.language.translate('x.loadError')))`.
+- Bilingual names: show `nameAr`/`nameEn` based on `language.locale()`.
+
+## i18n
+
+- Flat keys `'<entities>.<key>'` in `export const xAr = { ... } as const;` and the same keys in `xEn`.
+- Register both in `locales/ar/index.ts` and `locales/en/index.ts` `mergeLocale(...)`. `TranslationKey` is derived from `ar`, so a key missing from AR is a type error.
+- Standard keys: title, subtitle, add, edit, create, search, empty, emptyHint, loading, save, cancel, delete, deleteTitle, deleteConfirm, createSuccess, updateSuccess, deleteSuccess, loadError, saveError, deleteError, notFound, section.*, required.*, active/inactive, status.
+- Menu labels go in `menu.ar.ts`/`menu.en.ts` as `menu.<section>.<item>`.
+
+## Routing & navigation
+
+- `app.routes.ts`, children of `demo1` (guarded by `authGuard`), lazy `loadComponent`:
+  `<module>/<entities>`, `<module>/<entities>/new`, `<module>/<entities>/:id/edit` (documents may also use `:id`).
+- Sidebar: add `{ id, labelKey, route: '/demo1/...', permission: '<entities>.view' }` to the right section in `core/navigation/sidebar-menu.config.ts` (`kind: 'group'` for subheaders). Global search picks up sidebar entries automatically.
+- Permissions: keys `module.action` checked by `AccessControlService.can()` (enforcement currently off / fail-open).

@@ -28,7 +28,7 @@ import { AuthService } from '../../../core/api/auth.service';
 import { Branch } from '../../../core/api/models/branch.models';
 import { Currency } from '../../../core/api/models/currency.models';
 import { Customer } from '../../../core/api/models/customer.models';
-import { PaymentType } from '../../../core/api/models/payment-voucher.models';
+import { PaymentType } from '../../../core/api/models/payment-type.models';
 import {
   PosCashier,
   PosDevice,

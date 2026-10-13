@@ -43,6 +43,8 @@ export const menuAr = {
   'menu.accounting': 'الدليل المحاسبي',
   'menu.accounting.journal': 'قيود اليومية',
   'menu.accounting.journalTypes': 'أنواع القيود',
+  'menu.accounting.referenceTypes': 'أنواع المراجع',
+  'menu.accounting.paymentTypes': 'طرق الدفع',
   'menu.accounting.itemAccountingPolicies': 'سياسات محاسبة الأصناف',
   'menu.accounting.accountGroups': 'مجموعات الحسابات',
   'menu.accounting.periods': 'الفترات المحاسبية',
@@ -72,4 +74,6 @@ export const menuAr = {
   'menu.settings.branches': 'الفروع',
   'menu.settings.currencies': 'العملات',
   'menu.settings.systemLogs': 'سجلات النظام',
+  'menu.settings.systemAuditLog': 'سجل تدقيق النظام',
+  'menu.settings.permissionAuditLog': 'سجل تدقيق الصلاحيات',
 } as const;

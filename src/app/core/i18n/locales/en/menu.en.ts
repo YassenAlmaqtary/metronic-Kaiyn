@@ -44,6 +44,8 @@ export const menuEn = {
   'menu.accounting': 'Accounting Directory',
   'menu.accounting.journal': 'Journal Entries',
   'menu.accounting.journalTypes': 'Journal Types',
+  'menu.accounting.referenceTypes': 'Reference Types',
+  'menu.accounting.paymentTypes': 'Payment Types',
   'menu.accounting.itemAccountingPolicies': 'Item accounting policies',
   'menu.accounting.accountGroups': 'Account Groups',
   'menu.accounting.periods': 'Accounting Periods',
@@ -73,4 +75,6 @@ export const menuEn = {
   'menu.settings.branches': 'Branches',
   'menu.settings.currencies': 'Currencies',
   'menu.settings.systemLogs': 'System Logs',
+  'menu.settings.systemAuditLog': 'System Audit Log',
+  'menu.settings.permissionAuditLog': 'Permission Audit Log',
 } as const;

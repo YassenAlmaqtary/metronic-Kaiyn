@@ -1,0 +1,100 @@
+<div class="kt-container-fixed flex flex-col gap-6 max-w-5xl pb-10">
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div>
+			<div class="flex items-center gap-2 text-sm text-secondary-foreground mb-2">
+				<a class="hover:text-primary transition-colors" routerLink="/demo1/accounting/reference-types">{{
+					'referenceTypes.title' | translate
+				}}</a>
+				<i class="ki-filled ki-right text-[10px] rtl:rotate-180 opacity-60"></i>
+				<span class="font-medium text-foreground">
+					@if (isEditMode()) {
+						{{ 'referenceTypes.edit' | translate }}
+					} @else {
+						{{ 'referenceTypes.create' | translate }}
+					}
+				</span>
+			</div>
+			<div class="flex items-center gap-3">
+				<div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+					<i class="ki-filled ki-tag text-lg"></i>
+				</div>
+				<div>
+					<h1 class="text-xl font-semibold tracking-tight">
+						@if (isEditMode()) {
+							{{ 'referenceTypes.edit' | translate }}
+						} @else {
+							{{ 'referenceTypes.create' | translate }}
+						}
+					</h1>
+					<p class="text-sm text-secondary-foreground mt-0.5">{{ 'referenceTypes.subtitle' | translate }}</p>
+				</div>
+			</div>
+		</div>
+		<div class="flex items-center gap-2">
+			<a class="kt-btn kt-btn-outline" routerLink="/demo1/accounting/reference-types">
+				{{ 'referenceTypes.cancel' | translate }}
+			</a>
+			<button class="kt-btn kt-btn-primary min-w-28" type="button" [disabled]="saving() || loading()" (click)="onSubmit()">
+				@if (saving()) {
+					<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+				} @else {
+					<i class="ki-filled ki-check"></i>
+				}
+				{{ 'referenceTypes.save' | translate }}
+			</button>
+		</div>
+	</div>
+
+	@if (loading()) {
+		<div class="kt-card overflow-hidden">
+			<div class="kt-card-content flex items-center justify-center gap-3 py-24 text-secondary-foreground">
+				<span class="size-5 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+				{{ 'referenceTypes.loading' | translate }}
+			</div>
+		</div>
+	} @else {
+		<form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+			@if (errorMessage()) {
+				<div class="rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3.5 text-sm text-destructive flex items-start gap-2">
+					<i class="ki-filled ki-information-2 mt-0.5"></i>
+					<span>{{ errorMessage() }}</span>
+				</div>
+			}
+
+			<div class="kt-card overflow-hidden shadow-sm">
+				<div class="px-6 md:px-8 py-4 border-b border-border bg-muted/30">
+					<h2 class="text-sm font-semibold">{{ 'referenceTypes.section.basic' | translate }}</h2>
+					<p class="text-xs text-secondary-foreground mt-0.5">{{ 'referenceTypes.section.basicHint' | translate }}</p>
+				</div>
+				<div class="p-6 md:p-8">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+						<div class="flex flex-col gap-1.5">
+							<label class="kt-form-label required">{{ 'referenceTypes.referenceName' | translate }}</label>
+							<input class="kt-input h-11" formControlName="referenceName" type="text" maxlength="150" />
+							@if (form.controls.referenceName.touched && form.controls.referenceName.hasError('required')) {
+								<span class="text-xs text-destructive">{{ 'referenceTypes.required.referenceName' | translate }}</span>
+							}
+							@if (form.controls.referenceName.hasError('maxlength')) {
+								<span class="text-xs text-destructive">{{ 'referenceTypes.maxLength.referenceName' | translate }}</span>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="flex justify-end gap-2 pt-1">
+				<a class="kt-btn kt-btn-outline" routerLink="/demo1/accounting/reference-types">
+					{{ 'referenceTypes.cancel' | translate }}
+				</a>
+				<button class="kt-btn kt-btn-primary min-w-28" type="submit" [disabled]="saving()">
+					@if (saving()) {
+						<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+					} @else {
+						<i class="ki-filled ki-check"></i>
+					}
+					{{ 'referenceTypes.save' | translate }}
+				</button>
+			</div>
+		</form>
+	}
+</div>

@@ -55,6 +55,9 @@ import { branchesAr } from './branches.ar';
 import { companiesAr } from './companies.ar';
 import { systemLogsAr } from './system-logs.ar';
 import { usersAr } from './users.ar';
+import { referenceTypesAr } from './reference-types.ar';
+import { paymentTypesAr } from './payment-types.ar';
+import { auditLogsAr } from './audit-logs.ar';
 
 export const ar = mergeLocale(
   commonAr,
@@ -113,4 +116,7 @@ export const ar = mergeLocale(
   suppliersAr,
   itemAccountingPoliciesAr,
   userBranchesAr,
+  referenceTypesAr,
+  paymentTypesAr,
+  auditLogsAr,
 );

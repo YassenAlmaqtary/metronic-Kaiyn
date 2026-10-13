@@ -12,6 +12,20 @@ export function unwrapApiResponse<T>(response: ApiResponse<T>): T {
   return response.data;
 }
 
+/** For controllers that return the DTO directly, but may switch to the `ApiResponse` envelope. */
+export function unwrapRawOrApiResponse<T>(response: T | ApiResponse<T>): T {
+  if (
+    response &&
+    typeof response === 'object' &&
+    !Array.isArray(response) &&
+    'success' in response &&
+    typeof (response as ApiResponse<T>).success === 'boolean'
+  ) {
+    return unwrapApiResponse(response as ApiResponse<T>);
+  }
+  return response as T;
+}
+
 /**
  * For action endpoints (post / delete / toggle) that return `{ success: true }`
  * with null/empty `data`. Treating null data as failure was hiding real posts

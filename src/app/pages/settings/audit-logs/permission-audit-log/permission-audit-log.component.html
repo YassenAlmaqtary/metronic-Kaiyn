@@ -1,0 +1,120 @@
+<div class="kt-container-fixed flex flex-col gap-5 pb-8">
+	<div class="flex justify-between gap-4">
+		<div>
+			<h1 class="text-xl font-semibold">{{ 'auditLogs.permission.title' | translate }}</h1>
+			<p class="text-sm text-secondary-foreground">{{ 'auditLogs.permission.subtitle' | translate }}</p>
+		</div>
+	</div>
+
+	@if (errorMessage()) {
+		<div class="rounded border border-destructive/30 bg-destructive/10 p-3 text-destructive flex items-center justify-between gap-3">
+			<span>{{ errorMessage() }}</span>
+			<button class="kt-btn kt-btn-sm kt-btn-outline" type="button" (click)="load()">
+				{{ 'auditLogs.retry' | translate }}
+			</button>
+		</div>
+	}
+
+	<div class="kt-card">
+		<div class="kt-card-content p-5">
+			<div class="flex flex-wrap items-center gap-3 mb-4">
+				<button class="kt-btn kt-btn-sm" type="button" [class.kt-btn-primary]="filter() === 'all'" (click)="setFilter('all')">
+					{{ 'auditLogs.filter.all' | translate }}
+				</button>
+				<button class="kt-btn kt-btn-sm" type="button" [class.kt-btn-primary]="filter() === 'granted'" (click)="setFilter('granted')">
+					{{ 'auditLogs.filter.granted' | translate }}
+				</button>
+				<button class="kt-btn kt-btn-sm" type="button" [class.kt-btn-primary]="filter() === 'revoked'" (click)="setFilter('revoked')">
+					{{ 'auditLogs.filter.revoked' | translate }}
+				</button>
+				<button type="button" class="kt-btn kt-btn-sm kt-btn-light" [disabled]="!filtered().length" (click)="exportCsv()">
+					<i class="ki-filled ki-file-down"></i>
+					{{ 'common.exportCsv' | translate }}
+				</button>
+				<input
+					class="kt-input ms-auto max-w-xs"
+					type="search"
+					[ngModel]="searchTerm()"
+					(ngModelChange)="searchTerm.set($event)"
+					[placeholder]="'auditLogs.search' | translate" />
+			</div>
+
+			@if (loading()) {
+				<div class="py-12 text-center">{{ 'auditLogs.loading' | translate }}</div>
+			} @else if (!filtered().length) {
+				<div class="flex flex-col items-center justify-center gap-3 py-12 text-center">
+					<i class="ki-filled ki-security-user text-3xl text-muted-foreground"></i>
+					<div>
+						<p class="font-medium text-mono">{{ 'auditLogs.empty' | translate }}</p>
+						<p class="text-sm text-secondary-foreground mt-1">{{ 'auditLogs.emptyHint' | translate }}</p>
+					</div>
+				</div>
+			} @else {
+				<div class="kt-scrollable-x-auto">
+					<table class="kt-table">
+						<thead>
+							<tr>
+								<th>{{ 'auditLogs.auditId' | translate }}</th>
+								<th>{{ 'auditLogs.performedAt' | translate }}</th>
+								<th>{{ 'auditLogs.performedBy' | translate }}</th>
+								<th>{{ 'auditLogs.entity' | translate }}</th>
+								<th>{{ 'auditLogs.module' | translate }}</th>
+								<th>{{ 'auditLogs.permissionKey' | translate }}</th>
+								<th>{{ 'auditLogs.change' | translate }}</th>
+								<th>{{ 'auditLogs.notes' | translate }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (item of filtered(); track item.auditId) {
+								<tr>
+									<td class="font-medium text-mono">{{ item.auditId }}</td>
+									<td class="text-sm text-secondary-foreground whitespace-nowrap">{{ item.changedAt | date: 'medium' }}</td>
+									<td>{{ item.changedByName || item.changedBy }}</td>
+									<td>{{ item.entityType || '—' }} #{{ item.entityId }}</td>
+									<td>{{ item.moduleName || item.moduleId }}</td>
+									<td class="font-mono text-xs" dir="ltr">{{ item.permissionKey || item.permissionId }}</td>
+									<td>
+										<div class="flex items-center gap-1.5 whitespace-nowrap">
+											<span class="text-xs text-secondary-foreground">{{ changeLabel(item.oldValue) }}</span>
+											<i class="ki-filled ki-arrow-right text-xs rtl:rotate-180 opacity-60"></i>
+											<span
+												class="kt-badge"
+												[class.kt-badge-success]="item.newValue === true"
+												[class.kt-badge-destructive]="item.newValue === false">
+												{{ changeLabel(item.newValue) }}
+											</span>
+										</div>
+									</td>
+									<td class="text-sm text-secondary-foreground">{{ item.notes || '—' }}</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+
+			<div class="flex flex-wrap items-center justify-between gap-3 mt-4 text-sm text-secondary-foreground">
+				<span>{{ 'auditLogs.total' | translate }}: {{ totalCount() }}</span>
+				<div class="flex items-center gap-2">
+					<button
+						class="kt-btn kt-btn-sm kt-btn-outline"
+						type="button"
+						[disabled]="loading() || pageNumber() <= 1"
+						(click)="goToPage(pageNumber() - 1)">
+						<i class="ki-filled ki-left rtl:rotate-180"></i>
+						{{ 'auditLogs.prev' | translate }}
+					</button>
+					<span>{{ 'auditLogs.page' | translate }} {{ pageNumber() }} {{ 'auditLogs.of' | translate }} {{ totalPages() }}</span>
+					<button
+						class="kt-btn kt-btn-sm kt-btn-outline"
+						type="button"
+						[disabled]="loading() || pageNumber() >= totalPages()"
+						(click)="goToPage(pageNumber() + 1)">
+						{{ 'auditLogs.next' | translate }}
+						<i class="ki-filled ki-right rtl:rotate-180"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

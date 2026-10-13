@@ -17,10 +17,10 @@ import { Currency } from '../../../../core/api/models/currency.models';
 import {
   CreatePaymentVoucherLineRequest,
   CreatePaymentVoucherRequest,
-  PaymentType,
   PaymentVoucherLine,
   UpdatePaymentVoucherRequest,
 } from '../../../../core/api/models/payment-voucher.models';
+import { PaymentType } from '../../../../core/api/models/payment-type.models';
 import { TaxSetup } from '../../../../core/api/models/tax-setup.models';
 import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.util';
 import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
