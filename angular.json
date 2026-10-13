@@ -33,7 +33,6 @@
             ],
             "styles": [
               "src/tailwind.css",
-              "public/assets/vendors/apexcharts/apexcharts.css",
               "public/assets/vendors/keenicons/styles.bundle.css",
               "public/assets/css/styles.css",
               "src/kayian-theme.css",
@@ -42,8 +41,7 @@
             ],
             "scripts": [
               "public/assets/js/core.bundle.js",
-              "public/assets/vendors/ktui/ktui.min.js",
-              "public/assets/vendors/apexcharts/apexcharts.min.js"
+              "public/assets/vendors/ktui/ktui.min.js"
             ]
           },
           "configurations": {

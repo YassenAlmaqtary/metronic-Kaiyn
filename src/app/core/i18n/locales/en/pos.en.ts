@@ -38,6 +38,7 @@ export const posEn = {
   'pos.loading': 'Preparing POS…',
   'pos.saving': 'Saving order…',
   'pos.loadError': 'Could not load POS data',
+  'pos.stylesLoadError': 'Could not load POS styles. Refresh the page to try again.',
   'pos.saveError': 'Could not save the POS order',
   'pos.catalogError': 'Could not load POS products',
   'pos.noProducts': 'No products to show',

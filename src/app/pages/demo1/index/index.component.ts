@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, DOCUMENT } from '@angular/common';
 import {
   AfterViewInit,
   Component,
@@ -12,6 +12,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import type ApexCharts from 'apexcharts';
 import { switchMap } from 'rxjs';
 
 import { AuthService } from '../../../core/api/auth.service';
@@ -33,10 +34,9 @@ import {
 import { LanguageService } from '../../../core/services/language.service';
 import { MetronicInitService } from '../../../core/services/metronic-init.service';
 import { downloadCsv } from '../../../core/utils/download-csv';
+import { loadStylesheet } from '../../../core/utils/load-stylesheet';
 
-type ApexChartInstance = { render(): Promise<void>; destroy(): void };
-
-declare const ApexCharts: new (element: Element, options: Record<string, unknown>) => ApexChartInstance;
+type ApexChartInstance = ApexCharts;
 
 const BRANCH_STORAGE_KEY = 'kayian.dashboard.branchId';
 
@@ -54,6 +54,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   private language = inject(LanguageService);
   private metronicInit = inject(MetronicInitService);
   private destroyRef = inject(DestroyRef);
+  private document = inject(DOCUMENT);
 
 	readonly userName = this.auth.userName;
 	readonly today = new Date();
@@ -66,6 +67,8 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 	selectedBranchId = signal<number | null>(this.resolveInitialBranch());
 
 	private charts = new Map<string, ApexChartInstance>();
+	private apexChartsPromise: Promise<typeof ApexCharts> | null = null;
+	private apexChartsConstructor: typeof ApexCharts | null = null;
 	private viewReady = false;
 	private clockTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -118,6 +121,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.viewReady = false;
     if (this.clockTimer) {
       clearInterval(this.clockTimer);
       this.clockTimer = null;
@@ -414,27 +418,54 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
     this.charts.clear();
   }
 
-  private upsertChart(id: string, options: Record<string, unknown>): void {
-    const element = document.querySelector(`#${id}`);
-    if (!element || typeof ApexCharts === 'undefined') {
+  private upsertChart(id: string, options: ApexCharts.ApexOptions): void {
+    const element = this.document.querySelector<HTMLElement>(`#${id}`);
+    if (!element || !this.apexChartsConstructor) {
       return;
     }
     this.charts.get(id)?.destroy();
-    const chart = new ApexCharts(element, options);
+    const chart = new this.apexChartsConstructor(element, options);
     this.charts.set(id, chart);
     void chart.render();
   }
 
-  private renderAllCharts(data: DashboardOverview): void {
-    if (typeof ApexCharts === 'undefined') {
+  private async renderAllCharts(data: DashboardOverview): Promise<void> {
+    if (!this.viewReady) {
       return;
     }
+
+    try {
+      const [apexCharts] = await Promise.all([
+        this.loadApexCharts(),
+        loadStylesheet(this.document, 'assets/vendors/apexcharts/apexcharts.css'),
+      ]);
+      this.apexChartsConstructor ??= apexCharts;
+    } catch (error) {
+      console.error('Failed to load ApexCharts for the dashboard.', error);
+      this.errorMessage.set(this.language.translate('dashboard.chartLoadError'));
+      return;
+    }
+
+    if (!this.viewReady) {
+      return;
+    }
+
     this.renderSparkline('erp_spark_sales', data.salesSeries.map((p) => p.total), '#22c55e');
     this.renderSalesChart(data);
     this.renderCashflowChart(data);
     this.renderAttentionChart(data);
     this.renderDocsMixChart(data);
     this.renderLowStockChart(data);
+  }
+
+  private loadApexCharts(): Promise<typeof ApexCharts> {
+    this.apexChartsPromise ??= import('apexcharts')
+      .then((module) => module.default)
+      .catch((error: unknown) => {
+        this.apexChartsPromise = null;
+        throw error;
+      });
+    return this.apexChartsPromise;
   }
 
   private renderSparkline(id: string, data: number[], color: string): void {
@@ -486,7 +517,6 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
         fontFamily: 'inherit',
         animations: {
           enabled: true,
-          easing: 'easeinout',
           speed: 800,
           animateGradually: { enabled: true, delay: 120 },
         },
@@ -530,7 +560,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
       legend: {
         show: true,
         position: 'top',
-        horizontalAlign: 'start',
+        horizontalAlign: 'left',
         fontSize: '12px',
         labels: { colors: 'var(--color-muted-foreground)' },
         markers: { size: 5, shape: 'circle' },
@@ -832,7 +862,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
       dataLabels: { enabled: false },
       legend: {
         position: 'top',
-        horizontalAlign: 'start',
+        horizontalAlign: 'left',
         fontSize: '12px',
         labels: { colors: 'var(--color-muted-foreground)' },
       },

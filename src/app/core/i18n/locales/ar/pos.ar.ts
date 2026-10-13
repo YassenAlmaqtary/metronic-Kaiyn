@@ -38,6 +38,7 @@ export const posAr = {
   'pos.loading': 'جارٍ تجهيز نقطة البيع…',
   'pos.saving': 'جارٍ حفظ الطلب…',
   'pos.loadError': 'تعذر تحميل بيانات نقطة البيع',
+  'pos.stylesLoadError': 'تعذر تحميل تنسيقات نقطة البيع. حدّث الصفحة للمحاولة مجددًا.',
   'pos.saveError': 'تعذر حفظ طلب البيع',
   'pos.catalogError': 'تعذر تحميل أصناف نقطة البيع',
   'pos.noProducts': 'لا توجد أصناف للعرض',

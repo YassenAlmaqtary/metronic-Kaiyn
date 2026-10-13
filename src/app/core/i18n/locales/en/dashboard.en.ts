@@ -10,6 +10,7 @@ export const dashboardEn = {
   'dashboard.refreshFigures': 'Refresh figures',
   'dashboard.loading': 'Loading dashboard...',
   'dashboard.loadError': 'Some dashboard data could not be loaded',
+  'dashboard.chartLoadError': 'Dashboard charts could not be loaded',
   'dashboard.emptyPending': 'No pending documents — you are all caught up',
   'dashboard.branch': 'Branch',
   'dashboard.allBranches': 'All branches',

@@ -1,259 +1,167 @@
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard } from './core/api/guards/auth.guard';
 import { Demo1Component } from './layouts/demo1/demo1.component';
-import { SignInComponent } from './pages/auth/sign-in/sign-in.component';
-import { IndexComponent as Demo1IndexComponent } from './pages/demo1/index/index.component';
-import { PermissionsPageComponent } from './pages/settings/permissions/permissions-page/permissions-page.component';
-import { ModulesListComponent } from './pages/settings/modules/modules-list/modules-list.component';
-import { ModuleFormComponent } from './pages/settings/modules/module-form/module-form.component';
-import { RolesListComponent } from './pages/settings/roles/roles-list/roles-list.component';
-import { RoleFormComponent } from './pages/settings/roles/role-form/role-form.component';
-import { BranchesListComponent } from './pages/settings/branches/branches-list/branches-list.component';
-import { BranchFormComponent } from './pages/settings/branches/branch-form/branch-form.component';
-import { CompaniesListComponent } from './pages/settings/companies/companies-list/companies-list.component';
-import { CompanyFormComponent } from './pages/settings/companies/company-form/company-form.component';
-import { CurrenciesListComponent } from './pages/settings/currencies/currencies-list/currencies-list.component';
-import { CurrencyFormComponent } from './pages/settings/currencies/currency-form/currency-form.component';
-import { SystemLogFormComponent } from './pages/settings/system-logs/system-log-form/system-log-form.component';
-import { SystemLogsListComponent } from './pages/settings/system-logs/system-logs-list/system-logs-list.component';
-import { UserFormComponent } from './pages/settings/users/user-form/user-form.component';
-import { UsersListComponent } from './pages/settings/users/users-list/users-list.component';
-import { CustomerGroupFormComponent } from './pages/sales/customer-groups/customer-group-form/customer-group-form.component';
-import { CustomerGroupsListComponent } from './pages/sales/customer-groups/customer-groups-list/customer-groups-list.component';
-import { CustomerFormComponent } from './pages/sales/customers/customer-form/customer-form.component';
-import { CustomersListComponent } from './pages/sales/customers/customers-list/customers-list.component';
-import { SalesmanFormComponent } from './pages/sales/salesmen/salesman-form/salesman-form.component';
-import { SalesmenListComponent } from './pages/sales/salesmen/salesmen-list/salesmen-list.component';
-import { SalesInvoiceFormComponent } from './pages/sales/sales-invoices/sales-invoice-form/sales-invoice-form.component';
-import { SalesInvoicesListComponent } from './pages/sales/sales-invoices/sales-invoices-list/sales-invoices-list.component';
-import { SalesQuotesPageComponent } from './pages/sales/quotes/sales-quotes-page.component';
-import { PosComponent } from './pages/sales/pos/pos.component';
-import { PosDevicesListComponent } from './pages/pos/devices/pos-devices-list.component';
-import { PosCashiersListComponent } from './pages/pos/cashiers/pos-cashiers-list.component';
-import { PosShiftsListComponent } from './pages/pos/shifts/pos-shifts-list.component';
-import { PosSettingsPageComponent } from './pages/pos/settings/pos-settings-page.component';
-import { PosReturnsPageComponent } from './pages/pos/returns/pos-returns-page.component';
-import { PosReportsPageComponent } from './pages/pos/reports/pos-reports-page.component';
-import { PosReturnsReportPageComponent } from './pages/pos/reports/pos-returns-report-page.component';
-import { ProductGroupFormComponent } from './pages/products/product-groups/product-group-form/product-group-form.component';
-import { ProductGroupsListComponent } from './pages/products/product-groups/product-groups-list/product-groups-list.component';
-import { ProductFormComponent } from './pages/products/items/product-form/product-form.component';
-import { ProductsListComponent } from './pages/products/items/products-list/products-list.component';
+
 // TEMP: العلامات التجارية مخفية مؤقتاً
 // import { BrandFormComponent } from './pages/products/brands/brand-form/brand-form.component';
 // import { BrandsListComponent } from './pages/products/brands/brands-list/brands-list.component';
-import { UnitFormComponent } from './pages/products/units/unit-form/unit-form.component';
-import { UnitsListComponent } from './pages/products/units/units-list/units-list.component';
-import { ItemPricingPageComponent } from './pages/products/pricing/item-pricing-page/item-pricing-page.component';
-import { AccountGroupFormComponent } from './pages/accounting/account-groups/account-group-form/account-group-form.component';
-import { AccountGroupsListComponent } from './pages/accounting/account-groups/account-groups-list/account-groups-list.component';
-import { AccountingPeriodFormComponent } from './pages/accounting/periods/accounting-period-form/accounting-period-form.component';
-import { AccountingPeriodsListComponent } from './pages/accounting/periods/accounting-periods-list/accounting-periods-list.component';
-import { FiscalYearFormComponent } from './pages/accounting/fiscal-years/fiscal-year-form/fiscal-year-form.component';
-import { FiscalYearsListComponent } from './pages/accounting/fiscal-years/fiscal-years-list/fiscal-years-list.component';
-import { AccountFormComponent } from './pages/accounting/accounts/account-form/account-form.component';
-import { AccountsTreeComponent } from './pages/accounting/accounts/accounts-tree/accounts-tree.component';
-import { CostCenterFormComponent } from './pages/accounting/cost-centers/cost-center-form/cost-center-form.component';
-import { CostCentersListComponent } from './pages/accounting/cost-centers/cost-centers-list/cost-centers-list.component';
-import { TaxSetupFormComponent } from './pages/accounting/tax-setups/tax-setup-form/tax-setup-form.component';
-import { TaxSetupsListComponent } from './pages/accounting/tax-setups/tax-setups-list/tax-setups-list.component';
-import { OpeningBalanceFormComponent } from './pages/accounting/opening-balances/opening-balance-form/opening-balance-form.component';
-import { OpeningBalancesListComponent } from './pages/accounting/opening-balances/opening-balances-list/opening-balances-list.component';
-import { JournalEntryFormComponent } from './pages/accounting/journal-entries/journal-entry-form/journal-entry-form.component';
-import { JournalEntriesListComponent } from './pages/accounting/journal-entries/journal-entries-list/journal-entries-list.component';
-import { JournalTypeFormComponent } from './pages/accounting/journal-types/journal-type-form/journal-type-form.component';
-import { JournalTypesListComponent } from './pages/accounting/journal-types/journal-types-list/journal-types-list.component';
-import { ItemAccountingPoliciesListComponent } from './pages/accounting/item-accounting-policies/item-accounting-policies-list/item-accounting-policies-list.component';
-import { ItemAccountingPolicyFormComponent } from './pages/accounting/item-accounting-policies/item-accounting-policy-form/item-accounting-policy-form.component';
-import { UserBranchesPageComponent } from './pages/settings/user-branches/user-branches-page/user-branches-page.component';
-import { PaymentVoucherFormComponent } from './pages/accounting/payment-vouchers/payment-voucher-form/payment-voucher-form.component';
-import { PaymentVouchersListComponent } from './pages/accounting/payment-vouchers/payment-vouchers-list/payment-vouchers-list.component';
-import { ReceiptVoucherFormComponent } from './pages/accounting/receipt-vouchers/receipt-voucher-form/receipt-voucher-form.component';
-import { ReceiptVouchersListComponent } from './pages/accounting/receipt-vouchers/receipt-vouchers-list/receipt-vouchers-list.component';
-import { GeneralLedgerComponent } from './pages/accounting/reports/general-ledger/general-ledger.component';
-import { TrialBalanceComponent } from './pages/accounting/reports/trial-balance/trial-balance.component';
-import { BanksListComponent } from './pages/banks/banks/banks-list/banks-list.component';
-import { BankFormComponent } from './pages/banks/banks/bank-form/bank-form.component';
-import { BankAccountsListComponent } from './pages/banks/accounts/bank-accounts-list/bank-accounts-list.component';
-import { BankAccountFormComponent } from './pages/banks/accounts/bank-account-form/bank-account-form.component';
-import { CheckBooksListComponent } from './pages/banks/check-books/check-books-list/check-books-list.component';
-import { CheckBookFormComponent } from './pages/banks/check-books/check-book-form/check-book-form.component';
-import { IssuedChecksListComponent } from './pages/accounting/issued-checks/issued-checks-list/issued-checks-list.component';
-import { IssuedCheckFormComponent } from './pages/accounting/issued-checks/issued-check-form/issued-check-form.component';
-import { WarehousesListComponent } from './pages/inventory/warehouses/warehouses-list/warehouses-list.component';
-import { WarehouseFormComponent } from './pages/inventory/warehouses/warehouse-form/warehouse-form.component';
-import { StockIssuesListComponent } from './pages/inventory/stock-issues/stock-issues-list/stock-issues-list.component';
-import { StockIssueFormComponent } from './pages/inventory/stock-issues/stock-issue-form/stock-issue-form.component';
-import { StockTransfersListComponent } from './pages/inventory/stock-transfers/stock-transfers-list/stock-transfers-list.component';
-import { StockTransferFormComponent } from './pages/inventory/stock-transfers/stock-transfer-form/stock-transfer-form.component';
-import { StockReceivingsListComponent } from './pages/inventory/stock-receivings/stock-receivings-list/stock-receivings-list.component';
-import { StockReceivingFormComponent } from './pages/inventory/stock-receivings/stock-receiving-form/stock-receiving-form.component';
-import { StockTakingsListComponent } from './pages/inventory/stock-takings/stock-takings-list/stock-takings-list.component';
-import { StockTakingFormComponent } from './pages/inventory/stock-takings/stock-taking-form/stock-taking-form.component';
-import { StockAdjustmentsListComponent } from './pages/inventory/stock-adjustments/stock-adjustments-list/stock-adjustments-list.component';
-import { StockAdjustmentFormComponent } from './pages/inventory/stock-adjustments/stock-adjustment-form/stock-adjustment-form.component';
-import { CurrentStockReportComponent } from './pages/inventory/reports/current-stock-report/current-stock-report.component';
-import { ItemMovementReportComponent } from './pages/inventory/reports/item-movement-report/item-movement-report.component';
-import { StockIssueReportComponent } from './pages/inventory/reports/stock-issue-report/stock-issue-report.component';
-import { StockReceivingTypesListComponent } from './pages/inventory/stock-receiving-types/stock-receiving-types-list/stock-receiving-types-list.component';
-import { StockReceivingTypeFormComponent } from './pages/inventory/stock-receiving-types/stock-receiving-type-form/stock-receiving-type-form.component';
-import { StockIssueTypesListComponent } from './pages/inventory/stock-issue-types/stock-issue-types-list/stock-issue-types-list.component';
-import { StockIssueTypeFormComponent } from './pages/inventory/stock-issue-types/stock-issue-type-form/stock-issue-type-form.component';
-import { SuppliersListComponent } from './pages/purchasing/suppliers/suppliers-list/suppliers-list.component';
-import { SupplierFormComponent } from './pages/purchasing/suppliers/supplier-form/supplier-form.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth/sign-in' },
-  { path: 'auth/sign-in', component: SignInComponent, canActivate: [guestGuard] },
+  {
+    path: 'auth/sign-in',
+    loadComponent: () => import('./pages/auth/sign-in/sign-in.component').then((m) => m.SignInComponent),
+    canActivate: [guestGuard],
+  },
   {
     path: 'demo1',
     component: Demo1Component,
     canActivate: [authGuard],
     children: [
-      { path: '', component: Demo1IndexComponent },
-      { path: 'settings/users', component: UsersListComponent },
-      { path: 'settings/users/new', component: UserFormComponent },
-      { path: 'settings/users/:id/edit', component: UserFormComponent },
-      { path: 'settings/user-branches', component: UserBranchesPageComponent },
-      { path: 'settings/roles', component: RolesListComponent },
-      { path: 'settings/roles/new', component: RoleFormComponent },
-      { path: 'settings/roles/:id/edit', component: RoleFormComponent },
-      { path: 'settings/permissions', component: PermissionsPageComponent },
-      { path: 'settings/modules', component: ModulesListComponent },
-      { path: 'settings/modules/new', component: ModuleFormComponent },
-      { path: 'settings/modules/:id/edit', component: ModuleFormComponent },
-      { path: 'settings/companies', component: CompaniesListComponent },
-      { path: 'settings/companies/new', component: CompanyFormComponent },
-      { path: 'settings/companies/:id/edit', component: CompanyFormComponent },
-      { path: 'settings/branches', component: BranchesListComponent },
-      { path: 'settings/branches/new', component: BranchFormComponent },
-      { path: 'settings/branches/:id/edit', component: BranchFormComponent },
-      { path: 'settings/currencies', component: CurrenciesListComponent },
-      { path: 'settings/currencies/new', component: CurrencyFormComponent },
-      { path: 'settings/currencies/:id/edit', component: CurrencyFormComponent },
-      { path: 'settings/system-logs', component: SystemLogsListComponent },
-      { path: 'settings/system-logs/new', component: SystemLogFormComponent },
-      { path: 'sales/customer-groups', component: CustomerGroupsListComponent },
-      { path: 'sales/customer-groups/new', component: CustomerGroupFormComponent },
-      { path: 'sales/customer-groups/:id/edit', component: CustomerGroupFormComponent },
-      { path: 'sales/customers', component: CustomersListComponent },
-      { path: 'sales/customers/new', component: CustomerFormComponent },
-      { path: 'sales/customers/:id/edit', component: CustomerFormComponent },
-      { path: 'sales/salesmen', component: SalesmenListComponent },
-      { path: 'sales/salesmen/new', component: SalesmanFormComponent },
-      { path: 'sales/salesmen/:id/edit', component: SalesmanFormComponent },
+      { path: '', loadComponent: () => import('./pages/demo1/index/index.component').then((m) => m.IndexComponent) },
+      { path: 'settings/users', loadComponent: () => import('./pages/settings/users/users-list/users-list.component').then((m) => m.UsersListComponent) },
+      { path: 'settings/users/new', loadComponent: () => import('./pages/settings/users/user-form/user-form.component').then((m) => m.UserFormComponent) },
+      { path: 'settings/users/:id/edit', loadComponent: () => import('./pages/settings/users/user-form/user-form.component').then((m) => m.UserFormComponent) },
+      { path: 'settings/user-branches', loadComponent: () => import('./pages/settings/user-branches/user-branches-page/user-branches-page.component').then((m) => m.UserBranchesPageComponent) },
+      { path: 'settings/roles', loadComponent: () => import('./pages/settings/roles/roles-list/roles-list.component').then((m) => m.RolesListComponent) },
+      { path: 'settings/roles/new', loadComponent: () => import('./pages/settings/roles/role-form/role-form.component').then((m) => m.RoleFormComponent) },
+      { path: 'settings/roles/:id/edit', loadComponent: () => import('./pages/settings/roles/role-form/role-form.component').then((m) => m.RoleFormComponent) },
+      { path: 'settings/permissions', loadComponent: () => import('./pages/settings/permissions/permissions-page/permissions-page.component').then((m) => m.PermissionsPageComponent) },
+      { path: 'settings/modules', loadComponent: () => import('./pages/settings/modules/modules-list/modules-list.component').then((m) => m.ModulesListComponent) },
+      { path: 'settings/modules/new', loadComponent: () => import('./pages/settings/modules/module-form/module-form.component').then((m) => m.ModuleFormComponent) },
+      { path: 'settings/modules/:id/edit', loadComponent: () => import('./pages/settings/modules/module-form/module-form.component').then((m) => m.ModuleFormComponent) },
+      { path: 'settings/companies', loadComponent: () => import('./pages/settings/companies/companies-list/companies-list.component').then((m) => m.CompaniesListComponent) },
+      { path: 'settings/companies/new', loadComponent: () => import('./pages/settings/companies/company-form/company-form.component').then((m) => m.CompanyFormComponent) },
+      { path: 'settings/companies/:id/edit', loadComponent: () => import('./pages/settings/companies/company-form/company-form.component').then((m) => m.CompanyFormComponent) },
+      { path: 'settings/branches', loadComponent: () => import('./pages/settings/branches/branches-list/branches-list.component').then((m) => m.BranchesListComponent) },
+      { path: 'settings/branches/new', loadComponent: () => import('./pages/settings/branches/branch-form/branch-form.component').then((m) => m.BranchFormComponent) },
+      { path: 'settings/branches/:id/edit', loadComponent: () => import('./pages/settings/branches/branch-form/branch-form.component').then((m) => m.BranchFormComponent) },
+      { path: 'settings/currencies', loadComponent: () => import('./pages/settings/currencies/currencies-list/currencies-list.component').then((m) => m.CurrenciesListComponent) },
+      { path: 'settings/currencies/new', loadComponent: () => import('./pages/settings/currencies/currency-form/currency-form.component').then((m) => m.CurrencyFormComponent) },
+      { path: 'settings/currencies/:id/edit', loadComponent: () => import('./pages/settings/currencies/currency-form/currency-form.component').then((m) => m.CurrencyFormComponent) },
+      { path: 'settings/system-logs', loadComponent: () => import('./pages/settings/system-logs/system-logs-list/system-logs-list.component').then((m) => m.SystemLogsListComponent) },
+      { path: 'settings/system-logs/new', loadComponent: () => import('./pages/settings/system-logs/system-log-form/system-log-form.component').then((m) => m.SystemLogFormComponent) },
+      { path: 'sales/customer-groups', loadComponent: () => import('./pages/sales/customer-groups/customer-groups-list/customer-groups-list.component').then((m) => m.CustomerGroupsListComponent) },
+      { path: 'sales/customer-groups/new', loadComponent: () => import('./pages/sales/customer-groups/customer-group-form/customer-group-form.component').then((m) => m.CustomerGroupFormComponent) },
+      { path: 'sales/customer-groups/:id/edit', loadComponent: () => import('./pages/sales/customer-groups/customer-group-form/customer-group-form.component').then((m) => m.CustomerGroupFormComponent) },
+      { path: 'sales/customers', loadComponent: () => import('./pages/sales/customers/customers-list/customers-list.component').then((m) => m.CustomersListComponent) },
+      { path: 'sales/customers/new', loadComponent: () => import('./pages/sales/customers/customer-form/customer-form.component').then((m) => m.CustomerFormComponent) },
+      { path: 'sales/customers/:id/edit', loadComponent: () => import('./pages/sales/customers/customer-form/customer-form.component').then((m) => m.CustomerFormComponent) },
+      { path: 'sales/salesmen', loadComponent: () => import('./pages/sales/salesmen/salesmen-list/salesmen-list.component').then((m) => m.SalesmenListComponent) },
+      { path: 'sales/salesmen/new', loadComponent: () => import('./pages/sales/salesmen/salesman-form/salesman-form.component').then((m) => m.SalesmanFormComponent) },
+      { path: 'sales/salesmen/:id/edit', loadComponent: () => import('./pages/sales/salesmen/salesman-form/salesman-form.component').then((m) => m.SalesmanFormComponent) },
       { path: 'sales/pos', redirectTo: 'pos/terminal', pathMatch: 'full' },
-      { path: 'pos/terminal', component: PosComponent },
-      { path: 'pos/returns', component: PosReturnsPageComponent },
-      { path: 'pos/settings', component: PosSettingsPageComponent },
-      { path: 'pos/shifts', component: PosShiftsListComponent },
-      { path: 'pos/devices', component: PosDevicesListComponent },
-      { path: 'pos/cashiers', component: PosCashiersListComponent },
-      { path: 'pos/reports', component: PosReportsPageComponent },
-      { path: 'pos/returns-report', component: PosReturnsReportPageComponent },
-      { path: 'sales/sales-invoices', component: SalesInvoicesListComponent },
-      { path: 'sales/sales-invoices/new', component: SalesInvoiceFormComponent },
-      { path: 'sales/sales-invoices/:id', component: SalesInvoiceFormComponent },
-      { path: 'sales/quotes', component: SalesQuotesPageComponent },
-      { path: 'products/groups', component: ProductGroupsListComponent },
-      { path: 'products/groups/new', component: ProductGroupFormComponent },
-      { path: 'products/groups/:id/edit', component: ProductGroupFormComponent },
-      { path: 'products/items', component: ProductsListComponent },
-      { path: 'products/items/new', component: ProductFormComponent },
-      { path: 'products/items/:id/edit', component: ProductFormComponent },
-      { path: 'products/units', component: UnitsListComponent },
-      { path: 'products/units/new', component: UnitFormComponent },
-      { path: 'products/units/:id/edit', component: UnitFormComponent },
+      { path: 'pos/terminal', loadComponent: () => import('./pages/sales/pos/pos.component').then((m) => m.PosComponent) },
+      { path: 'pos/returns', loadComponent: () => import('./pages/pos/returns/pos-returns-page.component').then((m) => m.PosReturnsPageComponent) },
+      { path: 'pos/settings', loadComponent: () => import('./pages/pos/settings/pos-settings-page.component').then((m) => m.PosSettingsPageComponent) },
+      { path: 'pos/shifts', loadComponent: () => import('./pages/pos/shifts/pos-shifts-list.component').then((m) => m.PosShiftsListComponent) },
+      { path: 'pos/devices', loadComponent: () => import('./pages/pos/devices/pos-devices-list.component').then((m) => m.PosDevicesListComponent) },
+      { path: 'pos/cashiers', loadComponent: () => import('./pages/pos/cashiers/pos-cashiers-list.component').then((m) => m.PosCashiersListComponent) },
+      { path: 'pos/reports', loadComponent: () => import('./pages/pos/reports/pos-reports-page.component').then((m) => m.PosReportsPageComponent) },
+      { path: 'pos/returns-report', loadComponent: () => import('./pages/pos/reports/pos-returns-report-page.component').then((m) => m.PosReturnsReportPageComponent) },
+      { path: 'sales/sales-invoices', loadComponent: () => import('./pages/sales/sales-invoices/sales-invoices-list/sales-invoices-list.component').then((m) => m.SalesInvoicesListComponent) },
+      { path: 'sales/sales-invoices/new', loadComponent: () => import('./pages/sales/sales-invoices/sales-invoice-form/sales-invoice-form.component').then((m) => m.SalesInvoiceFormComponent) },
+      { path: 'sales/sales-invoices/:id', loadComponent: () => import('./pages/sales/sales-invoices/sales-invoice-form/sales-invoice-form.component').then((m) => m.SalesInvoiceFormComponent) },
+      { path: 'sales/quotes', loadComponent: () => import('./pages/sales/quotes/sales-quotes-page.component').then((m) => m.SalesQuotesPageComponent) },
+      { path: 'products/groups', loadComponent: () => import('./pages/products/product-groups/product-groups-list/product-groups-list.component').then((m) => m.ProductGroupsListComponent) },
+      { path: 'products/groups/new', loadComponent: () => import('./pages/products/product-groups/product-group-form/product-group-form.component').then((m) => m.ProductGroupFormComponent) },
+      { path: 'products/groups/:id/edit', loadComponent: () => import('./pages/products/product-groups/product-group-form/product-group-form.component').then((m) => m.ProductGroupFormComponent) },
+      { path: 'products/items', loadComponent: () => import('./pages/products/items/products-list/products-list.component').then((m) => m.ProductsListComponent) },
+      { path: 'products/items/new', loadComponent: () => import('./pages/products/items/product-form/product-form.component').then((m) => m.ProductFormComponent) },
+      { path: 'products/items/:id/edit', loadComponent: () => import('./pages/products/items/product-form/product-form.component').then((m) => m.ProductFormComponent) },
+      { path: 'products/units', loadComponent: () => import('./pages/products/units/units-list/units-list.component').then((m) => m.UnitsListComponent) },
+      { path: 'products/units/new', loadComponent: () => import('./pages/products/units/unit-form/unit-form.component').then((m) => m.UnitFormComponent) },
+      { path: 'products/units/:id/edit', loadComponent: () => import('./pages/products/units/unit-form/unit-form.component').then((m) => m.UnitFormComponent) },
       // TEMP: العلامات التجارية مخفية مؤقتاً
       // { path: 'products/brands', component: BrandsListComponent },
       // { path: 'products/brands/new', component: BrandFormComponent },
       // { path: 'products/brands/:id/edit', component: BrandFormComponent },
-      { path: 'products/pricing', component: ItemPricingPageComponent },
-      { path: 'accounting/account-groups', component: AccountGroupsListComponent },
-      { path: 'accounting/account-groups/new', component: AccountGroupFormComponent },
-      { path: 'accounting/account-groups/:id/edit', component: AccountGroupFormComponent },
-      { path: 'accounting/periods', component: AccountingPeriodsListComponent },
-      { path: 'accounting/periods/new', component: AccountingPeriodFormComponent },
-      { path: 'accounting/periods/:id/edit', component: AccountingPeriodFormComponent },
-      { path: 'accounting/fiscal-years', component: FiscalYearsListComponent },
-      { path: 'accounting/fiscal-years/new', component: FiscalYearFormComponent },
-      { path: 'accounting/fiscal-years/:id/edit', component: FiscalYearFormComponent },
-      { path: 'accounting/accounts', component: AccountsTreeComponent },
-      { path: 'accounting/accounts/new', component: AccountFormComponent },
-      { path: 'accounting/accounts/:id/edit', component: AccountFormComponent },
-      { path: 'accounting/cost-centers', component: CostCentersListComponent },
-      { path: 'accounting/cost-centers/new', component: CostCenterFormComponent },
-      { path: 'accounting/cost-centers/:id/edit', component: CostCenterFormComponent },
-      { path: 'accounting/tax-setups', component: TaxSetupsListComponent },
-      { path: 'accounting/tax-setups/new', component: TaxSetupFormComponent },
-      { path: 'accounting/tax-setups/:id/edit', component: TaxSetupFormComponent },
-      { path: 'accounting/opening-balances', component: OpeningBalancesListComponent },
-      { path: 'accounting/opening-balances/new', component: OpeningBalanceFormComponent },
-      { path: 'accounting/opening-balances/:id/edit', component: OpeningBalanceFormComponent },
-      { path: 'accounting/journal-entries', component: JournalEntriesListComponent },
-      { path: 'accounting/journal-entries/new', component: JournalEntryFormComponent },
-      { path: 'accounting/journal-entries/:id/edit', component: JournalEntryFormComponent },
-      { path: 'accounting/journal-types', component: JournalTypesListComponent },
-      { path: 'accounting/journal-types/new', component: JournalTypeFormComponent },
-      { path: 'accounting/journal-types/:id/edit', component: JournalTypeFormComponent },
-      { path: 'accounting/item-accounting-policies', component: ItemAccountingPoliciesListComponent },
-      { path: 'accounting/item-accounting-policies/new', component: ItemAccountingPolicyFormComponent },
-      { path: 'accounting/item-accounting-policies/:id/edit', component: ItemAccountingPolicyFormComponent },
-      { path: 'accounting/payment-vouchers', component: PaymentVouchersListComponent },
-      { path: 'accounting/payment-vouchers/new', component: PaymentVoucherFormComponent },
-      { path: 'accounting/payment-vouchers/:id/edit', component: PaymentVoucherFormComponent },
-      { path: 'accounting/receipt-vouchers', component: ReceiptVouchersListComponent },
-      { path: 'accounting/receipt-vouchers/new', component: ReceiptVoucherFormComponent },
-      { path: 'accounting/receipt-vouchers/:id/edit', component: ReceiptVoucherFormComponent },
-      { path: 'accounting/check-books', component: CheckBooksListComponent },
-      { path: 'accounting/check-books/new', component: CheckBookFormComponent },
-      { path: 'accounting/check-books/:id/edit', component: CheckBookFormComponent },
-      { path: 'accounting/issued-checks', component: IssuedChecksListComponent },
-      { path: 'accounting/issued-checks/new', component: IssuedCheckFormComponent },
-      { path: 'accounting/issued-checks/:id/edit', component: IssuedCheckFormComponent },
-      { path: 'accounting/reports/general-ledger', component: GeneralLedgerComponent },
-      { path: 'accounting/reports/trial-balance', component: TrialBalanceComponent },
-      { path: 'banks/banks', component: BanksListComponent },
-      { path: 'banks/banks/new', component: BankFormComponent },
-      { path: 'banks/banks/:id/edit', component: BankFormComponent },
-      { path: 'banks/accounts', component: BankAccountsListComponent },
-      { path: 'banks/accounts/new', component: BankAccountFormComponent },
-      { path: 'banks/accounts/:id/edit', component: BankAccountFormComponent },
-      { path: 'banks/check-books', component: CheckBooksListComponent },
-      { path: 'banks/check-books/new', component: CheckBookFormComponent },
-      { path: 'banks/check-books/:id/edit', component: CheckBookFormComponent },
-      { path: 'inventory/warehouses', component: WarehousesListComponent },
-      { path: 'inventory/warehouses/new', component: WarehouseFormComponent },
-      { path: 'inventory/warehouses/:id/edit', component: WarehouseFormComponent },
-      { path: 'inventory/stock-issues', component: StockIssuesListComponent },
-      { path: 'inventory/stock-issues/new', component: StockIssueFormComponent },
-      { path: 'inventory/stock-issues/:id', component: StockIssueFormComponent },
-      { path: 'inventory/stock-transfers', component: StockTransfersListComponent },
-      { path: 'inventory/stock-transfers/new', component: StockTransferFormComponent },
-      { path: 'inventory/stock-transfers/:id', component: StockTransferFormComponent },
-      { path: 'inventory/stock-receivings', component: StockReceivingsListComponent },
-      { path: 'inventory/stock-receivings/new', component: StockReceivingFormComponent },
-      { path: 'inventory/stock-receivings/:id/edit', component: StockReceivingFormComponent },
-      { path: 'inventory/stock-receivings/:id', component: StockReceivingFormComponent },
-      { path: 'inventory/stock-receiving-types', component: StockReceivingTypesListComponent },
-      { path: 'inventory/stock-receiving-types/new', component: StockReceivingTypeFormComponent },
-      { path: 'inventory/stock-receiving-types/:id/edit', component: StockReceivingTypeFormComponent },
-      { path: 'inventory/stock-issue-types', component: StockIssueTypesListComponent },
-      { path: 'inventory/stock-issue-types/new', component: StockIssueTypeFormComponent },
-      { path: 'inventory/stock-issue-types/:id/edit', component: StockIssueTypeFormComponent },
-      { path: 'inventory/stock-takings', component: StockTakingsListComponent },
-      { path: 'inventory/stock-takings/new', component: StockTakingFormComponent },
-      { path: 'inventory/stock-takings/:id', component: StockTakingFormComponent },
-      { path: 'inventory/stock-adjustments', component: StockAdjustmentsListComponent },
-      { path: 'inventory/stock-adjustments/new', component: StockAdjustmentFormComponent },
-      { path: 'inventory/stock-adjustments/:id/edit', component: StockAdjustmentFormComponent },
-      { path: 'inventory/stock-adjustments/:id', component: StockAdjustmentFormComponent },
-      { path: 'inventory/reports/current-stock', component: CurrentStockReportComponent },
-      { path: 'inventory/reports/item-movement', component: ItemMovementReportComponent },
-      { path: 'inventory/reports/stock-issue', component: StockIssueReportComponent },
-      { path: 'purchasing/suppliers', component: SuppliersListComponent },
-      { path: 'purchasing/suppliers/new', component: SupplierFormComponent },
-      { path: 'purchasing/suppliers/:id/edit', component: SupplierFormComponent },
+      { path: 'products/pricing', loadComponent: () => import('./pages/products/pricing/item-pricing-page/item-pricing-page.component').then((m) => m.ItemPricingPageComponent) },
+      { path: 'accounting/account-groups', loadComponent: () => import('./pages/accounting/account-groups/account-groups-list/account-groups-list.component').then((m) => m.AccountGroupsListComponent) },
+      { path: 'accounting/account-groups/new', loadComponent: () => import('./pages/accounting/account-groups/account-group-form/account-group-form.component').then((m) => m.AccountGroupFormComponent) },
+      { path: 'accounting/account-groups/:id/edit', loadComponent: () => import('./pages/accounting/account-groups/account-group-form/account-group-form.component').then((m) => m.AccountGroupFormComponent) },
+      { path: 'accounting/periods', loadComponent: () => import('./pages/accounting/periods/accounting-periods-list/accounting-periods-list.component').then((m) => m.AccountingPeriodsListComponent) },
+      { path: 'accounting/periods/new', loadComponent: () => import('./pages/accounting/periods/accounting-period-form/accounting-period-form.component').then((m) => m.AccountingPeriodFormComponent) },
+      { path: 'accounting/periods/:id/edit', loadComponent: () => import('./pages/accounting/periods/accounting-period-form/accounting-period-form.component').then((m) => m.AccountingPeriodFormComponent) },
+      { path: 'accounting/fiscal-years', loadComponent: () => import('./pages/accounting/fiscal-years/fiscal-years-list/fiscal-years-list.component').then((m) => m.FiscalYearsListComponent) },
+      { path: 'accounting/fiscal-years/new', loadComponent: () => import('./pages/accounting/fiscal-years/fiscal-year-form/fiscal-year-form.component').then((m) => m.FiscalYearFormComponent) },
+      { path: 'accounting/fiscal-years/:id/edit', loadComponent: () => import('./pages/accounting/fiscal-years/fiscal-year-form/fiscal-year-form.component').then((m) => m.FiscalYearFormComponent) },
+      { path: 'accounting/accounts', loadComponent: () => import('./pages/accounting/accounts/accounts-tree/accounts-tree.component').then((m) => m.AccountsTreeComponent) },
+      { path: 'accounting/accounts/new', loadComponent: () => import('./pages/accounting/accounts/account-form/account-form.component').then((m) => m.AccountFormComponent) },
+      { path: 'accounting/accounts/:id/edit', loadComponent: () => import('./pages/accounting/accounts/account-form/account-form.component').then((m) => m.AccountFormComponent) },
+      { path: 'accounting/cost-centers', loadComponent: () => import('./pages/accounting/cost-centers/cost-centers-list/cost-centers-list.component').then((m) => m.CostCentersListComponent) },
+      { path: 'accounting/cost-centers/new', loadComponent: () => import('./pages/accounting/cost-centers/cost-center-form/cost-center-form.component').then((m) => m.CostCenterFormComponent) },
+      { path: 'accounting/cost-centers/:id/edit', loadComponent: () => import('./pages/accounting/cost-centers/cost-center-form/cost-center-form.component').then((m) => m.CostCenterFormComponent) },
+      { path: 'accounting/tax-setups', loadComponent: () => import('./pages/accounting/tax-setups/tax-setups-list/tax-setups-list.component').then((m) => m.TaxSetupsListComponent) },
+      { path: 'accounting/tax-setups/new', loadComponent: () => import('./pages/accounting/tax-setups/tax-setup-form/tax-setup-form.component').then((m) => m.TaxSetupFormComponent) },
+      { path: 'accounting/tax-setups/:id/edit', loadComponent: () => import('./pages/accounting/tax-setups/tax-setup-form/tax-setup-form.component').then((m) => m.TaxSetupFormComponent) },
+      { path: 'accounting/opening-balances', loadComponent: () => import('./pages/accounting/opening-balances/opening-balances-list/opening-balances-list.component').then((m) => m.OpeningBalancesListComponent) },
+      { path: 'accounting/opening-balances/new', loadComponent: () => import('./pages/accounting/opening-balances/opening-balance-form/opening-balance-form.component').then((m) => m.OpeningBalanceFormComponent) },
+      { path: 'accounting/opening-balances/:id/edit', loadComponent: () => import('./pages/accounting/opening-balances/opening-balance-form/opening-balance-form.component').then((m) => m.OpeningBalanceFormComponent) },
+      { path: 'accounting/journal-entries', loadComponent: () => import('./pages/accounting/journal-entries/journal-entries-list/journal-entries-list.component').then((m) => m.JournalEntriesListComponent) },
+      { path: 'accounting/journal-entries/new', loadComponent: () => import('./pages/accounting/journal-entries/journal-entry-form/journal-entry-form.component').then((m) => m.JournalEntryFormComponent) },
+      { path: 'accounting/journal-entries/:id/edit', loadComponent: () => import('./pages/accounting/journal-entries/journal-entry-form/journal-entry-form.component').then((m) => m.JournalEntryFormComponent) },
+      { path: 'accounting/journal-types', loadComponent: () => import('./pages/accounting/journal-types/journal-types-list/journal-types-list.component').then((m) => m.JournalTypesListComponent) },
+      { path: 'accounting/journal-types/new', loadComponent: () => import('./pages/accounting/journal-types/journal-type-form/journal-type-form.component').then((m) => m.JournalTypeFormComponent) },
+      { path: 'accounting/journal-types/:id/edit', loadComponent: () => import('./pages/accounting/journal-types/journal-type-form/journal-type-form.component').then((m) => m.JournalTypeFormComponent) },
+      { path: 'accounting/item-accounting-policies', loadComponent: () => import('./pages/accounting/item-accounting-policies/item-accounting-policies-list/item-accounting-policies-list.component').then((m) => m.ItemAccountingPoliciesListComponent) },
+      { path: 'accounting/item-accounting-policies/new', loadComponent: () => import('./pages/accounting/item-accounting-policies/item-accounting-policy-form/item-accounting-policy-form.component').then((m) => m.ItemAccountingPolicyFormComponent) },
+      { path: 'accounting/item-accounting-policies/:id/edit', loadComponent: () => import('./pages/accounting/item-accounting-policies/item-accounting-policy-form/item-accounting-policy-form.component').then((m) => m.ItemAccountingPolicyFormComponent) },
+      { path: 'accounting/payment-vouchers', loadComponent: () => import('./pages/accounting/payment-vouchers/payment-vouchers-list/payment-vouchers-list.component').then((m) => m.PaymentVouchersListComponent) },
+      { path: 'accounting/payment-vouchers/new', loadComponent: () => import('./pages/accounting/payment-vouchers/payment-voucher-form/payment-voucher-form.component').then((m) => m.PaymentVoucherFormComponent) },
+      { path: 'accounting/payment-vouchers/:id/edit', loadComponent: () => import('./pages/accounting/payment-vouchers/payment-voucher-form/payment-voucher-form.component').then((m) => m.PaymentVoucherFormComponent) },
+      { path: 'accounting/receipt-vouchers', loadComponent: () => import('./pages/accounting/receipt-vouchers/receipt-vouchers-list/receipt-vouchers-list.component').then((m) => m.ReceiptVouchersListComponent) },
+      { path: 'accounting/receipt-vouchers/new', loadComponent: () => import('./pages/accounting/receipt-vouchers/receipt-voucher-form/receipt-voucher-form.component').then((m) => m.ReceiptVoucherFormComponent) },
+      { path: 'accounting/receipt-vouchers/:id/edit', loadComponent: () => import('./pages/accounting/receipt-vouchers/receipt-voucher-form/receipt-voucher-form.component').then((m) => m.ReceiptVoucherFormComponent) },
+      { path: 'accounting/check-books', loadComponent: () => import('./pages/banks/check-books/check-books-list/check-books-list.component').then((m) => m.CheckBooksListComponent) },
+      { path: 'accounting/check-books/new', loadComponent: () => import('./pages/banks/check-books/check-book-form/check-book-form.component').then((m) => m.CheckBookFormComponent) },
+      { path: 'accounting/check-books/:id/edit', loadComponent: () => import('./pages/banks/check-books/check-book-form/check-book-form.component').then((m) => m.CheckBookFormComponent) },
+      { path: 'accounting/issued-checks', loadComponent: () => import('./pages/accounting/issued-checks/issued-checks-list/issued-checks-list.component').then((m) => m.IssuedChecksListComponent) },
+      { path: 'accounting/issued-checks/new', loadComponent: () => import('./pages/accounting/issued-checks/issued-check-form/issued-check-form.component').then((m) => m.IssuedCheckFormComponent) },
+      { path: 'accounting/issued-checks/:id/edit', loadComponent: () => import('./pages/accounting/issued-checks/issued-check-form/issued-check-form.component').then((m) => m.IssuedCheckFormComponent) },
+      { path: 'accounting/reports/general-ledger', loadComponent: () => import('./pages/accounting/reports/general-ledger/general-ledger.component').then((m) => m.GeneralLedgerComponent) },
+      { path: 'accounting/reports/trial-balance', loadComponent: () => import('./pages/accounting/reports/trial-balance/trial-balance.component').then((m) => m.TrialBalanceComponent) },
+      { path: 'banks/banks', loadComponent: () => import('./pages/banks/banks/banks-list/banks-list.component').then((m) => m.BanksListComponent) },
+      { path: 'banks/banks/new', loadComponent: () => import('./pages/banks/banks/bank-form/bank-form.component').then((m) => m.BankFormComponent) },
+      { path: 'banks/banks/:id/edit', loadComponent: () => import('./pages/banks/banks/bank-form/bank-form.component').then((m) => m.BankFormComponent) },
+      { path: 'banks/accounts', loadComponent: () => import('./pages/banks/accounts/bank-accounts-list/bank-accounts-list.component').then((m) => m.BankAccountsListComponent) },
+      { path: 'banks/accounts/new', loadComponent: () => import('./pages/banks/accounts/bank-account-form/bank-account-form.component').then((m) => m.BankAccountFormComponent) },
+      { path: 'banks/accounts/:id/edit', loadComponent: () => import('./pages/banks/accounts/bank-account-form/bank-account-form.component').then((m) => m.BankAccountFormComponent) },
+      { path: 'banks/check-books', loadComponent: () => import('./pages/banks/check-books/check-books-list/check-books-list.component').then((m) => m.CheckBooksListComponent) },
+      { path: 'banks/check-books/new', loadComponent: () => import('./pages/banks/check-books/check-book-form/check-book-form.component').then((m) => m.CheckBookFormComponent) },
+      { path: 'banks/check-books/:id/edit', loadComponent: () => import('./pages/banks/check-books/check-book-form/check-book-form.component').then((m) => m.CheckBookFormComponent) },
+      { path: 'inventory/warehouses', loadComponent: () => import('./pages/inventory/warehouses/warehouses-list/warehouses-list.component').then((m) => m.WarehousesListComponent) },
+      { path: 'inventory/warehouses/new', loadComponent: () => import('./pages/inventory/warehouses/warehouse-form/warehouse-form.component').then((m) => m.WarehouseFormComponent) },
+      { path: 'inventory/warehouses/:id/edit', loadComponent: () => import('./pages/inventory/warehouses/warehouse-form/warehouse-form.component').then((m) => m.WarehouseFormComponent) },
+      { path: 'inventory/stock-issues', loadComponent: () => import('./pages/inventory/stock-issues/stock-issues-list/stock-issues-list.component').then((m) => m.StockIssuesListComponent) },
+      { path: 'inventory/stock-issues/new', loadComponent: () => import('./pages/inventory/stock-issues/stock-issue-form/stock-issue-form.component').then((m) => m.StockIssueFormComponent) },
+      { path: 'inventory/stock-issues/:id', loadComponent: () => import('./pages/inventory/stock-issues/stock-issue-form/stock-issue-form.component').then((m) => m.StockIssueFormComponent) },
+      { path: 'inventory/stock-transfers', loadComponent: () => import('./pages/inventory/stock-transfers/stock-transfers-list/stock-transfers-list.component').then((m) => m.StockTransfersListComponent) },
+      { path: 'inventory/stock-transfers/new', loadComponent: () => import('./pages/inventory/stock-transfers/stock-transfer-form/stock-transfer-form.component').then((m) => m.StockTransferFormComponent) },
+      { path: 'inventory/stock-transfers/:id', loadComponent: () => import('./pages/inventory/stock-transfers/stock-transfer-form/stock-transfer-form.component').then((m) => m.StockTransferFormComponent) },
+      { path: 'inventory/stock-receivings', loadComponent: () => import('./pages/inventory/stock-receivings/stock-receivings-list/stock-receivings-list.component').then((m) => m.StockReceivingsListComponent) },
+      { path: 'inventory/stock-receivings/new', loadComponent: () => import('./pages/inventory/stock-receivings/stock-receiving-form/stock-receiving-form.component').then((m) => m.StockReceivingFormComponent) },
+      { path: 'inventory/stock-receivings/:id/edit', loadComponent: () => import('./pages/inventory/stock-receivings/stock-receiving-form/stock-receiving-form.component').then((m) => m.StockReceivingFormComponent) },
+      { path: 'inventory/stock-receivings/:id', loadComponent: () => import('./pages/inventory/stock-receivings/stock-receiving-form/stock-receiving-form.component').then((m) => m.StockReceivingFormComponent) },
+      { path: 'inventory/stock-receiving-types', loadComponent: () => import('./pages/inventory/stock-receiving-types/stock-receiving-types-list/stock-receiving-types-list.component').then((m) => m.StockReceivingTypesListComponent) },
+      { path: 'inventory/stock-receiving-types/new', loadComponent: () => import('./pages/inventory/stock-receiving-types/stock-receiving-type-form/stock-receiving-type-form.component').then((m) => m.StockReceivingTypeFormComponent) },
+      { path: 'inventory/stock-receiving-types/:id/edit', loadComponent: () => import('./pages/inventory/stock-receiving-types/stock-receiving-type-form/stock-receiving-type-form.component').then((m) => m.StockReceivingTypeFormComponent) },
+      { path: 'inventory/stock-issue-types', loadComponent: () => import('./pages/inventory/stock-issue-types/stock-issue-types-list/stock-issue-types-list.component').then((m) => m.StockIssueTypesListComponent) },
+      { path: 'inventory/stock-issue-types/new', loadComponent: () => import('./pages/inventory/stock-issue-types/stock-issue-type-form/stock-issue-type-form.component').then((m) => m.StockIssueTypeFormComponent) },
+      { path: 'inventory/stock-issue-types/:id/edit', loadComponent: () => import('./pages/inventory/stock-issue-types/stock-issue-type-form/stock-issue-type-form.component').then((m) => m.StockIssueTypeFormComponent) },
+      { path: 'inventory/stock-takings', loadComponent: () => import('./pages/inventory/stock-takings/stock-takings-list/stock-takings-list.component').then((m) => m.StockTakingsListComponent) },
+      { path: 'inventory/stock-takings/new', loadComponent: () => import('./pages/inventory/stock-takings/stock-taking-form/stock-taking-form.component').then((m) => m.StockTakingFormComponent) },
+      { path: 'inventory/stock-takings/:id', loadComponent: () => import('./pages/inventory/stock-takings/stock-taking-form/stock-taking-form.component').then((m) => m.StockTakingFormComponent) },
+      { path: 'inventory/stock-adjustments', loadComponent: () => import('./pages/inventory/stock-adjustments/stock-adjustments-list/stock-adjustments-list.component').then((m) => m.StockAdjustmentsListComponent) },
+      { path: 'inventory/stock-adjustments/new', loadComponent: () => import('./pages/inventory/stock-adjustments/stock-adjustment-form/stock-adjustment-form.component').then((m) => m.StockAdjustmentFormComponent) },
+      { path: 'inventory/stock-adjustments/:id/edit', loadComponent: () => import('./pages/inventory/stock-adjustments/stock-adjustment-form/stock-adjustment-form.component').then((m) => m.StockAdjustmentFormComponent) },
+      { path: 'inventory/stock-adjustments/:id', loadComponent: () => import('./pages/inventory/stock-adjustments/stock-adjustment-form/stock-adjustment-form.component').then((m) => m.StockAdjustmentFormComponent) },
+      { path: 'inventory/reports/current-stock', loadComponent: () => import('./pages/inventory/reports/current-stock-report/current-stock-report.component').then((m) => m.CurrentStockReportComponent) },
+      { path: 'inventory/reports/item-movement', loadComponent: () => import('./pages/inventory/reports/item-movement-report/item-movement-report.component').then((m) => m.ItemMovementReportComponent) },
+      { path: 'inventory/reports/stock-issue', loadComponent: () => import('./pages/inventory/reports/stock-issue-report/stock-issue-report.component').then((m) => m.StockIssueReportComponent) },
+      { path: 'purchasing/suppliers', loadComponent: () => import('./pages/purchasing/suppliers/suppliers-list/suppliers-list.component').then((m) => m.SuppliersListComponent) },
+      { path: 'purchasing/suppliers/new', loadComponent: () => import('./pages/purchasing/suppliers/supplier-form/supplier-form.component').then((m) => m.SupplierFormComponent) },
+      { path: 'purchasing/suppliers/:id/edit', loadComponent: () => import('./pages/purchasing/suppliers/supplier-form/supplier-form.component').then((m) => m.SupplierFormComponent) },
     ],
   },
 ];

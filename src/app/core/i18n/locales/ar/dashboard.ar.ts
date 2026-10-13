@@ -10,6 +10,7 @@ export const dashboardAr = {
   'dashboard.refreshFigures': 'تحديث الأرقام',
   'dashboard.loading': 'جارٍ تحميل لوحة التحكم...',
   'dashboard.loadError': 'تعذر تحميل بعض بيانات لوحة التحكم',
+  'dashboard.chartLoadError': 'تعذر تحميل الرسوم البيانية للوحة التحكم',
   'dashboard.emptyPending': 'لا توجد مستندات معلّقة — كل شيء على ما يرام',
   'dashboard.branch': 'الفرع',
   'dashboard.allBranches': 'كل الفروع',

@@ -1,59 +1,61 @@
-# MetronicTailwindAngular
+# Kayian ERP
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.13.
+Kayian ERP is an Angular application built with Angular CLI 21 and styled with
+Tailwind CSS and Metronic UI.
+
+## Prerequisites
+
+- Node.js and npm
+
+## Install dependencies
+
+From the project root, install the project dependencies:
+
+```powershell
+npm install
+```
 
 ## Development server
 
-To start a local development server, run:
+Start the development server using the project's local Angular CLI:
 
-```bash
-ng serve
+```powershell
+npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Open `http://localhost:4200/` in your browser. The development server reloads
+the application when source files change.
 
-## Code scaffolding
+## Build
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Create the default production build:
 
-```bash
-ng generate component component-name
+```powershell
+npm run build
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Create a development build:
 
-```bash
-ng generate --help
+```powershell
+npm run build -- --configuration development
 ```
 
-## Building
+Build artifacts are written to `dist/kayian-erp/`. Production builds enforce
+the bundle and component-style budgets configured in `angular.json`.
 
-To build the project run:
+## Tests
 
-```bash
-ng build
+Run the unit tests with Karma:
+
+```powershell
+npm test
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Angular CLI
 
-## Running unit tests
+The Angular CLI is installed as a project dependency. Run it through npm rather
+than relying on a global `ng` command. For example:
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+```powershell
+npm exec ng -- generate component component-name
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

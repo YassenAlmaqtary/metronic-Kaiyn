@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, DOCUMENT } from '@angular/common';
 import {
   Component,
   DestroyRef,
@@ -51,6 +51,7 @@ import { LanguageService } from '../../../core/services/language.service';
 import { PaymentTypesService } from '../../../core/services/payment-types.service';
 import { PosService, isPosShiftOpen } from '../../../core/services/pos.service';
 import { StoresService } from '../../../core/services/stores.service';
+import { loadStylesheet } from '../../../core/utils/load-stylesheet';
 
 export interface PosCartLine {
   key: string;
@@ -87,6 +88,7 @@ interface PosSuccessState {
   styleUrl: './pos.component.scss',
 })
 export class PosComponent implements OnInit {
+  private document = inject(DOCUMENT);
   private destroyRef = inject(DestroyRef);
   private auth = inject(AuthService);
   private language = inject(LanguageService);
@@ -307,7 +309,13 @@ export class PosComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.bootstrap();
+    void loadStylesheet(this.document, 'assets/css/pos.css')
+      .then(() => this.bootstrap())
+      .catch((error: unknown) => {
+        console.error('Failed to load POS styles.', error);
+        this.errorMessage.set(this.language.translate('pos.stylesLoadError'));
+        this.loading.set(false);
+      });
   }
 
   @HostListener('window:keydown', ['$event'])

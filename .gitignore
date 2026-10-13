@@ -43,4 +43,9 @@ Thumbs.db
 
 /src/assets
 /public/assets
+!/public/assets/
+/public/assets/*
+!/public/assets/css/
+/public/assets/css/*
+!/public/assets/css/pos.css
 .vscode
