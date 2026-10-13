@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -43,7 +43,23 @@ export class JournalEntriesApiService {
   }
 
   getUnposted(fromDate?: string, toDate?: string, branchId?: number) {
-    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/JournalEntries/unposted'));
+    let params = new HttpParams();
+    if (fromDate != null) {
+      for (const value of Array.isArray(fromDate) ? fromDate : [fromDate]) {
+        params = params.append('fromDate', String(value));
+      }
+    }
+    if (toDate != null) {
+      for (const value of Array.isArray(toDate) ? toDate : [toDate]) {
+        params = params.append('toDate', String(value));
+      }
+    }
+    if (branchId != null) {
+      for (const value of Array.isArray(branchId) ? branchId : [branchId]) {
+        params = params.append('branchId', String(value));
+      }
+    }
+    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/JournalEntries/unposted'), { params });
   }
 
   deleteByEntryId(entryId: number) {

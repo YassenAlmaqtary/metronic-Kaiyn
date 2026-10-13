@@ -30,7 +30,7 @@ export class FiscalYearsApiService {
     return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/FiscalYears/open'));
   }
 
-  getYearByYear(year: string) {
+  getYearByYear(year: number) {
     return this.http.get<ApiResponse<unknown>>(buildApiUrl(toApiPath(`/api/FiscalYears/year/{year}`, { year: year })));
   }
 

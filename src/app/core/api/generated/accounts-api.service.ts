@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -18,7 +18,7 @@ export class AccountsApiService {
     return this.http.post<ApiResponse<unknown>>(buildApiUrl('/api/Accounts'), body);
   }
 
-  getCodeByCode(code: string) {
+  getCodeByCode(code: number) {
     return this.http.get<ApiResponse<unknown>>(buildApiUrl(toApiPath(`/api/Accounts/code/{code}`, { code: code })));
   }
 
@@ -27,7 +27,18 @@ export class AccountsApiService {
   }
 
   getNextCode(parentCode?: number, accType?: number) {
-    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/Accounts/next-code'));
+    let params = new HttpParams();
+    if (parentCode != null) {
+      for (const value of Array.isArray(parentCode) ? parentCode : [parentCode]) {
+        params = params.append('parentCode', String(value));
+      }
+    }
+    if (accType != null) {
+      for (const value of Array.isArray(accType) ? accType : [accType]) {
+        params = params.append('accType', String(value));
+      }
+    }
+    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/Accounts/next-code'), { params });
   }
 
   deleteById(id: number) {

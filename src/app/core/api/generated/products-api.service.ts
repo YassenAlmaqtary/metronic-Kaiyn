@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -19,11 +19,28 @@ export class ProductsApiService {
   }
 
   getAccountMapping(productTypeId?: number, branchId?: number) {
-    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/Products/account-mapping'));
+    let params = new HttpParams();
+    if (productTypeId != null) {
+      for (const value of Array.isArray(productTypeId) ? productTypeId : [productTypeId]) {
+        params = params.append('productTypeId', String(value));
+      }
+    }
+    if (branchId != null) {
+      for (const value of Array.isArray(branchId) ? branchId : [branchId]) {
+        params = params.append('branchId', String(value));
+      }
+    }
+    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/Products/account-mapping'), { params });
   }
 
   getSearch(q?: string) {
-    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/Products/search'));
+    let params = new HttpParams();
+    if (q != null) {
+      for (const value of Array.isArray(q) ? q : [q]) {
+        params = params.append('q', String(value));
+      }
+    }
+    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/Products/search'), { params });
   }
 
   postUploadImage(body: unknown) {

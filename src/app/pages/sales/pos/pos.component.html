@@ -645,18 +645,42 @@
 						<h3>{{ 'pos.selectBatchTitle' | translate }}</h3>
 					</div>
 				</div>
-				<div class="pos-modal-body space-y-2">
+				<div class="pos-modal-body">
+					<p class="text-sm text-secondary-foreground">{{ 'pos.selectBatchHint' | translate }}</p>
 					@for (batch of batchOptions(); track $index) {
 						<button
 							type="button"
-							class="flex w-full items-center justify-between rounded-lg border border-border px-4 py-3 text-start hover:bg-muted/50 transition-colors"
+							class="group grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-border bg-background px-4 py-3 text-start transition-colors hover:border-primary/40 hover:bg-primary/5"
+							[attr.aria-label]="
+								('pos.batchNumber' | translate) + ': ' + (batch.batchNumber || ('pos.noBatchNumber' | translate))
+							"
 							(click)="selectBatchOption(batch)">
-							<span class="font-medium">{{ batch.batchNumber || '—' }}</span>
-							<span class="text-xs text-secondary-foreground">
-								{{ batch.availableQty ?? 0 }}
-								@if (batch.expiryDate) {
-									· {{ batch.expiryDate | date: 'shortDate' }}
-								}
+							<span class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3">
+								<span class="flex min-w-0 flex-col gap-1">
+									<span class="text-xs text-secondary-foreground">{{ 'pos.batchNumber' | translate }}</span>
+									<span class="truncate font-semibold text-foreground">
+										{{ batch.batchNumber || ('pos.noBatchNumber' | translate) }}
+									</span>
+								</span>
+								<span class="flex flex-col gap-1">
+									<span class="text-xs text-secondary-foreground">{{ 'pos.availableQuantity' | translate }}</span>
+									<span class="font-semibold tabular-nums text-foreground">
+										{{ batch.availableQty ?? 0 | number: '1.0-3' }}
+									</span>
+								</span>
+								<span class="flex flex-col gap-1">
+									<span class="text-xs text-secondary-foreground">{{ 'pos.expiryDate' | translate }}</span>
+									<span class="font-medium text-foreground">
+										@if (batch.expiryDate) {
+											{{ batch.expiryDate | date: 'mediumDate' }}
+										} @else {
+											{{ 'pos.noExpiryDate' | translate }}
+										}
+									</span>
+								</span>
+							</span>
+							<span class="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+								<i class="ki-filled ki-arrow-left"></i>
 							</span>
 						</button>
 					}

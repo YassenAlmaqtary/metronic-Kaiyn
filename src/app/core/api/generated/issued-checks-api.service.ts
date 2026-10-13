@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -23,10 +23,21 @@ export class IssuedChecksApiService {
   }
 
   getRange(fromDate?: string, toDate?: string) {
-    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/IssuedChecks/range'));
+    let params = new HttpParams();
+    if (fromDate != null) {
+      for (const value of Array.isArray(fromDate) ? fromDate : [fromDate]) {
+        params = params.append('fromDate', String(value));
+      }
+    }
+    if (toDate != null) {
+      for (const value of Array.isArray(toDate) ? toDate : [toDate]) {
+        params = params.append('toDate', String(value));
+      }
+    }
+    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/IssuedChecks/range'), { params });
   }
 
-  getStatusByStatus(status: string) {
+  getStatusByStatus(status: number) {
     return this.http.get<ApiResponse<unknown>>(buildApiUrl(toApiPath(`/api/IssuedChecks/status/{status}`, { status: status })));
   }
 

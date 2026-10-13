@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -11,7 +11,13 @@ export class BankAccountsApiService {
   private http = inject(HttpClient);
 
   getAll(bankId?: number) {
-    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/BankAccounts'));
+    let params = new HttpParams();
+    if (bankId != null) {
+      for (const value of Array.isArray(bankId) ? bankId : [bankId]) {
+        params = params.append('bankId', String(value));
+      }
+    }
+    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/BankAccounts'), { params });
   }
 
   create(body: unknown) {

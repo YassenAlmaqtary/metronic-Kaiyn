@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -11,7 +11,18 @@ export class SalesInvoiceApiService {
   private http = inject(HttpClient);
 
   getAll(status?: number, branchId?: number) {
-    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/SalesInvoice'));
+    let params = new HttpParams();
+    if (status != null) {
+      for (const value of Array.isArray(status) ? status : [status]) {
+        params = params.append('status', String(value));
+      }
+    }
+    if (branchId != null) {
+      for (const value of Array.isArray(branchId) ? branchId : [branchId]) {
+        params = params.append('branchId', String(value));
+      }
+    }
+    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/SalesInvoice'), { params });
   }
 
   create(body: unknown) {
@@ -23,7 +34,13 @@ export class SalesInvoiceApiService {
   }
 
   getNextNumber(branchId?: number) {
-    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/SalesInvoice/next-number'));
+    let params = new HttpParams();
+    if (branchId != null) {
+      for (const value of Array.isArray(branchId) ? branchId : [branchId]) {
+        params = params.append('branchId', String(value));
+      }
+    }
+    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/SalesInvoice/next-number'), { params });
   }
 
   getById(id: number) {

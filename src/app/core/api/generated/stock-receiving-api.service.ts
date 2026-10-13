@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -19,7 +19,38 @@ export class StockReceivingApiService {
   }
 
   getAvailableQty(itemId?: number, storeId?: number, branchId?: number, batchNo?: string, expiryDate?: string, unitId?: number) {
-    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/StockReceiving/available-qty'));
+    let params = new HttpParams();
+    if (itemId != null) {
+      for (const value of Array.isArray(itemId) ? itemId : [itemId]) {
+        params = params.append('itemId', String(value));
+      }
+    }
+    if (storeId != null) {
+      for (const value of Array.isArray(storeId) ? storeId : [storeId]) {
+        params = params.append('storeId', String(value));
+      }
+    }
+    if (branchId != null) {
+      for (const value of Array.isArray(branchId) ? branchId : [branchId]) {
+        params = params.append('branchId', String(value));
+      }
+    }
+    if (batchNo != null) {
+      for (const value of Array.isArray(batchNo) ? batchNo : [batchNo]) {
+        params = params.append('batchNo', String(value));
+      }
+    }
+    if (expiryDate != null) {
+      for (const value of Array.isArray(expiryDate) ? expiryDate : [expiryDate]) {
+        params = params.append('expiryDate', String(value));
+      }
+    }
+    if (unitId != null) {
+      for (const value of Array.isArray(unitId) ? unitId : [unitId]) {
+        params = params.append('unitId', String(value));
+      }
+    }
+    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/StockReceiving/available-qty'), { params });
   }
 
   getBarcodeByBarcode(barcode: string) {
@@ -35,7 +66,13 @@ export class StockReceivingApiService {
   }
 
   getNextNumber(branchId?: number) {
-    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/StockReceiving/next-number'));
+    let params = new HttpParams();
+    if (branchId != null) {
+      for (const value of Array.isArray(branchId) ? branchId : [branchId]) {
+        params = params.append('branchId', String(value));
+      }
+    }
+    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/StockReceiving/next-number'), { params });
   }
 
   getPending() {

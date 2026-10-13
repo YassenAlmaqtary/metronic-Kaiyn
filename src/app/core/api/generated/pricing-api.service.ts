@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -31,7 +31,13 @@ export class PricingApiService {
   }
 
   postBulkUpdate(body: unknown, userId?: number) {
-    return this.http.post<ApiResponse<unknown>>(buildApiUrl('/api/Pricing/bulk-update'), body);
+    let params = new HttpParams();
+    if (userId != null) {
+      for (const value of Array.isArray(userId) ? userId : [userId]) {
+        params = params.append('userId', String(value));
+      }
+    }
+    return this.http.post<ApiResponse<unknown>>(buildApiUrl('/api/Pricing/bulk-update'), body, { params });
   }
 
   postChangeLog(body: unknown) {
@@ -39,7 +45,18 @@ export class PricingApiService {
   }
 
   getDashboard(priceListId?: number, branchId?: number) {
-    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/Pricing/dashboard'));
+    let params = new HttpParams();
+    if (priceListId != null) {
+      for (const value of Array.isArray(priceListId) ? priceListId : [priceListId]) {
+        params = params.append('priceListId', String(value));
+      }
+    }
+    if (branchId != null) {
+      for (const value of Array.isArray(branchId) ? branchId : [branchId]) {
+        params = params.append('branchId', String(value));
+      }
+    }
+    return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/Pricing/dashboard'), { params });
   }
 
   getPriceLists() {
@@ -63,6 +80,12 @@ export class PricingApiService {
   }
 
   postUpdatePrice(body: unknown, userId?: number) {
-    return this.http.post<ApiResponse<unknown>>(buildApiUrl('/api/Pricing/update-price'), body);
+    let params = new HttpParams();
+    if (userId != null) {
+      for (const value of Array.isArray(userId) ? userId : [userId]) {
+        params = params.append('userId', String(value));
+      }
+    }
+    return this.http.post<ApiResponse<unknown>>(buildApiUrl('/api/Pricing/update-price'), body, { params });
   }
 }

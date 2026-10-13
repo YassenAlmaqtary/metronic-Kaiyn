@@ -37,7 +37,8 @@
               "public/assets/vendors/keenicons/styles.bundle.css",
               "public/assets/css/styles.css",
               "src/kayian-theme.css",
-              "src/styles.scss"
+              "src/styles.scss",
+              "src/app/pages/demo1/index/index-dashboard.scss"
             ],
             "scripts": [
               "public/assets/js/core.bundle.js",

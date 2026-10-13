@@ -26,7 +26,7 @@ export class AccountingPeriodsApiService {
     return this.http.get<ApiResponse<unknown>>(buildApiUrl('/api/AccountingPeriods/current'));
   }
 
-  getFiscalyearByFiscalYear(fiscalYear: string) {
+  getFiscalyearByFiscalYear(fiscalYear: number) {
     return this.http.get<ApiResponse<unknown>>(buildApiUrl(toApiPath(`/api/AccountingPeriods/fiscalyear/{fiscalYear}`, { fiscalYear: fiscalYear })));
   }
 
