@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/api/auth.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
@@ -11,7 +12,7 @@ import { ThemeToggleService } from '../../../partials/theme-toggle/theme-toggle.
 
 @Component({
   selector: '[app-header]',
-  imports: [TranslatePipe, LanguageToggleComponent, ThemeToggleComponent],
+  imports: [RouterLink, TranslatePipe, LanguageToggleComponent, ThemeToggleComponent],
   templateUrl: './header.component.html',
 })
 export class HeaderComponent {

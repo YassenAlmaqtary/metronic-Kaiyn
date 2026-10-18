@@ -1,12 +1,13 @@
 <!-- begin: container -->
 	<div class="kt-container-fixed flex justify-between items-stretch lg:gap-4" id="headerContainer">
 		<!-- Mobile Logo -->
-		<div class="flex gap-2.5 lg:hidden items-center -ms-1">
-			<a class="shrink-0" href="#">
-				<img class="max-h-[25px] w-full" src="assets/media/app/mini-logo.svg" />
-			</a>
+		<div class="flex gap-1.5 sm:gap-2.5 lg:hidden items-center -ms-1 shrink-0">
 			<div class="flex items-center">
-				<button class="kt-btn kt-btn-icon kt-btn-ghost" data-kt-drawer-toggle="#sidebar">
+				<button
+					class="kt-btn kt-btn-icon kt-btn-ghost size-9 rounded-full"
+					type="button"
+					data-kt-drawer-toggle="#sidebar"
+					[attr.aria-label]="'common.openMenu' | translate">
 					<i class="ki-filled ki-menu">
 					</i>
 				</button>
@@ -17,6 +18,9 @@
 					</button>
 				}
 			</div>
+			<a class="shrink-0" routerLink="/demo1">
+				<img class="max-h-[25px] w-full" src="assets/media/app/mini-logo.svg" alt="KayianERP" />
+			</a>
 		</div>
 		<!-- End of Mobile Logo -->
 		<!-- Header mega tabs (الرئيسية / الملفات / حسابي / الشبكة / المتجر / المصادقة / المساعدة)
@@ -1845,9 +1849,9 @@
 		}
 
 		<!-- Topbar -->
-		<div class="flex items-center gap-2.5 shrink-0 ms-auto">
+		<div class="flex items-center gap-1 sm:gap-2.5 shrink-0 ms-auto">
 			<app-language-toggle></app-language-toggle>
-			<app-theme-toggle></app-theme-toggle>
+			<app-theme-toggle class="hidden sm:block"></app-theme-toggle>
 		<!-- Search -->
 			<button
 				type="button"

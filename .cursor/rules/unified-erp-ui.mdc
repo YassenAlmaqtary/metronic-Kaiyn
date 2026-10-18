@@ -15,7 +15,7 @@ Reference: `src/app/pages/inventory/stock-receivings/stock-receivings-list/`
 - Header: title + subtitle + primary add button (`kt-btn kt-btn-primary` with `ki-plus`)
 - Alerts: `rounded border border-success|destructive/30 bg-*/10 p-3`
 - One `kt-card` → `kt-card-content p-5`
-- Toolbar: filter buttons first, then search `kt-input ms-auto max-w-xs`
+- Toolbar: filter buttons first, then search `kt-input ms-auto max-w-xs` (on phones the global responsive layer moves search to the top, full width — keep this markup order)
 - Loading/empty: `py-12 text-center`
 - Table: `kt-table` (no `kt-table-border`)
 - Primary column: `<a class="font-medium text-primary" routerLink>`
@@ -29,7 +29,7 @@ Reference: `src/app/pages/sales/salesmen/salesman-form/`
 
 - Shell: `kt-container-fixed flex flex-col gap-6 max-w-5xl pb-10` (use `max-w-6xl` if many fields)
 - Top bar: breadcrumb + icon tile + title/subtitle + Cancel/Save
-- No sticky headers (`sticky` + high `z-index` causes layout overlap)
+- No sticky headers (`sticky` + high `z-index` causes layout overlap). Only exception: on phones the global responsive layer pins the form's bottom action row (`z-index: 5`, below the fixed header) — don't add sticky in page templates
 - Sections as separate `kt-card overflow-hidden shadow-sm` with `bg-muted/30` section header
 - Inputs: `kt-input h-11` / `kt-select h-11`; labels `kt-form-label` (+ `required` when needed)
 - Active flags: switch row with `kt-switch`, not a bare checkbox
@@ -43,6 +43,19 @@ Reference: `src/app/pages/inventory/stock-receivings/stock-receiving-form/` or `
 - Same non-sticky header pattern with Back/Save
 - Header fields card + lines table card + totals card
 - `max-w-6xl` (or `max-w-7xl` for heavy journals/vouchers)
+
+## Responsive (all pages)
+
+Global rules live in `src/kayian-responsive.css` (container padding, table scroll, mobile toolbars, popups as bottom sheets, sticky form footer on phones). Pages only need to keep these shapes so the global rules apply:
+
+- Page header row: `flex flex-wrap items-start justify-between gap-4` as the first child of `kt-container-fixed`
+- Toolbars: `flex flex-wrap items-center gap-3`; search is an `input.kt-input[type=search]` directly inside it
+- Tables always inside `kt-scrollable-x-auto`; wide line tables may set `min-w-[...]` on the table
+- On phones every `table.kt-table` renders as cards automatically (`ResponsiveTablesService` copies `<th>` text into `data-label`). Keep a real `<thead>` with one `<th>` per column; first column = card title; actions column = buttons only. Use `data-responsive="scroll"` on a table only if it must stay a scrollable grid
+- Field grids start at one column: `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3` — never a bare `grid-cols-3+`
+- Popups: `fixed inset-0 z-50 flex items-center justify-center p-4` with a `kt-card w-full max-w-*` child
+- Form footer actions: `form > div.flex.justify-end` as the last child of a form that is a direct child of `kt-container-fixed`
+- No fixed pixel widths on containers; use `w-full max-w-*` or `min-w-0`
 
 ## Checklist for every new section
 

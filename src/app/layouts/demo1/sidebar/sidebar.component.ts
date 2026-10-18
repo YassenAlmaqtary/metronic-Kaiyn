@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
@@ -11,6 +11,10 @@ import {
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { SidebarMenuStateService } from '../../../core/services/sidebar-menu-state.service';
 import { ThemeToggleService } from '../../../partials/theme-toggle/theme-toggle.service';
+
+interface KtDrawerStatic {
+  getInstance(element: HTMLElement): { hide(): void } | null;
+}
 
 type SidebarMenuBlock =
   | { type: 'link'; item: SidebarMenuLink }
@@ -25,6 +29,7 @@ type SidebarMenuBlock =
 })
 export class SidebarComponent {
   private router = inject(Router);
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
   private menuState = inject(SidebarMenuStateService);
   private sidebarMenu = inject(SidebarMenuService);
   protected themeService = inject(ThemeToggleService);
@@ -41,7 +46,16 @@ export class SidebarComponent {
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
       this.ensureActiveSectionExpanded();
       this.ensureActiveGroupExpanded();
+      this.closeMobileDrawer();
     });
+  }
+
+  private closeMobileDrawer(): void {
+    if (window.matchMedia('(min-width: 1024px)').matches) {
+      return;
+    }
+    const drawer = (globalThis as { KTDrawer?: KtDrawerStatic }).KTDrawer;
+    drawer?.getInstance(this.host.nativeElement)?.hide();
   }
 
   isSectionExpanded(sectionId: SidebarMenuSectionId): boolean {

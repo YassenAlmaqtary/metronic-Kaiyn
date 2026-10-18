@@ -21,4 +21,6 @@ export const commonAr = {
   'common.exportCsv': 'تصدير CSV',
   'common.confirm': 'تأكيد',
   'common.cancel': 'إلغاء',
+  'common.close': 'إغلاق',
+  'common.openMenu': 'فتح القائمة',
 } as const;

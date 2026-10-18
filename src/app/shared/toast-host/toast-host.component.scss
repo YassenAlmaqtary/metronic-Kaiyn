@@ -13,6 +13,14 @@
   width: min(24rem, calc(100vw - 2rem));
 }
 
+@media (max-width: 639.98px) {
+  .app-toast-host {
+    inset-inline: 0.75rem;
+    top: 4.5rem;
+    width: auto;
+  }
+}
+
 .app-toast {
   pointer-events: auto;
   display: flex;

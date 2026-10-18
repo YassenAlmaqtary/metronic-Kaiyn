@@ -27,6 +27,38 @@
 	</div>
 </div>
 
+<!-- 
+	هذا القسم مخصّص لشريط الجانب (Sidebar) في وضعية الجوال فقط (عندما تكون الشاشات أصغر من lg).
+	
+	١. أضفت سطر يحتوي على شعار التطبيق (Mini Logo) واسم التطبيق (يترجم أوتوماتيكياً)، يجمعهم رابط يوجه للصفحة الرئيسية (routerLink="/demo1").
+	
+	٢. يوجد زر دائري في الجهة اليمنى لإغلاق الدرج الجانبي (Sidebar Drawer)، مع رمز (X) لإغلاقه. 
+		- الزر يستخدم خصائص Metronic (kt-btn kt-btn-icon kt-btn-ghost) لتناسق الشكل مع باقية النظام.
+		- data-kt-drawer-dismiss لتفعيل خاصية إغلاق الدرج.
+		- [attr.aria-label] لضبط إمكانية الوصول ولإظهار عنوان مناسب حسب اللغة الحالية.
+	
+	٣. كل العنصر مخفي على الشاشات الكبيرة باستخدام flex lg:hidden، ويظهر فقط في الموبايل أو الشاشات الصغيرة.
+
+	٤. تم الحفاظ على التباعد (gap, px, py) ليكون الشكل متناسقاً مع التصميم المعتمد في بقية الصفحة والمسافة العلوية والسفلية طفيفة.
+
+	بشكل عام؛ هذا الكود يضمن ظهور الشعار واسم التطبيق وزر الإغلاق بشكل أنيق وسهل الاستخدام للمستخدمين على الأجهزة الصغيرة.
+-->
+<div class="flex lg:hidden items-center justify-between gap-3 px-5 pt-4 pb-1 shrink-0">
+	<a class="flex items-center gap-2.5 min-w-0" routerLink="/demo1">
+		<img class="min-h-[22px] max-w-none shrink-0" src="assets/media/app/mini-logo.svg" alt="" />
+		<span class="sidebar-brand-name text-base font-semibold tracking-tight whitespace-nowrap">
+			{{ 'app.name' | translate }}
+		</span>
+	</a>
+	<button
+		class="kt-btn kt-btn-icon kt-btn-ghost size-9 rounded-full shrink-0"
+		type="button"
+		data-kt-drawer-dismiss="true"
+		[attr.aria-label]="'common.close' | translate">
+		<i class="ki-filled ki-cross text-base"></i>
+	</button>
+</div>
+
 <div class="kt-sidebar-content flex grow shrink-0 py-5 pe-2" id="sidebar_content">
 	<div
 		class="kt-scrollable-y-hover grow shrink-0 flex ps-2 lg:ps-5 pe-1 lg:pe-3"

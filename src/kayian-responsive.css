@@ -1,0 +1,284 @@
+/**
+ * Kayian responsive layer — applies to every page from one place.
+ * Breakpoints follow Tailwind: sm 640 · md 768 · lg 1024 · xl 1280 · 2xl 1536.
+ *
+ * Rules inside @layer components can still be overridden by Tailwind utilities on a page.
+ * Unlayered rules below are intentional overrides of page utilities on small screens.
+ */
+
+@layer components {
+	/* Flex children default to min-width:auto, which lets wide tables push the whole page sideways. */
+	.kt-wrapper,
+	main#content {
+		min-width: 0;
+	}
+
+	main#content {
+		overflow-x: clip;
+	}
+
+	@media (max-width: 639.98px) {
+		.kt-container-fixed {
+			padding-inline: 1rem;
+		}
+	}
+
+	@media (min-width: 96rem) {
+		.kt-container-fixed {
+			max-width: 94rem;
+		}
+	}
+
+	/* ===== Tables: horizontal scroll with momentum, headers never wrap ===== */
+	.kt-scrollable-x-auto {
+		-webkit-overflow-scrolling: touch;
+		overscroll-behavior-x: contain;
+		scrollbar-width: thin;
+	}
+
+	.kt-table th {
+		white-space: nowrap;
+	}
+
+	@media (min-width: 640px) and (max-width: 1023.98px) {
+		.kt-scrollable-x-auto > .kt-table td {
+			white-space: nowrap;
+		}
+	}
+
+	/* ===== Popups ===== */
+	.fixed.inset-0.z-50 > .kt-card {
+		max-height: calc(100dvh - 2rem);
+		overflow-y: auto;
+	}
+}
+
+/* ===== Phones (< 640px) ===== */
+@media (max-width: 639.98px) {
+	/* Page title row: title on its own line, actions wrap underneath. */
+	.kt-container-fixed > .flex.justify-between:first-child {
+		flex-wrap: wrap;
+		row-gap: 0.75rem;
+	}
+
+	.kt-container-fixed > .flex.justify-between:first-child > .kt-btn,
+	.kt-container-fixed > .flex.justify-between:first-child > a.kt-btn {
+		flex: 1 1 100%;
+		justify-content: center;
+	}
+
+	/* List toolbars: search goes first and takes the full row. */
+	.kt-card .flex.flex-wrap > input.kt-input[type='search'],
+	.kt-card .flex.flex-wrap > input.kt-input.max-w-xs,
+	.kt-card .flex.flex-wrap > select.kt-select[class*='max-w-'] {
+		order: -1;
+		flex: 1 1 100%;
+		max-width: none;
+		margin-inline-start: 0;
+	}
+
+	.kt-card .flex.flex-wrap > .relative.max-w-sm,
+	.kt-card .flex.flex-wrap > .relative.max-w-xs {
+		max-width: none;
+	}
+
+	/* Popups become bottom sheets with full-width buttons. */
+	.fixed.inset-0.z-50.flex.items-center {
+		align-items: flex-end;
+		padding: 0.5rem;
+	}
+
+	.fixed.inset-0.z-50 > .kt-card {
+		max-width: 100%;
+		max-height: calc(100dvh - 1rem);
+		animation: kayian-sheet-up 0.22s ease-out;
+	}
+
+	.fixed.inset-0.z-50 > .kt-card .flex.justify-end > .kt-btn {
+		flex: 1 1 0;
+		justify-content: center;
+	}
+
+	/* Form footer actions: sticky at the bottom, full-width buttons. */
+	.kt-container-fixed > form > .flex.justify-end:last-child {
+		position: sticky;
+		bottom: 0;
+		z-index: 5;
+		margin-inline: -1rem;
+		padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+		background: color-mix(in srgb, var(--background) 88%, transparent);
+		backdrop-filter: blur(12px);
+		border-top: 1px solid var(--border);
+	}
+
+	.kt-container-fixed > form > .flex.justify-end:last-child > .kt-btn {
+		flex: 1 1 0;
+		justify-content: center;
+	}
+
+	/* Breadcrumb + page icon row in forms. */
+	.kt-container-fixed h1 {
+		font-size: 1.125rem;
+	}
+}
+
+/*
+ * ===== Phones: table rows become labelled cards =====
+ * Labels come from ResponsiveTablesService (data-label / data-cell on each cell).
+ * `html` prefix is needed to beat the zebra/border !important rules in styles.scss.
+ */
+@media (max-width: 639.98px) {
+	html .kt-scrollable-x-auto:has(> .kt-table:not([data-responsive='scroll'])) {
+		overflow: visible;
+	}
+
+	html .kt-card-content.p-0 > .kt-scrollable-x-auto:has(> .kt-table:not([data-responsive='scroll'])) {
+		padding: 0.75rem;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) {
+		display: block;
+		width: 100% !important;
+		min-width: 0 !important;
+		border: 0 !important;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) > thead {
+		display: none;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) > tbody,
+	html .kt-table:not([data-responsive='scroll']) > tfoot {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) > tfoot {
+		margin-top: 0.75rem;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) > tbody > tr,
+	html .kt-table:not([data-responsive='scroll']) > tfoot > tr {
+		display: flex;
+		flex-direction: column;
+		border: 1px solid var(--border);
+		border-radius: 0.9rem;
+		overflow: hidden;
+		box-shadow: 0 6px 18px -14px rgba(15, 50, 120, 0.45);
+	}
+
+	html .kt-table:not([data-responsive='scroll']) > tbody > tr > td,
+	html .kt-table:not([data-responsive='scroll']) > tfoot > tr > td,
+	html .kt-table:not([data-responsive='scroll']) > tfoot > tr > th {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		width: auto !important;
+		min-width: 0 !important;
+		padding: 0.6rem 0.9rem !important;
+		border: 0 !important;
+		text-align: end;
+		white-space: normal !important;
+		overflow-wrap: anywhere;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) > tbody > tr > td + td,
+	html .kt-table:not([data-responsive='scroll']) > tfoot > tr > td + td {
+		border-top: 1px dashed var(--border) !important;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) > tbody > tr > td::before,
+	html .kt-table:not([data-responsive='scroll']) > tfoot > tr > td::before {
+		content: attr(data-label);
+		flex: 0 0 auto;
+		max-width: 45%;
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--muted-foreground);
+		text-align: start;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) td[data-label='']::before,
+	html .kt-table:not([data-responsive='scroll']) td:not([data-label])::before {
+		display: none;
+	}
+
+	/* First column is the card title. */
+	html .kt-table:not([data-responsive='scroll']) > tbody > tr > td:first-child {
+		justify-content: flex-start;
+		text-align: start;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		background-image: linear-gradient(180deg, color-mix(in srgb, var(--primary) 8%, transparent), transparent) !important;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) > tbody > tr > td:first-child::before {
+		display: none;
+	}
+
+	/* Editable line items: label above the input. */
+	html .kt-table:not([data-responsive='scroll']) td[data-cell='field'] {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.35rem;
+		text-align: start;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) td[data-cell='field']::before {
+		max-width: none;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) td[data-cell='field']:first-child::before {
+		display: block;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) td[data-cell='field'] :is(.kt-input, .kt-select, input, select, textarea) {
+		width: 100%;
+		min-width: 0;
+	}
+
+	/* Row actions: one strip at the bottom of the card. */
+	html .kt-table:not([data-responsive='scroll']) td[data-cell='actions'] {
+		justify-content: flex-end;
+		background: color-mix(in srgb, var(--muted) 70%, transparent) !important;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) td[data-cell='actions']::before {
+		display: none;
+	}
+
+	html .kt-table:not([data-responsive='scroll']) td[data-cell='actions'] > .flex {
+		flex-wrap: wrap;
+		justify-content: flex-end;
+	}
+
+	/* Full-width rows (empty states, group headers, totals captions). */
+	html .kt-table:not([data-responsive='scroll']) td[colspan]:not([colspan='1']) {
+		justify-content: center;
+		text-align: center;
+	}
+}
+
+/* Touch devices: hover lift effects stick after tap. */
+@media (hover: none) {
+	.kt-card:hover,
+	html.dark .kt-card:hover,
+	.kt-btn-light:hover,
+	.kt-btn-outline:hover,
+	.kt-btn-primary:hover {
+		transform: none;
+	}
+}
+
+@keyframes kayian-sheet-up {
+	from {
+		opacity: 0;
+		transform: translateY(1.5rem);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
