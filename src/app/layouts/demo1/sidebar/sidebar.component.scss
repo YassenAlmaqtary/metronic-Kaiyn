@@ -67,3 +67,30 @@
 :host.dark .kt-menu-item.show > .kt-menu-link .kt-menu-icon {
 	color: #93c5fd;
 }
+
+/* ===== Mobile drawer header ===== */
+:host .sidebar-mobile-header {
+	padding: 0.85rem 0.9rem;
+	padding-top: calc(0.85rem + env(safe-area-inset-top, 0px));
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	background: rgba(0, 0, 0, 0.12);
+}
+
+:host .sidebar-mobile-header .sidebar-brand-name {
+	color: #ffffff;
+}
+
+:host .sidebar-mobile-close {
+	background: rgba(255, 255, 255, 0.1) !important;
+	border: 1px solid rgba(255, 255, 255, 0.18) !important;
+	color: #ffffff !important;
+}
+
+:host .sidebar-mobile-close i {
+	color: #ffffff !important;
+}
+
+:host .sidebar-mobile-close:hover,
+:host .sidebar-mobile-close:active {
+	background: rgba(255, 255, 255, 0.18) !important;
+}
