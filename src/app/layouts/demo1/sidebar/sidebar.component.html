@@ -95,12 +95,11 @@
 							{{ section.labelKey | translate }}
 						</span>
 						<span class="kt-menu-arrow text-muted-foreground w-[20px] shrink-0 justify-end ms-1 me-[-10px]">
-							<span class="inline-flex kt-menu-item-show:hidden">
-								<i class="ki-filled ki-plus text-[11px]"></i>
-							</span>
-							<span class="hidden kt-menu-item-show:inline-flex">
-								<i class="ki-filled ki-minus text-[11px]"></i>
-							</span>
+							<i
+								class="ki-filled ki-down text-[11px] inline-block transition-transform duration-200"
+								[class.rotate-180]="!isSectionExpanded(section.id)"
+								aria-hidden="true">
+							</i>
 						</span>
 					</div>
 
