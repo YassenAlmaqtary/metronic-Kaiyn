@@ -1,8 +1,9 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map, of, switchMap, throwError, timer } from 'rxjs';
 
 import { buildApiUrl, toApiPath } from '../api/api-url';
+import { SKIP_HTTP_CACHE } from '../api/interceptors/http-cache.interceptor';
 import { ApiResponse } from '../api/models/api-response.model';
 import {
   AvailableQtyResult,
@@ -84,22 +85,27 @@ export class StockReceivingsService {
   }
 
   private waitUntilPosted(id: number, attempt = 0): Observable<StockReceivingHeader> {
-    return this.getById(id).pipe(
-      switchMap((doc) => {
-        if (isStockDocPosted(doc.status, doc.datePosted, { kind: 'receiving' })) {
-          return of(doc);
-        }
-        if (attempt >= 4) {
-          return throwError(
-            () =>
-              new Error(
-                'تم استلام رد نجاح من الخادم لكن المستند ما زال معلّقًا — تحقق من الترحيل في الخادم أو أعد المحاولة',
-              ),
-          );
-        }
-        return timer(350).pipe(switchMap(() => this.waitUntilPosted(id, attempt + 1)));
-      }),
-    );
+    return this.http
+      .get<ApiResponse<unknown>>(buildApiUrl(toApiPath(`${this.basePath}/{id}`, { id })), {
+        context: new HttpContext().set(SKIP_HTTP_CACHE, true),
+      })
+      .pipe(
+        map((r) => this.normalizeOne(unwrapApiResponse(r))),
+        switchMap((doc) => {
+          if (isStockDocPosted(doc.status, doc.datePosted, { kind: 'receiving' })) {
+            return of(doc);
+          }
+          if (attempt >= 4) {
+            return throwError(
+              () =>
+                new Error(
+                  'تم استلام رد نجاح من الخادم لكن المستند ما زال معلّقًا — تحقق من الترحيل في الخادم أو أعد المحاولة',
+                ),
+            );
+          }
+          return timer(350).pipe(switchMap(() => this.waitUntilPosted(id, attempt + 1)));
+        }),
+      );
   }
 
   private normalizeList(data: unknown): StockReceivingListItem[] {

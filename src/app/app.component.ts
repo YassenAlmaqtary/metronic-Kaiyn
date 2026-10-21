@@ -7,10 +7,11 @@ import { LanguageService } from './core/services/language.service';
 import { AuthService } from './core/api/auth.service';
 import { AccessControlService } from './core/services/access-control.service';
 import { ThemeToggleService } from './partials/theme-toggle/theme-toggle.service';
+import { LoadingBarComponent } from './shared/loading-bar/loading-bar.component';
 
 @Component({
   selector: 'body[app-root]',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, LoadingBarComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
