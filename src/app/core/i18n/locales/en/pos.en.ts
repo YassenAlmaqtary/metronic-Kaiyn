@@ -1,6 +1,7 @@
 export const posEn = {
   'pos.title': 'Point of Sale',
   'pos.subtitle': 'Fast selling — scan, add, collect',
+  'pos.previewScreen': 'New screen (preview)',
   'pos.searchPlaceholder': 'Search by name or scan barcode…',
   'pos.barcodeHint': 'Enter to add · F2 search · F4 pay · F7 return · F8 held',
   'pos.cart': 'Cart',

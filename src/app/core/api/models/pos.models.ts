@@ -146,6 +146,8 @@ export interface PosOrderItem {
   discountAmount?: number | null;
   taxAmount?: number | null;
   lineTotal?: number | null;
+  batchNumber?: string | null;
+  expiryDate?: string | null;
   isPromotionReward?: boolean | null;
   promotionDiscountAmount?: number | null;
 }

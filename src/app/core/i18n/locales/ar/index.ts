@@ -11,6 +11,7 @@ import { salesInvoicesAr } from './sales-invoices.ar';
 import { salesQuotesAr } from './sales-quotes.ar';
 import { globalSearchAr } from './global-search.ar';
 import { posAr } from './pos.ar';
+import { posPreviewAr } from './pos-preview.ar';
 import { posAdminAr } from './pos-admin.ar';
 import { productGroupsAr } from './product-groups.ar';
 import { productsAr } from './products.ar';
@@ -82,6 +83,7 @@ export const ar = mergeLocale(
   salesQuotesAr,
   globalSearchAr,
   posAr,
+  posPreviewAr,
   posAdminAr,
   productGroupsAr,
   productsAr,

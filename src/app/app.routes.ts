@@ -54,6 +54,7 @@ export const routes: Routes = [
       { path: 'sales/salesmen/:id/edit', loadComponent: () => import('./pages/sales/salesmen/salesman-form/salesman-form.component').then((m) => m.SalesmanFormComponent) },
       { path: 'sales/pos', redirectTo: 'pos/terminal', pathMatch: 'full' },
       { path: 'pos/terminal', loadComponent: () => import('./pages/sales/pos/pos.component').then((m) => m.PosComponent) },
+      { path: 'pos/terminal-preview', loadComponent: () => import('./pages/sales/pos/pos-terminal-preview.component').then((m) => m.PosTerminalPreviewComponent) },
       { path: 'pos/returns', loadComponent: () => import('./pages/pos/returns/pos-returns-page.component').then((m) => m.PosReturnsPageComponent) },
       { path: 'pos/settings', loadComponent: () => import('./pages/pos/settings/pos-settings-page.component').then((m) => m.PosSettingsPageComponent) },
       { path: 'pos/shifts', loadComponent: () => import('./pages/pos/shifts/pos-shifts-list.component').then((m) => m.PosShiftsListComponent) },

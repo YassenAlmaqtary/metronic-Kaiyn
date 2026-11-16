@@ -352,6 +352,12 @@ export const SIDEBAR_MENU_SECTIONS: readonly SidebarMenuSection[] = [
         permission: 'salesInvoices.view',
       },
       {
+        id: 'pos-terminal-preview',
+        labelKey: 'menu.pos.terminalPreview',
+        route: '/demo1/pos/terminal-preview',
+        permission: 'salesInvoices.view',
+      },
+      {
         id: 'pos-returns',
         labelKey: 'menu.pos.returns',
         route: '/demo1/pos/returns',

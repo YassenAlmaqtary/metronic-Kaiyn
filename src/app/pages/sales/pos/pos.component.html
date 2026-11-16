@@ -50,6 +50,10 @@
 			</div>
 
 			<div class="pos-top-actions">
+				<a class="kt-btn kt-btn-primary pos-preview-link" routerLink="/demo1/pos/terminal-preview">
+					<i class="ki-filled ki-eye"></i>
+					{{ 'pos.previewScreen' | translate }}
+				</a>
 				@if (shift(); as sh) {
 					<div class="pos-session-chip" [class.ready]="canOperate()">
 						<i class="ki-filled ki-time"></i>

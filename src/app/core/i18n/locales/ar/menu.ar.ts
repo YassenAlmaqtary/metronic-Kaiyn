@@ -6,6 +6,7 @@ export const menuAr = {
   'menu.pos': 'نقاط البيع',
   'menu.pos.group.operations': 'العمليات',
   'menu.pos.terminal': 'نقطة بيع',
+  'menu.pos.terminalPreview': 'نقطة البيع الجديدة (معاينة)',
   'menu.pos.returns': 'مرتجع نقاط البيع',
   'menu.pos.group.admin': 'الإعدادات والإدارة',
   'menu.pos.settings': 'إعدادات نقاط البيع',

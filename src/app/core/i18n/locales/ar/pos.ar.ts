@@ -1,6 +1,7 @@
 export const posAr = {
   'pos.title': 'نقاط البيع',
   'pos.subtitle': 'بيع سريع — مسح، إضافة، تحصيل',
+  'pos.previewScreen': 'الشاشة الجديدة (معاينة)',
   'pos.searchPlaceholder': 'ابحث بالاسم أو امسح الباركود…',
   'pos.barcodeHint': 'Enter للإضافة · F2 بحث · F4 تحصيل · F7 مرتجع · F8 معلّقة',
   'pos.cart': 'سلة البيع',

@@ -11,6 +11,7 @@ import { salesInvoicesEn } from './sales-invoices.en';
 import { salesQuotesEn } from './sales-quotes.en';
 import { globalSearchEn } from './global-search.en';
 import { posEn } from './pos.en';
+import { posPreviewEn } from './pos-preview.en';
 import { posAdminEn } from './pos-admin.en';
 import { productGroupsEn } from './product-groups.en';
 import { productsEn } from './products.en';
@@ -82,6 +83,7 @@ export const en = mergeLocale(
   salesQuotesEn,
   globalSearchEn,
   posEn,
+  posPreviewEn,
   posAdminEn,
   productGroupsEn,
   productsEn,

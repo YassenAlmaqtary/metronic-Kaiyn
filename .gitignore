@@ -48,4 +48,5 @@ Thumbs.db
 !/public/assets/css/
 /public/assets/css/*
 !/public/assets/css/pos.css
+!/public/assets/css/pos-terminal-preview.css
 .vscode

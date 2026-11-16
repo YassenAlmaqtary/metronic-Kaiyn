@@ -2,68 +2,72 @@
  * Kayian Soft UI — light + night tokens
  */
 :root {
-	--kayian-navy: #0a1730;
-	--kayian-navy-mid: #111c44;
-	--kayian-blue: #0061ff;
-	--kayian-blue-soft: #e8f0ff;
-	--kayian-canvas: #eaf1fb;
+	--kayian-navy: #21083f;
+	--kayian-navy-mid: #35105f;
+	--kayian-blue: #4b168c;
+	--kayian-blue-soft: #f0e9fa;
+	--kayian-canvas: #f5f2f8;
+	--kayian-purple: #4b168c;
+	--kayian-gold: #f5b923;
 
-	--primary: #0061ff;
+	--primary: #4b168c;
 	--primary-foreground: #ffffff;
-	--ring: #3b82f6;
-	--background: #eaf1fb;
-	--color-background: #eaf1fb;
+	--ring: #6b35a5;
+	--background: #f5f2f8;
+	--color-background: #f5f2f8;
 	--foreground: #0f172a;
 	--card: #ffffff;
 	--card-foreground: #0f172a;
-	--muted: #eef2f8;
+	--muted: #f1edf6;
 	--muted-foreground: #64748b;
-	--accent: #e8f0ff;
-	--accent-foreground: #0061ff;
+	--accent: #f0e9fa;
+	--accent-foreground: #4b168c;
 	--border: #e2e8f0;
 	--input: #e2e8f0;
 	--radius: 0.9rem;
 }
 
 html.dark {
-	--primary: #3b82f6;
+	--primary: #a77ad3;
 	--primary-foreground: #ffffff;
-	--ring: #60a5fa;
-	--background: #070f1c;
-	--color-background: #070f1c;
+	--ring: #c9a7ef;
+	--background: #140c20;
+	--color-background: #140c20;
 	--foreground: #e8eef8;
-	--card: #111c33;
+	--card: #21152f;
 	--card-foreground: #e8eef8;
-	--muted: #152238;
+	--muted: #2a1c39;
 	--muted-foreground: #94a3b8;
-	--accent: #1a2f55;
-	--accent-foreground: #93c5fd;
-	--border: #1e2f4a;
-	--input: #1e2f4a;
+	--accent: #38244d;
+	--accent-foreground: #d7b8fa;
+	--border: #3a2a4a;
+	--input: #3a2a4a;
 	--mono: #e8eef8;
 	--mono-foreground: #0b1220;
-	--secondary: #152238;
+	--secondary: #2a1c39;
 	--secondary-foreground: #e2e8f0;
 }
 
 .kt-btn-primary {
-	background-image: linear-gradient(135deg, #5b9bff 0%, #0061ff 48%, #0047d6 100%) !important;
+	background-image: linear-gradient(135deg, #ffd25a 0%, #f5b923 52%, #e8a900 100%) !important;
 	border-color: transparent !important;
 	box-shadow:
-		0 10px 24px -10px rgba(0, 97, 255, 0.65),
+		0 10px 24px -10px rgba(180, 119, 0, 0.38),
 		0 1px 0 rgba(255, 255, 255, 0.25) inset;
 	border-radius: 0.85rem;
 	font-weight: 600;
+	color: #28133f !important;
 }
 
 .kt-btn-primary:hover {
-	background-image: linear-gradient(135deg, #6aa4ff 0%, #0052e6 50%, #003fbf 100%) !important;
-	box-shadow: 0 14px 28px -10px rgba(0, 97, 255, 0.75);
+	background-image: linear-gradient(135deg, #ffdb77 0%, #efb21d 50%, #d99d00 100%) !important;
+	box-shadow: 0 14px 28px -10px rgba(180, 119, 0, 0.48);
 }
 
 html.dark .kt-btn-primary {
-	background-image: linear-gradient(135deg, #60a5fa 0%, #2563eb 45%, #1d4ed8 100%) !important;
+	background-image: linear-gradient(135deg, #ffd25a 0%, #f5b923 52%, #e8a900 100%) !important;
 	box-shadow:
-		0 12px 28px -10px rgba(37, 99, 235, 0.55),
-		0 0 0 1px rgba(147, 197, 253, 0.15) inset;
+		0 12px 28px -10px rgba(180, 119, 0, 0.38),
+		0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+	color: #28133f !important;
 }

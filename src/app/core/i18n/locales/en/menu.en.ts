@@ -6,6 +6,7 @@ export const menuEn = {
   'menu.pos': 'Point of Sale',
   'menu.pos.group.operations': 'Operations',
   'menu.pos.terminal': 'POS terminal',
+  'menu.pos.terminalPreview': 'New POS terminal (preview)',
   'menu.pos.returns': 'POS returns',
   'menu.pos.group.admin': 'Settings & administration',
   'menu.pos.settings': 'POS settings',

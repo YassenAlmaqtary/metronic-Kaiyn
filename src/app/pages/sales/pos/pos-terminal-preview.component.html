@@ -1,0 +1,333 @@
+<div class="pos-preview" [attr.dir]="language.direction()">
+	<header class="preview-header">
+		<div class="preview-brand">
+			<a class="preview-logo" routerLink="/demo1" [attr.aria-label]="'posPreview.home' | translate">
+				<span class="preview-logo-mark">K</span>
+				<span>KAYAN <b>POS</b></span>
+			</a>
+			<span class="preview-live"><i></i> {{ 'posPreview.previewMode' | translate }}</span>
+		</div>
+
+		<div class="preview-context">
+			<label class="preview-header-pill"><i class="ki-filled ki-shop"></i><select [ngModel]="branchId()" (ngModelChange)="onBranchChange($event)"><option [ngValue]="null">{{ 'posPreview.branch' | translate }}</option>@for (branch of branches(); track branch.branchId) {<option [ngValue]="branch.branchId">{{ branch.branchName || branch.branchId }}</option>}</select></label>
+			<label class="preview-header-pill"><i class="ki-filled ki-package"></i><select [ngModel]="storeId()" (ngModelChange)="onStoreChange($event)"><option [ngValue]="null">{{ 'posPreview.store' | translate }}</option>@for (store of stores(); track store.storeId) {<option [ngValue]="store.storeId">{{ store.storeName || store.storeId }}</option>}</select></label>
+			<span class="preview-header-pill"><i class="ki-filled ki-profile-user"></i>{{ cashier()?.userName || ('posPreview.cashier' | translate) }}</span>
+			<span class="preview-header-pill"><i class="ki-filled ki-tablet"></i>{{ 'posPreview.cashierNumber' | translate }}: {{ cashier()?.cashierId || '—' }}</span>
+			<span class="preview-header-pill"><i class="ki-filled ki-bill"></i>{{ 'posPreview.shift' | translate }}: {{ shift()?.shiftId || '—' }}</span>
+		</div>
+
+		<div class="preview-datetime">
+			<span><i class="ki-filled ki-calendar"></i> {{ today() | date: 'mediumDate' }}</span>
+			<span><i class="ki-filled ki-time"></i> {{ today() | date: 'shortTime' }}</span>
+			<a class="preview-exit" routerLink="/demo1/pos/terminal" [attr.title]="'posPreview.oldSystem' | translate">
+				<i class="ki-filled ki-exit-right"></i>
+				<span>{{ 'posPreview.oldSystem' | translate }}</span>
+			</a>
+		</div>
+	</header>
+
+	@if (stylesheetError()) {
+		<div class="preview-error" role="alert">{{ 'posPreview.stylesError' | translate }}</div>
+	}
+	@if (loading() || shiftBusy()) {
+		<div class="preview-message" role="status">{{ 'posPreview.connectingApi' | translate }}</div>
+	}
+	@if (message()) {
+		<div class="preview-message" role="status">
+			<span>{{ message() }}</span>
+			<button type="button" (click)="message.set('')" [attr.aria-label]="'posPreview.dismiss' | translate">×</button>
+		</div>
+	}
+
+	<main class="preview-workspace">
+		<aside class="preview-checkout">
+			<div class="preview-totals">
+				<div><span>{{ 'posPreview.subtotal' | translate }}</span><strong>{{ subtotal() | number: '1.2-2' }}</strong><i class="ki-filled ki-coins"></i></div>
+				<div><span>{{ 'posPreview.tax' | translate }}</span><strong>{{ tax() | number: '1.2-2' }}</strong><i class="ki-filled ki-percentage"></i></div>
+				<div><span>{{ 'posPreview.discount' | translate }}</span><strong>{{ discountAmount() | number: '1.2-2' }}</strong><i class="ki-filled ki-price-tag"></i></div>
+				<div class="preview-grand-total">
+					<span>{{ 'posPreview.grandTotal' | translate }}</span>
+					<strong><i class="ki-filled ki-handcart"></i> {{ total() | number: '1.2-2' }}</strong>
+				</div>
+				<div class="preview-payment-stats">
+					<div><span>{{ 'posPreview.paid' | translate }}</span><strong>{{ paid() | number: '1.2-2' }}</strong></div>
+					<div><span>{{ 'posPreview.remaining' | translate }}</span><strong>{{ remaining() | number: '1.2-2' }}</strong></div>
+				</div>
+			</div>
+
+			<div class="preview-methods" [attr.aria-label]="'posPreview.paymentMethods' | translate">
+				@for (paymentType of paymentTypes(); track paymentType.paymentTypeId) {
+					<button type="button" [class.active]="paymentTypeId() === paymentType.paymentTypeId" (click)="setPaymentType(paymentType.paymentTypeId)">
+						<i class="ki-filled" [class]="paymentTypeIcon(paymentType)"></i><span>{{ paymentType.paymentTypeName || paymentType.paymentTypeId }}</span>
+					</button>
+				}
+			</div>
+			<label class="preview-cash-input">
+				<span>{{ 'posPreview.amountPaid' | translate }}</span>
+				<input type="number" min="0" step="0.01" [ngModel]="cashReceived()" (ngModelChange)="cashReceived.set($event); keypadFresh.set(true)" />
+			</label>
+
+			<div class="preview-keypad">
+				@for (key of ['7', '8', '9', 'up', '4', '5', '6', 'down', '1', '2', '3', 'search', '.', '0', 'backspace', 'clear']; track key) {
+					<button type="button" [class.key-special]="['up', 'down', 'search', 'clear', 'backspace'].includes(key)" (click)="pressKey(key)">
+						{{ key === 'up' ? '↑' : key === 'down' ? '↓' : key === 'search' ? ('posPreview.keySearch' | translate) : key === 'backspace' ? '⌫' : key === 'clear' ? ('posPreview.keyClear' | translate) : key }}
+					</button>
+				}
+			</div>
+
+			<div class="preview-checkout-actions">
+				<button type="button" class="preview-hold" (click)="openDialog('suspended')"><i class="ki-filled ki-time"></i><span>{{ 'posPreview.holdSave' | translate }}<small>F8</small></span></button>
+				<button type="button" class="preview-complete" (click)="completeSale()"><i class="ki-filled ki-handcart"></i><span>{{ 'posPreview.completeSale' | translate }}<small>F12</small></span></button>
+			</div>
+		</aside>
+
+		<section class="preview-sale">
+			<div class="preview-sale-toolbar">
+				<div class="preview-sale-actions">
+					<button type="button" class="active"><i class="ki-filled ki-handcart"></i><span>{{ 'posPreview.sales' | translate }}<small>Sales</small></span></button>
+					<button type="button" (click)="openDialog('returns')"><i class="ki-filled ki-arrow-left"></i><span>{{ 'posPreview.return' | translate }}<small>Return</small></span></button>
+					<button type="button" (click)="holdSale()"><i class="ki-filled ki-time"></i><span>{{ 'posPreview.hold' | translate }}<small>Hold</small></span></button>
+					<button type="button" (click)="openDialog('print')"><i class="ki-filled ki-printer"></i><span>{{ 'posPreview.print' | translate }}<small>Printer On</small></span></button>
+				</div>
+				<div class="preview-statuses">
+					<span><i></i> {{ 'posPreview.localData' | translate }}</span><span><i></i> {{ 'posPreview.previewStatus' | translate }}</span>
+					<button type="button" class="preview-suspended" (click)="openDialog('suspended')">{{ 'posPreview.suspendedCount' | translate }}: {{ suspendedSales().length }}</button>
+				</div>
+			</div>
+
+			<div class="preview-invoice">
+				<div class="preview-table-wrap">
+					<table>
+						<thead>
+							<tr><th>{{ 'posPreview.rowNumber' | translate }}</th><th>{{ 'posPreview.itemNumber' | translate }}</th><th>{{ 'posPreview.itemDescription' | translate }}</th><th>{{ 'posPreview.quantity' | translate }}</th><th>{{ 'posPreview.total' | translate }}</th><th>{{ 'posPreview.tax' | translate }}</th><th></th></tr>
+						</thead>
+						<tbody>
+							@for (line of cart(); track line.product.id + '-' + line.product.batchNumber; let i = $index) {
+								<tr>
+									<td>{{ i + 1 }}</td>
+									<td>{{ line.product.id }}</td>
+									<td class="preview-item-name">{{ productName(line.product) }}</td>
+									<td class="preview-quantity">
+										<button type="button" (click)="changeQuantity(line.product.id, -1)" [attr.aria-label]="'posPreview.decrease' | translate">−</button>
+										<input type="number" min="1" [ngModel]="line.quantity" (ngModelChange)="setQuantity(line.product.id, $event)" (dblclick)="openQuantityEditor(line.product.id)" />
+										<button type="button" (click)="changeQuantity(line.product.id, 1)" [attr.aria-label]="'posPreview.increase' | translate">+</button>
+									</td>
+									<td>{{ line.product.price * line.quantity | number: '1.2-2' }} {{ currencyLabel() }}</td>
+									<td>{{ lineTax(line) | number: '1.2-2' }} {{ currencyLabel() }}</td>
+									<td><button type="button" class="preview-remove" (click)="removeLine(line.product.id)" [attr.aria-label]="'posPreview.deleteItem' | translate">▤</button></td>
+								</tr>
+							} @empty {
+								<tr><td colspan="7" class="preview-empty">{{ 'posPreview.emptyInvoice' | translate }}</td></tr>
+							}
+						</tbody>
+					</table>
+				</div>
+
+				<div class="preview-search-row">
+					<button type="button" class="preview-search-button" (click)="focusSearch()"><i class="ki-filled ki-magnifier"></i><span>{{ 'posPreview.findItem' | translate }}<small>F1</small></span></button>
+					<div class="preview-quantity-control"><button type="button" (click)="openQuantityEditor()">−</button><strong>{{ cart().length ? cart()[0].quantity : 1 }}</strong><button type="button" (click)="openQuantityEditor()">+</button></div>
+					<label class="preview-barcode"><i class="ki-filled ki-barcode"></i><input [attr.placeholder]="'posPreview.barcodePlaceholder' | translate" [ngModel]="search()" (ngModelChange)="search.set($event)" (keydown.enter)="lookupBarcode()" /><i class="ki-filled ki-keyboard"></i></label>
+					<button type="button" class="preview-customer" (click)="customerSearch.set(''); openDialog('customers')"><span>{{ 'posPreview.lastCustomer' | translate }}</span><strong>{{ selectedCustomerName() }}</strong></button>
+				</div>
+
+				<div class="preview-products">
+					@for (product of filteredProducts(); track product.id) {
+						<button type="button" class="preview-product" (click)="addProduct(product)">
+							<span class="preview-product-icon"><i [class]="'ki-filled ' + product.icon"></i></span>
+							<strong>{{ productName(product) }}</strong>
+							<span>{{ product.price | number: '1.2-2' }} {{ currencyLabel() }}</span>
+						</button>
+					} @empty {
+						<div class="preview-no-products">{{ 'posPreview.noMatchingProducts' | translate }}</div>
+					}
+				</div>
+
+				<div class="preview-shortcuts">
+					<button type="button" (click)="customerSearch.set(''); openDialog('customers')"><i class="ki-filled ki-profile-user"></i><span>{{ 'posPreview.shortcutCustomer' | translate }}<small>F2</small></span></button>
+					<button type="button" (click)="openDialog('discount')"><i class="ki-filled ki-price-tag"></i><span>{{ 'posPreview.shortcutDiscount' | translate }}<small>F3</small></span></button>
+					<button type="button" (click)="message.set(language.translate('posPreview.sampleNotes'))"><i class="ki-filled ki-note-2"></i><span>{{ 'posPreview.notes' | translate }}<small>F4</small></span></button>
+					<button type="button" (click)="openDialog('print')"><i class="ki-filled ki-printer"></i><span>{{ 'posPreview.print' | translate }}<small>F5</small></span></button>
+					<button type="button" (click)="message.set(language.translate('posPreview.drawerAction'))"><i class="ki-filled ki-wallet"></i><span>{{ 'posPreview.openDrawer' | translate }}<small>F6</small></span></button>
+					<button type="button" class="preview-old-link" routerLink="/demo1/pos/terminal"><i class="ki-filled ki-arrow-left"></i><span>{{ 'posPreview.oldSystem' | translate }}<small>{{ 'posPreview.back' | translate }}</small></span></button>
+				</div>
+			</div>
+		</section>
+
+		<aside class="preview-categories">
+			@for (category of categories(); track category.id) {
+				<button type="button" [class.active]="selectedCategory() === category.id" (click)="selectCategory(category.id)">
+					<i [class]="'ki-filled ' + category.icon"></i><span>{{ category.name }}</span>
+				</button>
+			}
+			<button type="button" class="preview-category-more" [class.active]="selectedCategory() === 'all'" (click)="selectCategory('all')">
+				<i class="ki-filled ki-arrows-circle"></i><span>{{ 'posPreview.category.all' | translate }}</span>
+			</button>
+		</aside>
+	</main>
+
+	@if (dialog(); as activeDialog) {
+		<div class="preview-dialog-backdrop" (click)="closeDialog()">
+			<section class="preview-dialog" [class.preview-dialog-wide]="activeDialog === 'products' || activeDialog === 'customers' || activeDialog === 'returns' || activeDialog === 'suspended' || activeDialog === 'batches'" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+				<header class="preview-dialog-header">
+					<div class="preview-dialog-title">
+						<span class="preview-dialog-brand"><b>K</b><small>KAYAN<br />POS</small></span>
+						<h2>
+							@if (activeDialog === 'products') { {{ 'posPreview.itemSearch' | translate }} }
+							@else if (activeDialog === 'payment') { {{ 'posPreview.paymentConfirm' | translate }} }
+							@else if (activeDialog === 'suspended') { {{ 'posPreview.suspendedInvoices' | translate }} }
+							@else if (activeDialog === 'returns') { {{ 'posPreview.returnScreen' | translate }} }
+							@else if (activeDialog === 'customers') { {{ 'posPreview.customerScreen' | translate }} }
+							@else if (activeDialog === 'discount') { {{ 'posPreview.discountScreen' | translate }} }
+							@else if (activeDialog === 'quantity') { {{ 'posPreview.quantityScreen' | translate }} }
+							@else if (activeDialog === 'shift') { {{ 'posPreview.shiftScreen' | translate }} }
+							@else if (activeDialog === 'batches') { {{ 'posPreview.batchScreen' | translate }} }
+							@else { {{ 'posPreview.printOptions' | translate }} }
+						</h2>
+					</div>
+					@if (activeDialog !== 'shift') { <button type="button" class="preview-dialog-close" (click)="closeDialog()" [attr.aria-label]="'posPreview.close' | translate">×</button> }
+				</header>
+
+				@if (activeDialog === 'shift') {
+					<div class="preview-dialog-body">
+						<p class="preview-dialog-note">{{ 'posPreview.shiftApiNotice' | translate }}</p>
+						@if (pendingShift(); as existingShift) {
+							<p>{{ 'posPreview.openShiftFound' | translate }} #{{ existingShift.shiftId }}</p>
+							<button type="button" class="preview-dialog-primary" [disabled]="shiftBusy()" (click)="resumeShift()">{{ 'posPreview.resumeShift' | translate }}</button>
+						} @else {
+							<label class="preview-dialog-field"><span>{{ 'posPreview.openingBalance' | translate }} ({{ currencyLabel() }})</span><input type="number" min="0" step="0.01" [ngModel]="openingBalance()" (ngModelChange)="openingBalance.set($event)" /></label>
+							<button type="button" class="preview-dialog-primary" [disabled]="shiftBusy()" (click)="openShift()">{{ shiftBusy() ? ('posPreview.connectingApi' | translate) : ('posPreview.openShift' | translate) }}</button>
+						}
+					</div>
+				}
+
+				@if (activeDialog === 'batches') {
+					<div class="preview-dialog-body">
+						<p class="preview-dialog-note">{{ 'posPreview.batchSelectionNotice' | translate }}</p>
+						<div class="preview-dialog-table-wrap"><table class="preview-dialog-table"><thead><tr><th>{{ 'posPreview.batchNumber' | translate }}</th><th>{{ 'posPreview.expiryDate' | translate }}</th><th>{{ 'posPreview.stock' | translate }}</th><th></th></tr></thead><tbody>
+							@for (batch of batchOptions(); track batch.batchNumber + '-' + batch.expiryDate; let i = $index) {
+								<tr><td>{{ batch.batchNumber || '—' }}</td><td>{{ batch.expiryDate ? (batch.expiryDate | date: 'mediumDate') : '—' }}</td><td>{{ batch.availableQty }}</td><td><button type="button" class="preview-dialog-add" (click)="selectBatch(batch)">{{ 'posPreview.select' | translate }}</button></td></tr>
+							}
+						</tbody></table></div>
+						<button type="button" class="preview-dialog-secondary" (click)="cancelBatchSelection()">{{ 'posPreview.cancel' | translate }}</button>
+					</div>
+				}
+
+				@if (activeDialog === 'products') {
+					<div class="preview-dialog-body">
+						<label class="preview-dialog-search"><i class="ki-filled ki-magnifier"></i><input autofocus [attr.placeholder]="'posPreview.searchItem' | translate" [ngModel]="productSearch()" (ngModelChange)="productSearch.set($event)" /></label>
+						<div class="preview-dialog-tabs"><button type="button" class="selected">{{ 'posPreview.all' | translate }}</button><button type="button">{{ 'posPreview.bestSelling' | translate }}</button><button type="button">{{ 'posPreview.favorites' | translate }}</button><button type="button">{{ 'posPreview.byCategory' | translate }}</button></div>
+						<div class="preview-dialog-table-wrap">
+							<table class="preview-dialog-table">
+								<thead><tr><th>{{ 'posPreview.rowNumber' | translate }}</th><th>{{ 'posPreview.itemNumber' | translate }}</th><th>{{ 'posPreview.product' | translate }}</th><th>{{ 'posPreview.category' | translate }}</th><th>{{ 'posPreview.unit' | translate }}</th><th>{{ 'posPreview.price' | translate }}</th><th>{{ 'posPreview.stock' | translate }}</th><th></th></tr></thead>
+								<tbody>
+									@for (product of searchedProducts(); track product.id; let i = $index) {
+										<tr [class.highlighted]="i === 1">
+											<td>{{ i + 1 }}</td><td>{{ product.id }}</td><td class="preview-dialog-product-name">{{ product.name }}</td><td>{{ categoryName(product.category) }}</td><td>{{ product.unit }}</td><td>{{ product.price | number: '1.2-2' }}</td><td>{{ product.stock ?? '—' }}</td><td><button type="button" class="preview-dialog-add" (click)="selectPreviewProduct(product)">{{ 'posPreview.add' | translate }}</button></td>
+										</tr>
+									} @empty {
+										<tr><td colspan="8" class="preview-dialog-empty">{{ 'posPreview.noMatchingProducts' | translate }}</td></tr>
+									}
+								</tbody>
+							</table>
+						</div>
+						<div class="preview-dialog-pagination"><button type="button">«</button><button type="button">‹</button><button type="button" class="selected">1</button><button type="button">2</button><button type="button">3</button><button type="button">4</button><button type="button">›</button><button type="button">»</button></div>
+					</div>
+					<footer class="preview-dialog-footer"><button type="button" class="preview-dialog-secondary" (click)="closeDialog()">{{ 'posPreview.close' | translate }} <small>Esc</small></button><span>{{ 'posPreview.pageCount' | translate }}: {{ searchedProducts().length }}</span></footer>
+				}
+
+				@if (activeDialog === 'payment') {
+					<div class="preview-dialog-body preview-payment-dialog">
+						<div class="preview-payment-total"><span>{{ 'posPreview.amountDue' | translate }}</span><strong>{{ total() | number: '1.2-2' }}</strong></div>
+						<div class="preview-payment-methods">
+							@for (paymentType of paymentTypes(); track paymentType.paymentTypeId) {
+								<button type="button" [class.selected]="paymentTypeId() === paymentType.paymentTypeId" (click)="setPaymentType(paymentType.paymentTypeId)"><i class="ki-filled" [class]="paymentTypeIcon(paymentType)"></i> {{ paymentType.paymentTypeName || paymentType.paymentTypeId }}</button>
+							}
+						</div>
+						<label class="preview-dialog-field"><span>{{ 'posPreview.amountPaid' | translate }}</span><input type="number" min="0" step="0.01" [ngModel]="cashReceived()" (ngModelChange)="cashReceived.set($event); keypadFresh.set(true)" /></label>
+						<div class="preview-payment-change"><span>{{ remaining() ? ('posPreview.collectRemaining' | translate) : ('posPreview.change' | translate) }}</span><strong>{{ (remaining() || change()) | number: '1.2-2' }}</strong></div>
+						<p class="preview-dialog-note">{{ 'posPreview.localOnlyNotice' | translate }}</p>
+					</div>
+					<footer class="preview-dialog-footer"><button type="button" class="preview-dialog-secondary" (click)="closeDialog()">{{ 'posPreview.cancel' | translate }} <small>Esc</small></button><button type="button" class="preview-dialog-primary" [disabled]="remaining() > 0 || saving()" (click)="confirmPayment()">{{ saving() ? ('posPreview.saving' | translate) : ('posPreview.paymentConfirm' | translate) }}</button></footer>
+				}
+
+				@if (activeDialog === 'suspended') {
+					<div class="preview-dialog-body">
+						<div class="preview-suspended-info">{{ 'posPreview.suspendedMemoryNotice' | translate }}</div>
+						<ul class="preview-suspended-list">
+							@for (sale of suspendedSales(); track $index) {
+								<li><div><strong>{{ 'posPreview.suspendedInvoice' | translate }} #{{ sale.posOrderId }}</strong><small>{{ suspendedItemCount(sale) }} {{ 'posPreview.items' | translate }} · {{ suspendedTotal(sale) | number: '1.2-2' }} {{ currencyLabel() }}</small></div><div class="preview-suspended-total">{{ suspendedItemCount(sale) }} {{ 'posPreview.items' | translate }}</div><button type="button" class="preview-dialog-add" [disabled]="saving()" (click)="resumeSuspendedSale($index)">{{ 'posPreview.resume' | translate }}</button><button type="button" class="preview-dialog-danger" (click)="deleteSuspendedSale($index)">{{ 'posPreview.delete' | translate }}</button></li>
+							} @empty {
+								<li class="preview-dialog-empty">{{ 'posPreview.noSuspended' | translate }}</li>
+							}
+						</ul>
+					</div>
+					<footer class="preview-dialog-footer"><button type="button" class="preview-dialog-secondary" (click)="closeDialog()">{{ 'posPreview.close' | translate }} <small>Esc</small></button><button type="button" class="preview-dialog-primary" [disabled]="!cart().length || saving()" (click)="holdSale()">{{ 'posPreview.holdCurrentInvoice' | translate }}</button></footer>
+				}
+
+				@if (activeDialog === 'returns') {
+					<div class="preview-dialog-body">
+						@if (!selectedReturnOrder()) {
+							<label class="preview-dialog-search"><i class="ki-filled ki-magnifier"></i><input [attr.placeholder]="'posPreview.returnSearch' | translate" [ngModel]="returnSearch()" (ngModelChange)="returnSearch.set($event)" /></label>
+							<div class="preview-dialog-return-layout">
+								<div class="preview-dialog-table-wrap">
+									<table class="preview-dialog-table">
+										<thead><tr><th>{{ 'posPreview.rowNumber' | translate }}</th><th>{{ 'posPreview.invoice' | translate }}</th><th>{{ 'posPreview.date' | translate }}</th><th>{{ 'posPreview.user' | translate }}</th><th>{{ 'posPreview.total' | translate }}</th><th></th></tr></thead>
+										<tbody>@for (order of searchedOrders(); track order.posOrderId) {
+											<tr><td>{{ $index + 1 }}</td><td>{{ orderNumber(order) }}</td><td>{{ orderDate(order) | date: 'short' }}</td><td>{{ orderCustomerName(order) }}</td><td>{{ orderTotal(order) | number: '1.2-2' }}</td><td><button type="button" class="preview-dialog-add" (click)="selectReturnOrder(order)">{{ 'posPreview.select' | translate }}</button></td></tr>
+										}</tbody>
+									</table>
+								</div>
+								<div class="preview-return-choice"><strong>{{ 'posPreview.returnType' | translate }}</strong><label><input type="radio" name="return-mode" [checked]="returnAll()" (change)="setReturnAll(true)" /> {{ 'posPreview.returnFull' | translate }}</label><label><input type="radio" name="return-mode" [checked]="!returnAll()" (change)="setReturnAll(false)" /> {{ 'posPreview.returnSelected' | translate }}</label><label class="preview-dialog-field"><span>{{ 'posPreview.returnNotes' | translate }}</span><textarea [attr.placeholder]="'posPreview.returnReason' | translate" [ngModel]="returnReason()" (ngModelChange)="returnReason.set($event)"></textarea></label></div>
+							</div>
+						} @else {
+							<div class="preview-return-selected"><strong>{{ 'posPreview.returnInvoice' | translate }} {{ selectedReturnOrder()!.posOrderId }}</strong><span>{{ 'posPreview.total' | translate }}: {{ selectedReturnOrder()!.totalAmount | number: '1.2-2' }} {{ currencyLabel() }}</span><button type="button" (click)="selectedReturnOrder.set(null)">{{ 'posPreview.changeInvoice' | translate }}</button></div>
+							<div class="preview-dialog-table-wrap"><table class="preview-dialog-table"><thead><tr><th>{{ 'posPreview.product' | translate }}</th><th>{{ 'posPreview.sold' | translate }}</th><th>{{ 'posPreview.returnQuantity' | translate }}</th><th>{{ 'posPreview.total' | translate }}</th></tr></thead><tbody>@for (line of returnLines(); track line.key) {<tr><td>{{ line.name }}</td><td>{{ line.soldQuantity }}</td><td><input class="preview-inline-number" type="number" min="0" [max]="line.soldQuantity" [ngModel]="returnQuantities()[line.key]" (ngModelChange)="setReturnQuantity(line, $event)" /></td><td>{{ returnLineAmount(line) | number: '1.2-2' }}</td></tr>}</tbody></table></div>
+							<label class="preview-dialog-field"><span>{{ 'posPreview.returnReason' | translate }}</span><textarea [attr.placeholder]="'posPreview.returnReason' | translate" [ngModel]="returnReason()" (ngModelChange)="returnReason.set($event)"></textarea></label>
+						}
+					</div>
+					<footer class="preview-dialog-footer"><button type="button" class="preview-dialog-secondary" (click)="closeDialog()">{{ 'posPreview.cancel' | translate }} <small>Esc</small></button>@if (selectedReturnOrder()) {<button type="button" class="preview-dialog-primary" [disabled]="returnBusy()" (click)="confirmReturn()">{{ returnBusy() ? ('posPreview.saving' | translate) : ('posPreview.continueReturn' | translate) }}</button>}</footer>
+				}
+
+				@if (activeDialog === 'customers') {
+					<div class="preview-dialog-body">
+						<label class="preview-dialog-search"><i class="ki-filled ki-magnifier"></i><input [attr.placeholder]="'posPreview.customerSearch' | translate" [ngModel]="customerSearch()" (ngModelChange)="customerSearch.set($event)" /></label>
+						<div class="preview-dialog-table-wrap"><table class="preview-dialog-table"><thead><tr><th>{{ 'posPreview.rowNumber' | translate }}</th><th>{{ 'posPreview.customerNumber' | translate }}</th><th>{{ 'posPreview.name' | translate }}</th><th>{{ 'posPreview.mobile' | translate }}</th><th>{{ 'posPreview.type' | translate }}</th><th></th></tr></thead><tbody>@for (item of searchedCustomers(); track item.customerId) {<tr><td>{{ $index + 1 }}</td><td>{{ item.customerId }}</td><td>{{ customerName(item) }}</td><td>{{ item.phone || '—' }}</td><td>{{ 'posPreview.customer' | translate }}</td><td><button type="button" class="preview-dialog-add" (click)="chooseCustomer(item)">{{ 'posPreview.select' | translate }}</button></td></tr>}</tbody></table></div>
+					</div>
+					<footer class="preview-dialog-footer"><button type="button" class="preview-dialog-secondary" (click)="closeDialog()">{{ 'posPreview.close' | translate }} <small>Esc</small></button><button type="button" class="preview-dialog-primary" (click)="selectNewCustomer()">{{ 'posPreview.addCustomer' | translate }}</button></footer>
+				}
+
+				@if (activeDialog === 'discount') {
+					<div class="preview-dialog-body preview-discount-dialog">
+						<div class="preview-dialog-tabs"><button type="button" [class.selected]="discountMode() === 'percent'" (click)="discountMode.set('percent')">{{ 'posPreview.percentDiscount' | translate }}</button><button type="button" [class.selected]="discountMode() === 'amount'" (click)="discountMode.set('amount')">{{ 'posPreview.fixedDiscount' | translate }}</button></div>
+						<div class="preview-discount-presets">@for (value of [5, 10, 15, 20]; track value) {<button type="button" [class.selected]="discountMode() === 'percent' && discountValue() === value" (click)="discountMode.set('percent'); discountValue.set(value)">{{ value }}%</button>}</div>
+						<label class="preview-dialog-field"><span>{{ discountMode() === 'percent' ? ('posPreview.discountPercent' | translate) : ('posPreview.discountValue' | translate) }}</span><div class="preview-discount-input"><input type="number" min="0" [max]="discountMode() === 'percent' ? 100 : subtotal()" [ngModel]="discountValue()" (ngModelChange)="discountValue.set($event)" /><strong>{{ discountMode() === 'percent' ? '%' : ('posPreview.currency' | translate) }}</strong></div></label>
+						<div class="preview-discount-summary"><span>{{ 'posPreview.discountAmount' | translate }}</span><strong>{{ discountAmount() | number: '1.2-2' }} {{ 'posPreview.currency' | translate }}</strong><span>{{ 'posPreview.afterDiscountTotal' | translate }}</span><strong>{{ total() | number: '1.2-2' }} {{ 'posPreview.currency' | translate }}</strong></div>
+					</div>
+					<footer class="preview-dialog-footer"><button type="button" class="preview-dialog-secondary" (click)="closeDialog()">{{ 'posPreview.cancel' | translate }} <small>Esc</small></button><button type="button" class="preview-dialog-primary" (click)="applyDiscount()">{{ 'posPreview.apply' | translate }}</button></footer>
+				}
+
+				@if (activeDialog === 'quantity') {
+					<div class="preview-dialog-body preview-quantity-dialog">
+						@if (selectedLine(); as line) {
+							<p>{{ productName(line.product) }}</p>
+							<strong class="preview-quantity-value">{{ line.quantity }}</strong>
+							<div class="preview-quantity-editor"><button type="button" (click)="changeEditedLine(-1)">−</button><input type="number" min="0" [ngModel]="line.quantity" (ngModelChange)="setQuantity(line.product.id, $event)" /><button type="button" (click)="changeEditedLine(1)">+</button></div>
+							<small>{{ 'posPreview.availableQuantity' | translate }}: {{ line.quantity + 12 }} · {{ 'posPreview.price' | translate }}: {{ line.product.price | number: '1.2-2' }} {{ 'posPreview.currency' | translate }}</small>
+						} @else {
+							<p>{{ 'posPreview.addItemForQuantityEdit' | translate }}</p>
+						}
+					</div>
+					<footer class="preview-dialog-footer"><button type="button" class="preview-dialog-secondary" (click)="closeDialog()">{{ 'posPreview.cancel' | translate }} <small>Esc</small></button><button type="button" class="preview-dialog-primary" (click)="closeDialog()">{{ 'posPreview.approve' | translate }}</button></footer>
+				}
+
+				@if (activeDialog === 'print') {
+					<div class="preview-dialog-body preview-print-dialog">
+						<div class="preview-print-paper"><strong>KAYAN</strong><span>{{ 'posPreview.receipt' | translate }}</span><hr /><span>{{ 'posPreview.invoiceNumber' | translate }}: 97066</span><span>{{ 'posPreview.items' | translate }}: {{ cart().length }}</span><b>{{ 'posPreview.total' | translate }}: {{ total() | number: '1.2-2' }} {{ 'posPreview.currency' | translate }}</b><small>{{ 'posPreview.thanks' | translate }}</small></div>
+						<div class="preview-print-options"><strong>{{ 'posPreview.printOptions' | translate }}</strong><label><span>{{ 'posPreview.customerReceipt' | translate }}</span><button type="button" role="switch" [attr.aria-checked]="printSettings().receipt" [class.on]="printSettings().receipt" (click)="togglePrintSetting('receipt')"><i></i></button></label><label><span>{{ 'posPreview.storeCopy' | translate }}</span><button type="button" role="switch" [attr.aria-checked]="printSettings().invoice" [class.on]="printSettings().invoice" (click)="togglePrintSetting('invoice')"><i></i></button></label><label><span>{{ 'posPreview.openCashDrawer' | translate }}</span><button type="button" role="switch" [attr.aria-checked]="printSettings().openDrawer" [class.on]="printSettings().openDrawer" (click)="togglePrintSetting('openDrawer')"><i></i></button></label><div class="preview-print-copies"><span>{{ 'posPreview.copyCount' | translate }}</span><button type="button">−</button><strong>1</strong><button type="button">+</button></div></div>
+					</div>
+					<footer class="preview-dialog-footer"><button type="button" class="preview-dialog-secondary" (click)="closeDialog()">{{ 'posPreview.close' | translate }} <small>Esc</small></button><button type="button" class="preview-dialog-primary" (click)="confirmPrint()">{{ 'posPreview.print' | translate }} <small>F5</small></button></footer>
+				}
+			</section>
+		</div>
+	}
+</div>
