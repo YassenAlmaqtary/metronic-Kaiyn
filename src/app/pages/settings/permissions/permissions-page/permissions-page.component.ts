@@ -1,11 +1,13 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { concatMap, from, map, toArray } from 'rxjs';
 
 import {
-  BulkSetRolePermissionsRequest,
   ModulePermissions,
   Permission,
+  SetRolePermissionRequest,
 } from '../../../../core/api/models/permission.models';
 import { Role } from '../../../../core/api/models/role.models';
 import { extractApiErrorMessage } from '../../../../core/api/utils/api-response.util';
@@ -22,6 +24,7 @@ import { RolesService } from '../../../../core/services/roles.service';
   styleUrl: './permissions-page.component.scss',
 })
 export class PermissionsPageComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   private permissionsService = inject(PermissionsService);
   private rolesService = inject(RolesService);
   private language = inject(LanguageService);
@@ -31,6 +34,7 @@ export class PermissionsPageComponent implements OnInit {
   permissions = signal<Permission[]>([]);
   roles = signal<Role[]>([]);
   modules = signal<ModulePermissions[]>([]);
+  private loadedModules: ModulePermissions[] = [];
 
   loadingCatalog = signal(true);
   loadingMatrix = signal(false);
@@ -102,7 +106,8 @@ export class PermissionsPageComponent implements OnInit {
 
   onRoleChange(value: number | null): void {
     this.selectedRoleId.set(value);
-    
+    this.loadedModules = [];
+    this.modules.set([]);
 
     if (value) {
       this.loadRoleMatrix(value);
@@ -118,6 +123,7 @@ export class PermissionsPageComponent implements OnInit {
     this.permissionsService.getRoleMatrix(roleId).subscribe({
       next: (matrix) => {
         this.modules.set(this.cloneModules(matrix.modules ?? []));
+        this.loadedModules = this.cloneModules(matrix.modules ?? []);
         this.loadingMatrix.set(false);
       },
       error: (error) => {
@@ -130,7 +136,7 @@ export class PermissionsPageComponent implements OnInit {
   }
 
   isAllowed(module: ModulePermissions, permissionKey: string): boolean {
-    return module.permissions?.[permissionKey] ?? false;
+    return this.permissionValue(module, permissionKey);
   }
 
   togglePermission(module: ModulePermissions, permissionKey: string): void {
@@ -140,12 +146,19 @@ export class PermissionsPageComponent implements OnInit {
           return item;
         }
 
+        const permissions = { ...(item.permissions ?? {}) };
+        const matchingKey = Object.keys(permissions).find(
+          (key) => key.toLowerCase() === permissionKey.toLowerCase(),
+        );
+        const nextValue = !this.permissionValue(item, permissionKey);
+        if (matchingKey && matchingKey !== permissionKey) {
+          delete permissions[matchingKey];
+        }
+        permissions[permissionKey] = nextValue;
+
         return {
           ...item,
-          permissions: {
-            ...(item.permissions ?? {}),
-            [permissionKey]: !(item.permissions?.[permissionKey] ?? false),
-          },
+          permissions,
         };
       }),
     );
@@ -157,43 +170,39 @@ export class PermissionsPageComponent implements OnInit {
       return;
     }
 
-    const catalog = this.permissions();
-    const moduleList = this.modules();
-
-    if (!catalog.length || !moduleList.length) {
+    const changedAssignments = this.getChangedAssignments(roleId);
+    if (!changedAssignments.length) {
+      this.toast.info(this.language.translate('permissions.noChanges'));
       return;
     }
 
-    const request: BulkSetRolePermissionsRequest = {
-      roleId,
-      permissions: moduleList.flatMap((module) =>
-        catalog
-          .filter((permission) => permission.permissionKey)
-          .map((permission) => ({
-            moduleId: module.moduleId,
-            permissionId: permission.permissionId,
-            isAllowed: module.permissions?.[permission.permissionKey!] ?? false,
-          })),
-      ),
-    };
-
     this.saving.set(true);
     this.errorMessage.set('');
-    
-
-    this.permissionsService.setRolePermissionsBulk(request).subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.toast.success(this.language.translate('permissions.saveSuccess'));
-        this.loadRoleMatrix(roleId);
-      },
-      error: (error) => {
-        this.saving.set(false);
-        this.errorMessage.set(
-          extractApiErrorMessage(error, this.language.translate('permissions.saveError')),
-        );
-      },
-    });
+    from(changedAssignments)
+      .pipe(
+        concatMap((request) => this.permissionsService.setRolePermission(request)),
+        toArray(),
+        map((results) => results.every((saved) => saved === true)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (saved) => {
+          this.saving.set(false);
+          if (!saved) {
+            this.errorMessage.set(this.language.translate('permissions.saveRejected'));
+            return;
+          }
+          this.loadedModules = this.cloneModules(this.modules());
+          this.toast.success(this.language.translate('permissions.saveSuccess'));
+          this.loadRoleMatrix(roleId);
+        },
+        error: (error) => {
+          this.saving.set(false);
+          this.errorMessage.set(
+            extractApiErrorMessage(error, this.language.translate('permissions.saveError')),
+          );
+        },
+      });
   }
 
   onSearchChange(value: string): void {
@@ -209,5 +218,42 @@ export class PermissionsPageComponent implements OnInit {
       ...module,
       permissions: { ...(module.permissions ?? {}) },
     }));
+  }
+
+  private permissionValue(module: ModulePermissions, permissionKey: string): boolean {
+    const key = Object.keys(module.permissions ?? {}).find(
+      (candidate) => candidate.toLowerCase() === permissionKey.toLowerCase(),
+    );
+    return key ? module.permissions?.[key] ?? false : false;
+  }
+
+  private getChangedAssignments(roleId: number): SetRolePermissionRequest[] {
+    const catalog = this.permissions().filter(
+      (permission): permission is Permission & { permissionKey: string } =>
+        !!permission.permissionKey && permission.permissionId > 0,
+    );
+    const originalByModule = new Map(
+      this.loadedModules.map((module) => [module.moduleId, module]),
+    );
+
+    return this.modules().flatMap((module) => {
+      const original = originalByModule.get(module.moduleId);
+      if (!original || module.moduleId <= 0) {
+        return [];
+      }
+
+      return catalog.flatMap((permission) => {
+        const isAllowed = this.permissionValue(module, permission.permissionKey);
+        if (isAllowed === this.permissionValue(original, permission.permissionKey)) {
+          return [];
+        }
+        return [{
+          roleId,
+          moduleId: module.moduleId,
+          permissionId: permission.permissionId,
+          isAllowed,
+        }];
+      });
+    });
   }
 }

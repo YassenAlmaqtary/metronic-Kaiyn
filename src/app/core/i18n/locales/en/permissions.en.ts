@@ -22,5 +22,7 @@ export const permissionsEn = {
   'permissions.matrixLoadError': 'Failed to load role permissions',
   'permissions.saveError': 'Failed to save role permissions',
   'permissions.saveSuccess': 'Role permissions saved successfully',
+  'permissions.saveRejected': 'The server did not confirm saving these permissions. Review the changes and try again.',
+  'permissions.noChanges': 'There are no new changes to save.',
   'permissions.manageForRole': 'Manage permissions',
 } as const;

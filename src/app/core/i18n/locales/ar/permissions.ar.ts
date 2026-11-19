@@ -22,5 +22,7 @@ export const permissionsAr = {
   'permissions.matrixLoadError': 'تعذر تحميل صلاحيات الدور',
   'permissions.saveError': 'تعذر حفظ صلاحيات الدور',
   'permissions.saveSuccess': 'تم حفظ صلاحيات الدور بنجاح',
+  'permissions.saveRejected': 'لم يؤكد الخادم حفظ الصلاحيات. راجع التغييرات وحاول مرة أخرى.',
+  'permissions.noChanges': 'لا توجد تغييرات جديدة لحفظها.',
   'permissions.manageForRole': 'إدارة الصلاحيات',
 } as const;

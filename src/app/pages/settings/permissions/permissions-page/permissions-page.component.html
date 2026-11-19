@@ -30,6 +30,7 @@
 					<label class="kt-form-label">{{ 'permissions.selectRole' | translate }}</label>
 					<select
 						class="kt-input"
+						[disabled]="saving()"
 						[ngModel]="selectedRoleId()"
 						(ngModelChange)="onRoleChange($event)">
 						<option [ngValue]="null">{{ 'permissions.selectRolePlaceholder' | translate }}</option>
@@ -39,7 +40,7 @@
 					</select>
 				</div>
 				@if (selectedRoleId()) {
-					<button class="kt-btn kt-btn-primary" type="button" [disabled]="saving() || loadingMatrix()" (click)="saveRolePermissions()">
+					<button class="kt-btn kt-btn-primary" type="button" [disabled]="saving() || loadingMatrix() || loadingCatalog()" (click)="saveRolePermissions()">
 						@if (saving()) {
 							<span class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
 						}
