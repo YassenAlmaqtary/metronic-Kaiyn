@@ -4,15 +4,22 @@ import { Observable, map, timeout } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import {
+  AiAssistantStepKey,
   SqlAgentAskRequest,
   SqlAgentAskResponse,
 } from '../api/models/sql-agent.models';
 import { TokenStorageService } from '../api/token-storage.service';
 
 export interface SqlAgentStreamHandlers {
-  onChunk: (text: string) => void;
+  onChunk: (text: string, mode?: 'delta' | 'cumulative') => void;
+  onActivity?: (activity: AiAssistantStepKey) => void;
   onDone: () => void;
   onError: (error: unknown) => void;
+}
+
+interface ParsedStreamChunk {
+  text: string;
+  mode: 'delta' | 'cumulative';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -85,6 +92,52 @@ export class SqlAgentService {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
+        let eventData: string[] = [];
+        let sseEventName = '';
+        let activityCompleted = false;
+
+        const emitRecord = (record: string, eventNameHint = ''): void => {
+          const activity = this.parseActivity(record, eventNameHint);
+          if (activity && !(activity === 'completed' && activityCompleted)) {
+            handlers.onActivity?.(activity);
+            activityCompleted = activity === 'completed';
+          }
+          const chunk = this.parseStreamRecord(
+            record,
+            environment.sqlAgent.streamCumulative,
+            eventNameHint,
+          );
+          if (chunk) {
+            handlers.onChunk(chunk.text, chunk.mode);
+          }
+        };
+
+        const processLine = (line: string): void => {
+          const trimmed = line.trim();
+          if (!trimmed) {
+            if (eventData.length) {
+              emitRecord(eventData.join('\n'), sseEventName);
+              eventData = [];
+            }
+            sseEventName = '';
+            return;
+          }
+          if (trimmed.startsWith(':')) {
+            return;
+          }
+          if (trimmed.startsWith('data:')) {
+            eventData.push(trimmed.slice(5).trimStart());
+            return;
+          }
+          if (trimmed.startsWith('event:')) {
+            sseEventName = trimmed.slice(6).trim();
+            return;
+          }
+          if (/^(id|retry):/.test(trimmed)) {
+            return;
+          }
+          emitRecord(trimmed);
+        };
 
         while (true) {
           const { done, value } = await reader.read();
@@ -93,22 +146,20 @@ export class SqlAgentService {
           }
 
           buffer += decoder.decode(value, { stream: true });
-          const parts = buffer.split('\n');
+          const parts = buffer.split(/\r?\n/);
           buffer = parts.pop() ?? '';
 
           for (const line of parts) {
-            const chunk = this.parseSseLine(line);
-            if (chunk) {
-              handlers.onChunk(chunk);
-            }
+            processLine(line);
           }
         }
 
+        buffer += decoder.decode();
         if (buffer.trim()) {
-          const chunk = this.parseSseLine(buffer);
-          if (chunk) {
-            handlers.onChunk(chunk);
-          }
+          processLine(buffer);
+        }
+        if (eventData.length) {
+          emitRecord(eventData.join('\n'), sseEventName);
         }
 
         handlers.onDone();
@@ -121,32 +172,178 @@ export class SqlAgentService {
       });
   }
 
-  private parseSseLine(line: string): string | null {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith(':')) {
+  private parseActivity(record: string, eventNameHint: string): AiAssistantStepKey | null {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(record.trim());
+    } catch {
       return null;
     }
-    if (trimmed.startsWith('data:')) {
-      const data = trimmed.slice(5).trim();
-      if (!data || data === '[DONE]') {
+
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return null;
+    }
+
+    const event = parsed as Record<string, unknown>;
+    const eventName =
+      typeof event['event'] === 'string'
+        ? event['event'].toLowerCase()
+        : eventNameHint.toLowerCase();
+    const nodeName = typeof event['node'] === 'string' ? event['node'].toLowerCase() : '';
+
+    if (
+      eventName === 'complete' ||
+      (eventName === 'on_chain_end' && nodeName === 'generate_answer')
+    ) {
+      return 'completed';
+    }
+    if (eventName === 'on_tool_error' || eventName === 'on_chain_error') {
+      return 'failed';
+    }
+    if (eventName === 'on_tool_start') {
+      return 'querying';
+    }
+    if (eventName === 'on_tool_end') {
+      return 'dataReady';
+    }
+    if (eventName === 'on_chat_model_start' || eventName === 'on_chat_model_stream') {
+      return 'answering';
+    }
+    if (eventName === 'on_chain_start') {
+      if (nodeName.includes('generate_answer')) {
+        return 'answering';
+      }
+      if (/sql|query|database|tool|retriev|search/.test(nodeName)) {
+        return 'querying';
+      }
+      return 'analyzing';
+    }
+    if (eventName === 'on_chain_end' && /sql|query|database|tool|retriev|search/.test(nodeName)) {
+      return 'dataReady';
+    }
+
+    return null;
+  }
+
+  private parseStreamRecord(
+    record: string,
+    defaultCumulative: boolean,
+    eventNameHint = '',
+  ): ParsedStreamChunk | null {
+    const trimmed = record.trim();
+    if (!trimmed || trimmed === '[DONE]') {
+      return null;
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(trimmed);
+    } catch {
+      return trimmed.startsWith('{') || trimmed.startsWith('[')
+        ? null
+        : { text: trimmed, mode: defaultCumulative ? 'cumulative' : 'delta' };
+    }
+
+    if (typeof parsed === 'string') {
+      return parsed
+        ? { text: parsed, mode: defaultCumulative ? 'cumulative' : 'delta' }
+        : null;
+    }
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return null;
+    }
+
+    const event = parsed as Record<string, unknown>;
+    const eventName =
+      typeof event['event'] === 'string'
+        ? event['event'].toLowerCase()
+        : eventNameHint.toLowerCase();
+    const nodeName = typeof event['node'] === 'string' ? event['node'].toLowerCase() : '';
+    const data = 'data' in event ? event['data'] : event;
+
+    if (eventName === 'complete' || eventName === 'on_chain_end') {
+      if (eventName === 'on_chain_end' && nodeName && nodeName !== 'generate_answer') {
         return null;
       }
-      try {
-        const parsed = JSON.parse(data) as {
-          chunk?: string;
-          output?: string;
-          token?: string;
-          content?: string;
-          done?: boolean;
-        };
-        if (parsed.done === true && parsed.chunk == null && parsed.output == null) {
-          return null;
-        }
-        return parsed.chunk ?? parsed.output ?? parsed.token ?? parsed.content ?? data;
-      } catch {
-        return data;
-      }
+      const answer = this.extractAnswerText(data);
+      return answer ? { text: answer, mode: 'cumulative' } : null;
+    }
+
+    if (
+      eventName === 'on_chat_model_stream' ||
+      eventName === 'on_llm_new_token' ||
+      eventName === 'on_chain_stream'
+    ) {
+      const text = this.extractStreamText(data);
+      return text ? { text, mode: 'delta' } : null;
+    }
+
+    if (eventName && !eventName.startsWith('on_')) {
+      return null;
+    }
+
+    const answer = this.extractAnswerText(data);
+    if (answer) {
+      return { text: answer, mode: defaultCumulative ? 'cumulative' : 'delta' };
     }
     return null;
+  }
+
+  private extractStreamText(value: unknown): string {
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (!value || typeof value !== 'object') {
+      return '';
+    }
+
+    if (Array.isArray(value)) {
+      return value.map((part) => this.extractStreamText(part)).join('');
+    }
+
+    const record = value as Record<string, unknown>;
+    for (const key of ['chunk', 'delta', 'message', 'content', 'text', 'token']) {
+      if (key in record) {
+        const text = this.extractStreamText(record[key]);
+        if (text) {
+          return text;
+        }
+      }
+    }
+    return '';
+  }
+
+  private extractAnswerText(value: unknown, depth = 0): string {
+    if (depth > 5 || value == null) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return value.map((part) => this.extractAnswerText(part, depth + 1)).join('');
+    }
+    if (typeof value !== 'object') {
+      return '';
+    }
+
+    const record = value as Record<string, unknown>;
+    for (const key of ['answer', 'final_answer', 'finalAnswer', 'response', 'output', 'text', 'content']) {
+      if (key in record) {
+        const text = this.extractAnswerText(record[key], depth + 1);
+        if (text) {
+          return text;
+        }
+      }
+    }
+    for (const key of ['data', 'result', 'chunk', 'message']) {
+      if (key in record) {
+        const text = this.extractAnswerText(record[key], depth + 1);
+        if (text) {
+          return text;
+        }
+      }
+    }
+    return '';
   }
 }

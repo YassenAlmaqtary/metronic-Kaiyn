@@ -1,7 +1,8 @@
 /**
  * Dev proxy for Angular (@angular/build:dev-server).
  * /api        → Kayian ERP backend :5000
- * /sql-agent  → SQL Agent FastAPI   :8050  (avoids browser CORS)
+ * /sql-agent/* → SQL Agent localhost:8050/api/v1/*
+ * /sql-agent/health → SQL Agent localhost:8050/health
  */
 module.exports = [
   {
@@ -16,7 +17,7 @@ module.exports = [
     target: 'http://127.0.0.1:8050',
     secure: false,
     changeOrigin: true,
-    pathRewrite: { '^/sql-agent': '' },
+    pathRewrite: { '^/api/v1': '' },
     logLevel: 'debug',
   },
 ];

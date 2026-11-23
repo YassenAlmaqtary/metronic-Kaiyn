@@ -12,6 +12,34 @@
   animation: ai-assistant-blink 1s step-end infinite;
 }
 
+.ai-assistant-activity {
+  border-inline-start: 1px solid var(--border);
+  margin-inline-start: 0.35rem;
+  padding-inline-start: 0.6rem;
+}
+
+.ai-assistant-step-indicator {
+  display: inline-flex;
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: 0 0 0.85rem;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+}
+
+.ai-assistant-step-pending {
+  color: var(--primary);
+}
+
+.ai-assistant-step-active {
+  color: var(--primary);
+}
+
+.ai-assistant-step-error {
+  color: var(--color-destructive, #f8285a);
+}
+
 @keyframes ai-assistant-pulse {
   0%,
   100% {

@@ -15,4 +15,20 @@ export interface AiAssistantMessage {
   createdAt: number;
   streaming?: boolean;
   error?: boolean;
+  steps?: AiAssistantStep[];
+}
+
+export type AiAssistantStepKey =
+  | 'analyzing'
+  | 'querying'
+  | 'dataReady'
+  | 'answering'
+  | 'completed'
+  | 'cancelled'
+  | 'failed';
+
+export interface AiAssistantStep {
+  id: string;
+  key: AiAssistantStepKey;
+  status: 'active' | 'done' | 'error';
 }

@@ -2,7 +2,11 @@ import { Injectable, inject, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { AiAssistantMessage } from '../api/models/sql-agent.models';
+import {
+  AiAssistantMessage,
+  AiAssistantStep,
+  AiAssistantStepKey,
+} from '../api/models/sql-agent.models';
 import { TranslationKey } from '../i18n';
 import { AccessControlService } from './access-control.service';
 import { LanguageService } from './language.service';
@@ -57,7 +61,16 @@ export class AiAssistantService {
     this.sending.set(false);
     this.messages.update((list) =>
       list.map((message) =>
-        message.streaming ? { ...message, streaming: false } : message,
+        message.streaming
+          ? {
+              ...message,
+              streaming: false,
+              steps: [
+                ...this.finishActiveStep(message.steps ?? []),
+                this.createStep('cancelled', 'done'),
+              ],
+            }
+          : message,
       ),
     );
   }
@@ -69,7 +82,10 @@ export class AiAssistantService {
     }
 
     const userMessage = this.createMessage('user', query);
-    const placeholder = this.createMessage('assistant', '', { streaming: true });
+    const placeholder = this.createMessage('assistant', '', {
+      streaming: true,
+      steps: [this.createStep('analyzing', 'active')],
+    });
 
     this.messages.update((list) => [...list, userMessage, placeholder]);
     this.sending.set(true);
@@ -140,16 +156,22 @@ export class AiAssistantService {
     this.sqlAgent.askStream(
       query,
       {
-        onChunk: (chunk) => {
-          if (environment.sqlAgent.streamCumulative) {
+        onChunk: (chunk, mode) => {
+          if (mode === 'cumulative') {
             received = chunk;
-          } else if (received && chunk.startsWith(received)) {
+          } else if (mode === 'delta') {
+            received += chunk;
+          } else if (
+            environment.sqlAgent.streamCumulative &&
+            (!received || chunk.startsWith(received))
+          ) {
             received = chunk;
           } else {
             received += chunk;
           }
           this.patchAssistant(assistantId, received, true);
         },
+        onActivity: (activity) => this.recordActivity(assistantId, activity),
         onDone: () => {
           this.sending.set(false);
           this.abortController = null;
@@ -180,11 +202,75 @@ export class AiAssistantService {
       this.failAssistant(id, sanitized.text);
       return;
     }
+    this.recordActivity(id, 'completed');
     this.patchAssistant(id, sanitized.text, false, false);
   }
 
   private failAssistant(id: string, content: string): void {
+    this.recordActivity(id, 'failed');
     this.patchAssistant(id, content, false, true);
+  }
+
+  private recordActivity(id: string, key: AiAssistantStepKey): void {
+    this.messages.update((list) =>
+      list.map((message) => {
+        if (message.id !== id) {
+          return message;
+        }
+
+        const steps = message.steps ?? [];
+        const lastStep = steps[steps.length - 1];
+        if (lastStep?.key === key && lastStep.status === 'active') {
+          return message;
+        }
+
+        if (key === 'completed') {
+          const completedSteps = steps.map((step) =>
+            step.status === 'active' ? { ...step, status: 'done' as const } : step,
+          );
+          if (completedSteps[completedSteps.length - 1]?.key !== 'completed') {
+            completedSteps.push(this.createStep('completed', 'done'));
+          }
+          return { ...message, steps: completedSteps };
+        }
+
+        if (key === 'failed') {
+          const previousSteps =
+            lastStep?.key === 'completed' ? steps.slice(0, -1) : steps;
+          const failedSteps = this.finishActiveStep(previousSteps, 'error');
+          if (failedSteps[failedSteps.length - 1]?.key !== 'failed') {
+            failedSteps.push(this.createStep('failed', 'error'));
+          }
+          return { ...message, steps: failedSteps };
+        }
+
+        const nextSteps = steps.map((step) =>
+          step.status === 'active' ? { ...step, status: 'done' as const } : step,
+        );
+        nextSteps.push(this.createStep(key, 'active'));
+        return { ...message, steps: nextSteps };
+      }),
+    );
+  }
+
+  private finishActiveStep(
+    steps: AiAssistantStep[],
+    status: 'done' | 'error' = 'done',
+  ): AiAssistantStep[] {
+    return steps.map((step) =>
+      step.status === 'active' ? { ...step, status } : step,
+    );
+  }
+
+  private createStep(
+    key: AiAssistantStepKey,
+    status: AiAssistantStep['status'],
+  ): AiAssistantStep {
+    return {
+      id: `${key}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      key,
+      status,
+    };
   }
 
   /**

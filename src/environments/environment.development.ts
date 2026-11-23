@@ -3,12 +3,12 @@ export const environment = {
   apiUrl: '',
   sqlAgent: {
     /** Same-origin via proxy.conf.js → http://127.0.0.1:8050 */
-    baseUrl: '/sql-agent',
+    baseUrl: 'http://127.0.0.1:8050/api/v1',
     healthPath: '/health',
     /** JWT ask — uses Kayian ERP Bearer token (auth interceptor). */
-    askPath: '/ask',
-    streamPath: '',
-    preferStream: false,
+    askPath: '/chat',
+    streamPath: '/chat/stream',
+    preferStream: true,
     streamRequiresAuth: true,
     streamCumulative: true,
     askTimeoutMs: 180_000,

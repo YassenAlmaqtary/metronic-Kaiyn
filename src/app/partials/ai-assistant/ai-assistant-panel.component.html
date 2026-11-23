@@ -89,6 +89,33 @@
 									}
 								}
 							</div>
+							@if (message.role === 'assistant' && message.steps?.length) {
+								<div class="ai-assistant-activity max-w-[92%] px-1" role="status" aria-live="polite">
+									<p class="mb-1 text-[10px] font-medium text-secondary-foreground">
+										{{ 'aiAssistant.agentSteps' | translate }}
+									</p>
+									<ol class="space-y-1">
+										@for (step of message.steps; track step.id) {
+											<li
+												class="flex items-center gap-2 text-xs text-secondary-foreground"
+												[class.ai-assistant-step-active]="step.status === 'active'"
+												[class.ai-assistant-step-error]="step.status === 'error'"
+											>
+												<span class="ai-assistant-step-indicator" [class.ai-assistant-step-pending]="step.status === 'active'">
+													@if (step.status === 'active') {
+														<span class="ai-assistant-dot"></span>
+													} @else if (step.status === 'error') {
+														<i class="ki-filled ki-cross"></i>
+													} @else {
+														<i class="ki-filled ki-check"></i>
+													}
+												</span>
+												{{ stepLabel(step.key) }}
+											</li>
+										}
+									</ol>
+								</div>
+							}
 						</div>
 					}
 				}

@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild, effect, inject, signal } from '@angul
 import { FormsModule } from '@angular/forms';
 
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
+import { AiAssistantStepKey } from '../../core/api/models/sql-agent.models';
 import { AiAssistantService } from '../../core/services/ai-assistant.service';
 import { LanguageService } from '../../core/services/language.service';
 import { TranslationKey } from '../../core/i18n';
@@ -54,6 +55,10 @@ export class AiAssistantPanelComponent {
   useSuggestion(key: TranslationKey): void {
     this.draft.set(this.language.translate(key));
     this.onSubmit();
+  }
+
+  stepLabel(key: AiAssistantStepKey): string {
+    return this.language.translate(`aiAssistant.step.${key}` as TranslationKey);
   }
 
   private scrollToBottom(): void {
