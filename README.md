@@ -28,16 +28,16 @@ the application when source files change.
 
 ## Build
 
-Create the default production build:
+Create a production build:
 
 ```powershell
-npm run build
+npm run build:production
 ```
 
 Create a development build:
 
 ```powershell
-npm run build -- --configuration development
+npm run build:development
 ```
 
 Build artifacts are written to `dist/kayian-erp/`. Production builds enforce
@@ -49,6 +49,12 @@ Run the unit tests with Karma:
 
 ```powershell
 npm test
+```
+
+Run the unit tests once and exit (useful for a quick verification):
+
+```powershell
+npm run test:once
 ```
 
 ## Angular CLI

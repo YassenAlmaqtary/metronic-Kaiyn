@@ -7,6 +7,8 @@ import { AiAssistantService } from '../../core/services/ai-assistant.service';
 import { LanguageService } from '../../core/services/language.service';
 import { TranslationKey } from '../../core/i18n';
 
+type DeleteConfirmation = 'session' | 'memory';
+
 @Component({
   selector: 'app-ai-assistant-panel',
   imports: [FormsModule, TranslatePipe],
@@ -18,6 +20,7 @@ export class AiAssistantPanelComponent {
   private language = inject(LanguageService);
 
   draft = signal('');
+  readonly deleteConfirmation = signal<DeleteConfirmation | null>(null);
   readonly suggestions: TranslationKey[] = [
     'aiAssistant.suggestion.unpaidInvoices',
     'aiAssistant.suggestion.accountGroupsCount',
@@ -57,8 +60,41 @@ export class AiAssistantPanelComponent {
     this.onSubmit();
   }
 
+  openDeleteSessionConfirmation(): void {
+    this.deleteConfirmation.set('session');
+  }
+
+  openDeleteMemoryConfirmation(): void {
+    this.deleteConfirmation.set('memory');
+  }
+
+  closeDeleteConfirmation(): void {
+    this.deleteConfirmation.set(null);
+  }
+
+  confirmDeletion(): void {
+    const target = this.deleteConfirmation();
+    this.deleteConfirmation.set(null);
+    if (target === 'session') {
+      this.assistant.deleteCurrentSession();
+    } else if (target === 'memory') {
+      this.assistant.deleteAllMemory();
+    }
+  }
+
   stepLabel(key: AiAssistantStepKey): string {
     return this.language.translate(`aiAssistant.step.${key}` as TranslationKey);
+  }
+
+  isActiveSession(sessionId: string): boolean {
+    return sessionId === this.assistant.activeSessionId();
+  }
+
+  onSessionChange(event: Event): void {
+    const target = event.target;
+    if (target instanceof HTMLSelectElement) {
+      this.assistant.selectSession(target.value);
+    }
   }
 
   private scrollToBottom(): void {

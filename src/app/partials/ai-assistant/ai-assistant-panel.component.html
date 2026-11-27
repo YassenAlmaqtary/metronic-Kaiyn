@@ -31,11 +31,21 @@
 				<div class="flex items-center gap-1 shrink-0">
 					<button
 						type="button"
-						class="kt-btn kt-btn-sm kt-btn-ghost kt-btn-icon"
-						(click)="assistant.clear()"
-						[attr.title]="'aiAssistant.clear' | translate"
+						class="kt-btn kt-btn-sm kt-btn-ghost kt-btn-icon text-destructive"
+						(click)="openDeleteMemoryConfirmation()"
+						[disabled]="assistant.sending() || assistant.sessionsLoading() || assistant.historyLoading() || assistant.deleting()"
+						[attr.title]="'aiAssistant.deleteMemory' | translate"
 					>
 						<i class="ki-filled ki-trash"></i>
+					</button>
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm kt-btn-ghost kt-btn-icon"
+						(click)="assistant.startNewSession()"
+						[disabled]="assistant.sending() || assistant.sessionsLoading() || assistant.historyLoading() || assistant.deleting()"
+						[attr.title]="'aiAssistant.newSession' | translate"
+					>
+						<i class="ki-filled ki-plus"></i>
 					</button>
 					<button
 						type="button"
@@ -47,7 +57,68 @@
 				</div>
 			</header>
 
+			<div class="flex items-center gap-2 border-b border-border px-3 py-2">
+				<label for="ai-assistant-session" class="shrink-0 text-xs text-secondary-foreground">
+					{{ 'aiAssistant.sessions' | translate }}
+				</label>
+				<select
+					id="ai-assistant-session"
+					class="min-w-0 flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-xs"
+					[value]="assistant.activeSessionId()"
+					[disabled]="assistant.sessionsLoading() || assistant.historyLoading() || assistant.sending()"
+					(change)="onSessionChange($event)"
+				>
+					<option [value]="assistant.activeSessionId()">{{ assistant.activeSessionTitle() }}</option>
+					@for (session of assistant.sessions(); track session.session_id) {
+						@if (!isActiveSession(session.session_id)) {
+							<option [value]="session.session_id">{{ session.title }}</option>
+						}
+					}
+				</select>
+				@if (assistant.sessionsLoading()) {
+					<span class="ai-assistant-dot text-primary" [attr.aria-label]="'aiAssistant.loadingSessions' | translate"></span>
+				} @else {
+					<button
+						type="button"
+						class="kt-btn kt-btn-sm kt-btn-ghost kt-btn-icon"
+						(click)="assistant.reloadSessions()"
+						[disabled]="assistant.deleting()"
+						[attr.title]="'aiAssistant.reloadSessions' | translate"
+					>
+						<i class="ki-filled ki-arrows-circle"></i>
+					</button>
+				}
+				<button
+					type="button"
+					class="kt-btn kt-btn-sm kt-btn-ghost kt-btn-icon text-destructive"
+					(click)="openDeleteSessionConfirmation()"
+					[disabled]="!assistant.canDeleteCurrentSession() || assistant.sending() || assistant.sessionsLoading() || assistant.historyLoading() || assistant.deleting()"
+					[attr.title]="'aiAssistant.deleteSession' | translate"
+				>
+					<i class="ki-filled ki-trash"></i>
+				</button>
+			</div>
+
+			@if (assistant.historyError()) {
+				<div class="flex items-center justify-between gap-2 border-b border-warning/20 bg-warning/5 px-3 py-2 text-xs text-warning" role="status">
+					{{ 'aiAssistant.sessionsError' | translate }}
+					<button type="button" class="underline" (click)="assistant.reloadSessions()">
+						{{ 'aiAssistant.retry' | translate }}
+					</button>
+				</div>
+			}
+			@if (assistant.operationError()) {
+				<p class="border-b border-destructive/20 bg-destructive/5 px-3 py-2 text-xs text-destructive" role="alert">
+					{{ 'aiAssistant.deleteError' | translate }}
+				</p>
+			}
+
 			<div class="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+				@if (assistant.historyLoading()) {
+					<p class="text-center text-xs text-secondary-foreground">
+						{{ 'aiAssistant.loadingSession' | translate }}
+					</p>
+				}
 				@for (message of assistant.messages(); track message.id) {
 					@if (message.role === 'system') {
 						<div class="rounded-xl border border-border bg-muted/40 px-3 py-2 text-xs text-secondary-foreground whitespace-pre-wrap">
@@ -116,6 +187,11 @@
 									</ol>
 								</div>
 							}
+							@if (message.role === 'assistant' && message.memoryWarning) {
+								<p class="max-w-[92%] px-1 text-xs text-warning" role="status">
+									{{ 'aiAssistant.memoryWarning' | translate }}
+								</p>
+							}
 						</div>
 					}
 				}
@@ -162,5 +238,50 @@
 				}
 			</form>
 		</section>
+
+		@if (deleteConfirmation(); as confirmation) {
+			<div class="fixed inset-0 z-[120] flex items-center justify-center p-4 pointer-events-auto">
+				<button
+					type="button"
+					class="absolute inset-0 bg-black/40"
+					(click)="closeDeleteConfirmation()"
+					[attr.aria-label]="'aiAssistant.cancelDelete' | translate"
+				></button>
+				<div
+					class="relative kt-card w-full max-w-md shadow-xl"
+					role="alertdialog"
+					aria-modal="true"
+					aria-labelledby="ai-assistant-delete-title"
+					(click)="$event.stopPropagation()"
+				>
+					<div class="kt-card-content flex flex-col gap-4 p-6">
+						<div>
+							<h3 id="ai-assistant-delete-title" class="text-lg font-semibold text-mono">
+								{{ (confirmation === 'session' ? 'aiAssistant.deleteSession' : 'aiAssistant.deleteMemory') | translate }}
+							</h3>
+							<p class="mt-2 text-sm text-secondary-foreground">
+								{{ (confirmation === 'session' ? 'aiAssistant.confirmDeleteSession' : 'aiAssistant.confirmDeleteMemory') | translate }}
+							</p>
+						</div>
+						<div class="flex justify-end gap-2">
+							<button
+								type="button"
+								class="kt-btn kt-btn-outline"
+								(click)="closeDeleteConfirmation()"
+							>
+								{{ 'aiAssistant.cancelDelete' | translate }}
+							</button>
+							<button
+								type="button"
+								class="kt-btn kt-btn-destructive"
+								(click)="confirmDeletion()"
+							>
+								{{ 'aiAssistant.confirmDelete' | translate }}
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
 	</div>
 }

@@ -6,6 +6,8 @@ import {
   AiAssistantMessage,
   AiAssistantStep,
   AiAssistantStepKey,
+  SqlAgentSessionHistory,
+  SqlAgentSessionSummary,
 } from '../api/models/sql-agent.models';
 import { TranslationKey } from '../i18n';
 import { AccessControlService } from './access-control.service';
@@ -14,6 +16,8 @@ import { SqlAgentService } from './sql-agent.service';
 
 @Injectable({ providedIn: 'root' })
 export class AiAssistantService {
+  private static readonly sessionStorageKey = 'ai-assistant-session-id';
+
   private sqlAgent = inject(SqlAgentService);
   private language = inject(LanguageService);
   private access = inject(AccessControlService);
@@ -21,8 +25,18 @@ export class AiAssistantService {
   readonly open = signal(false);
   readonly sending = signal(false);
   readonly messages = signal<AiAssistantMessage[]>([]);
+  readonly sessions = signal<SqlAgentSessionSummary[]>([]);
+  readonly activeSessionId = signal('');
+  readonly sessionsLoading = signal(false);
+  readonly historyLoading = signal(false);
+  readonly historyError = signal(false);
+  readonly deleting = signal(false);
+  readonly operationError = signal(false);
 
   private abortController: AbortController | null = null;
+  private sessionId = this.loadSessionId();
+  private initialSessionRestorePending = true;
+  private refreshSessionsPending = false;
 
   show(): void {
     if (!this.access.canUseAiAssistant()) {
@@ -31,6 +45,9 @@ export class AiAssistantService {
     this.open.set(true);
     if (!this.messages().length) {
       this.messages.set([this.systemWelcome()]);
+    }
+    if (this.initialSessionRestorePending) {
+      this.loadSessions(true);
     }
   }
 
@@ -50,9 +67,122 @@ export class AiAssistantService {
     }
   }
 
-  clear(): void {
+  startNewSession(): void {
+    if (this.sending() || this.sessionsLoading() || this.historyLoading() || this.deleting()) {
+      return;
+    }
+    this.initialSessionRestorePending = false;
     this.cancel();
+    this.sessionId = this.createSessionId();
+    this.activeSessionId.set(this.sessionId);
+    this.historyError.set(false);
     this.messages.set([this.systemWelcome()]);
+  }
+
+  selectSession(sessionId: string): void {
+    if (
+      !sessionId ||
+      (sessionId === this.sessionId &&
+        this.messages().some((message) => message.role !== 'system')) ||
+      this.sending() ||
+      this.sessionsLoading() ||
+      this.historyLoading() ||
+      this.deleting()
+    ) {
+      return;
+    }
+
+    this.sessionId = sessionId;
+    this.activeSessionId.set(sessionId);
+    sessionStorage.setItem(AiAssistantService.sessionStorageKey, sessionId);
+    this.historyLoading.set(true);
+    this.historyError.set(false);
+    this.messages.set([]);
+
+    this.sqlAgent
+      .getSession(sessionId)
+      .pipe(finalize(() => this.historyLoading.set(false)))
+      .subscribe({
+        next: (history) => this.restoreSession(history),
+        error: () => {
+          this.messages.set([this.systemWelcome()]);
+          this.historyError.set(true);
+        },
+      });
+  }
+
+  reloadSessions(): void {
+    this.loadSessions(false);
+  }
+
+  activeSessionTitle(): string {
+    return (
+      this.sessions().find((session) => session.session_id === this.activeSessionId())?.title ||
+      this.t('aiAssistant.newSession')
+    );
+  }
+
+  canDeleteCurrentSession(): boolean {
+    return this.sessions().some((session) => session.session_id === this.sessionId);
+  }
+
+  deleteCurrentSession(): void {
+    if (
+      !this.canDeleteCurrentSession() ||
+      this.sending() ||
+      this.sessionsLoading() ||
+      this.historyLoading() ||
+      this.deleting()
+    ) {
+      return;
+    }
+
+    const deletedSessionId = this.sessionId;
+    this.deleting.set(true);
+    this.operationError.set(false);
+    this.sqlAgent
+      .deleteSession(deletedSessionId)
+      .pipe(finalize(() => this.deleting.set(false)))
+      .subscribe({
+        next: () => {
+          this.sessions.update((sessions) =>
+            sessions.filter((session) => session.session_id !== deletedSessionId),
+          );
+          this.sessionId = this.createSessionId();
+          this.activeSessionId.set(this.sessionId);
+          this.historyError.set(false);
+          this.messages.set([this.systemWelcome()]);
+        },
+        error: () => this.operationError.set(true),
+      });
+  }
+
+  deleteAllMemory(): void {
+    if (
+      this.sending() ||
+      this.sessionsLoading() ||
+      this.historyLoading() ||
+      this.deleting()
+    ) {
+      return;
+    }
+
+    this.deleting.set(true);
+    this.operationError.set(false);
+    this.sqlAgent
+      .deleteAllMemory()
+      .pipe(finalize(() => this.deleting.set(false)))
+      .subscribe({
+        next: () => {
+          this.sessions.set([]);
+          this.initialSessionRestorePending = false;
+          this.sessionId = this.createSessionId();
+          this.activeSessionId.set(this.sessionId);
+          this.messages.set([this.systemWelcome()]);
+          this.historyError.set(false);
+        },
+        error: () => this.operationError.set(true),
+      });
   }
 
   cancel(): void {
@@ -77,7 +207,7 @@ export class AiAssistantService {
 
   send(rawQuery: string): void {
     const query = rawQuery.trim();
-    if (!query || this.sending()) {
+    if (!query || this.sending() || this.deleting()) {
       return;
     }
 
@@ -100,10 +230,16 @@ export class AiAssistantService {
 
   private sendViaAsk(query: string, assistantId: string): void {
     this.sqlAgent
-      .ask(query)
+      .ask(query, this.sessionId)
       .pipe(finalize(() => this.sending.set(false)))
       .subscribe({
-        next: (output) => this.finishAssistant(assistantId, output),
+        next: (response) => {
+          if (response.memory_warning) {
+            this.markMemoryWarning(assistantId);
+          }
+          this.finishAssistant(assistantId, response.answer);
+          this.loadSessions(false);
+        },
         error: (error) =>
           this.failAssistant(assistantId, this.describeAgentError(error)),
       });
@@ -155,6 +291,7 @@ export class AiAssistantService {
 
     this.sqlAgent.askStream(
       query,
+      this.sessionId,
       {
         onChunk: (chunk, mode) => {
           if (mode === 'cumulative') {
@@ -172,11 +309,13 @@ export class AiAssistantService {
           this.patchAssistant(assistantId, received, true);
         },
         onActivity: (activity) => this.recordActivity(assistantId, activity),
+        onMemoryWarning: () => this.markMemoryWarning(assistantId),
         onDone: () => {
           this.sending.set(false);
           this.abortController = null;
           const text = received.trim() || this.t('aiAssistant.emptyResponse');
           this.finishAssistant(assistantId, text);
+          this.loadSessions(false);
         },
         onError: (error) => {
           // Stream may be unavailable (auth/path/CORS) — fall back to /ask*.
@@ -211,6 +350,14 @@ export class AiAssistantService {
     this.patchAssistant(id, content, false, true);
   }
 
+  private markMemoryWarning(id: string): void {
+    this.messages.update((list) =>
+      list.map((message) =>
+        message.id === id ? { ...message, memoryWarning: true } : message,
+      ),
+    );
+  }
+
   private recordActivity(id: string, key: AiAssistantStepKey): void {
     this.messages.update((list) =>
       list.map((message) => {
@@ -242,6 +389,17 @@ export class AiAssistantService {
             failedSteps.push(this.createStep('failed', 'error'));
           }
           return { ...message, steps: failedSteps };
+        }
+
+        const existingIndex = steps.findIndex((step) => step.key === key);
+        if (existingIndex >= 0) {
+          return {
+            ...message,
+            steps: steps.map((step, index) => ({
+              ...step,
+              status: index === existingIndex ? 'active' : step.status === 'active' ? 'done' : step.status,
+            })),
+          };
         }
 
         const nextSteps = steps.map((step) =>
@@ -344,6 +502,67 @@ export class AiAssistantService {
       createdAt: Date.now(),
       ...extras,
     };
+  }
+
+  private loadSessions(restoreCurrent: boolean): void {
+    if (this.sessionsLoading()) {
+      this.refreshSessionsPending = true;
+      return;
+    }
+    this.sessionsLoading.set(true);
+    this.historyError.set(false);
+    this.sqlAgent
+      .listSessions()
+      .pipe(
+        finalize(() => {
+          this.sessionsLoading.set(false);
+          if (this.refreshSessionsPending) {
+            this.refreshSessionsPending = false;
+            this.loadSessions(false);
+          }
+        }),
+      )
+      .subscribe({
+        next: (sessions) => {
+          this.sessions.set(sessions);
+          if (restoreCurrent) {
+            this.initialSessionRestorePending = false;
+            const session =
+              sessions.find((item) => item.session_id === this.sessionId) ?? sessions[0];
+            if (session) {
+              this.selectSession(session.session_id);
+            }
+          }
+        },
+        error: () => {
+          this.initialSessionRestorePending = false;
+          this.historyError.set(true);
+        },
+      });
+  }
+
+  private restoreSession(history: SqlAgentSessionHistory): void {
+    const restored = history.messages.map((item, index) =>
+      this.createMessage(item.role, item.content, {
+        createdAt: Date.parse(item.created_at) || Date.now(),
+        id: `${history.session_id}-${index}`,
+      }),
+    );
+    this.messages.set(restored.length ? restored : [this.systemWelcome()]);
+    this.initialSessionRestorePending = false;
+  }
+
+  private loadSessionId(): string {
+    const stored = sessionStorage.getItem(AiAssistantService.sessionStorageKey);
+    const sessionId = stored || this.createSessionId();
+    this.activeSessionId.set(sessionId);
+    return sessionId;
+  }
+
+  private createSessionId(): string {
+    const sessionId = crypto.randomUUID();
+    sessionStorage.setItem(AiAssistantService.sessionStorageKey, sessionId);
+    return sessionId;
   }
 
   private t(key: string): string {
