@@ -549,6 +549,16 @@ html.dark .kt-header .text-secondary-foreground {
 	color: #fff !important;
 }
 
+.kt-header .kt-dropdown-menu a,
+.kt-header .kt-dropdown-menu .kt-menu-title {
+	color: var(--foreground) !important;
+}
+
+html .kt-header .kt-dropdown-menu .text-secondary-foreground,
+html .kt-header .kt-dropdown-menu .text-muted-foreground {
+	color: var(--muted-foreground) !important;
+}
+
 .kt-sidebar,
 .kt-sidebar.bg-background,
 .kt-sidebar.dark,
